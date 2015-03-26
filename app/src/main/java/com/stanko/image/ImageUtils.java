@@ -756,7 +756,7 @@ public class ImageUtils {
     /**
      * Returns given @Bitmap resized the to given size.
      *
-     * @param bm : Bitmap to resize.
+     * @param bitmap : Bitmap to resize.
      * @param newHeight : Height to resize.
      * @param newWidth : Width to resize.
      * @return Resized Bitmap.
@@ -845,7 +845,8 @@ public class ImageUtils {
      * OR resized by only newWidth if newHeight==0
      * according to aspect ratio
      *
-     * @param context
+     * @param resources
+     * @param contentResolver
      * @param bitmapResId
      * @param newHeight
      * @param newWidth
@@ -1490,9 +1491,9 @@ public class ImageUtils {
     /**
      * Merge the two images into a single.
      *
-     * @param p_context-Application context.
-     * @param p_img1	-resource id of image one.
-     * @param p_img2	-resource id of image two.
+     * @param context   -Application context.
+     * @param mBitmap1	- image one.
+     * @param mBitmap2ResId	-resource id of image two.
      * @return -returns the Bitmap image.
      */
     public static BitmapDrawable getRecyclingBitmapByAddImages(final Context context, final Bitmap mBitmap1, final int mBitmap2ResId) {
