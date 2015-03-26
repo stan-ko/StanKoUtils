@@ -16,16 +16,6 @@
 
 package com.stanko.image;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -36,11 +26,21 @@ import com.stanko.tools.FileUtils;
 import com.stanko.tools.Log;
 import com.stanko.tools.SDCardHelper;
 
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 /**
  * A simple subclass of {@link ImageResizer} that fetches and resizes images fetched from a URL.
  */
 public class ImageFetcher extends ImageResizer {
-	
+
     private static final String TAG = "ImageFetcher";
 //    private static final int HTTP_CACHE_SIZE = 10 * 1024 * 1024; // 10MB
     //private static final String HTTP_CACHE_DIR = "http";
@@ -164,16 +164,16 @@ public class ImageFetcher extends ImageResizer {
     }
 
     /**
-    * Simple network connection check.
-    *
-    * @param context
-    */
+     * Simple network connection check.
+     *
+     * @param context
+     */
     private void checkConnection(Context context) {
-    	
+
 //        final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 //        final NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 //        if (networkInfo == null || !networkInfo.isConnectedOrConnecting()) {
-    	//TODO!!!
+        //TODO!!!
 //        if (!ServerChecker.checkIsNetworkAvailable(context))
 //            Toast.makeText(context, context.getString(R.string.no_network_connection_toast), Toast.LENGTH_LONG).show();
 //            //Toast.makeText(context, R.string.no_network_connection_toast, Toast.LENGTH_LONG).show();
@@ -193,59 +193,59 @@ public class ImageFetcher extends ImageResizer {
         FileDescriptor fileDescriptor = null;
         FileInputStream fileInputStream = null;
         InputStream inputStream = null;
-		try {
+        try {
 
-			// check if its URL but not a Local File
-			URL url = null;
-			try {
-				url = new URL(sUrlOrUri);
-			} catch (MalformedURLException ignored) {}
+            // check if its URL but not a Local File
+            URL url = null;
+            try {
+                url = new URL(sUrlOrUri);
+            } catch (MalformedURLException ignored) {}
 
-			File imageFile = null;
-			// if data isn't URL than file's path usually starts with /mnt/
-			if (url == null || sUrlOrUri.substring(0, 5).equals("/mnt/")) {
-				imageFile = new File(sUrlOrUri);
-				// from file
-				if (imageFile.exists() /*&& imageFile.canRead()*/) {
-					fileInputStream = new FileInputStream(imageFile);
-					fileDescriptor = fileInputStream.getFD();
-				} 
-				// from drawable by Uri
-				else 
-					inputStream = mContentResolver.openInputStream(Uri.parse(sUrlOrUri));
-			} 
-			// if data is valid URL check if its already DL-ed
-			else {
-				imageFile = SDCardHelper.getFileForImageCaching(sUrlOrUri);
-				if ((!imageFile.exists() || imageFile.length() == 0) && downloadUrlToFile(url, imageFile)){
-					fileInputStream = new FileInputStream(imageFile.toString());
-					fileDescriptor = fileInputStream.getFD();
-				}
-				else { // could be incompletely DL-ed in theory
-					fileInputStream = new FileInputStream(imageFile);
-					fileDescriptor = fileInputStream.getFD();
-				}
-			}
+            File imageFile = null;
+            // if data isn't URL than file's path usually starts with /mnt/
+            if (url == null || sUrlOrUri.substring(0, 5).equals("/mnt/")) {
+                imageFile = new File(sUrlOrUri);
+                // from file
+                if (imageFile.exists() /*&& imageFile.canRead()*/) {
+                    fileInputStream = new FileInputStream(imageFile);
+                    fileDescriptor = fileInputStream.getFD();
+                }
+                // from drawable by Uri
+                else
+                    inputStream = mContentResolver.openInputStream(Uri.parse(sUrlOrUri));
+            }
+            // if data is valid URL check if its already DL-ed
+            else {
+                imageFile = SDCardHelper.getFileForImageCaching(sUrlOrUri);
+                if ((!imageFile.exists() || imageFile.length() == 0) && downloadUrlToFile(url, imageFile)){
+                    fileInputStream = new FileInputStream(imageFile.toString());
+                    fileDescriptor = fileInputStream.getFD();
+                }
+                else { // could be incompletely DL-ed in theory
+                    fileInputStream = new FileInputStream(imageFile);
+                    fileDescriptor = fileInputStream.getFD();
+                }
+            }
 
-		} catch (IOException e) {
-			Log.e(TAG, "processBitmap - " + e);
-		} catch (IllegalStateException e) {
-			Log.e(TAG, "processBitmap - " + e);
-		}
+        } catch (IOException e) {
+            Log.e(TAG, "processBitmap - " + e);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "processBitmap - " + e);
+        }
 
         Bitmap bitmap = null;
-        
+
         if (fileDescriptor != null) {
-        	//bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
+            //bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor);
             bitmap = decodeSampledBitmapFromDescriptor(fileDescriptor, mImageWidth, mImageHeight, getImageCache());
-        } 
+        }
         else if(fileInputStream!=null)
-        	//bitmap = BitmapFactory.decodeStream(inputStream);
-        	bitmap = decodeSampledBitmapFromStream(fileInputStream, mImageWidth, mImageHeight, getImageCache());
+            //bitmap = BitmapFactory.decodeStream(inputStream);
+            bitmap = decodeSampledBitmapFromStream(fileInputStream, mImageWidth, mImageHeight, getImageCache());
         else if(inputStream!=null)
-        	//bitmap = BitmapFactory.decodeStream(inputStream);
-        	bitmap = decodeSampledBitmapFromStream(inputStream, mImageWidth, mImageHeight, getImageCache());
-        
+            //bitmap = BitmapFactory.decodeStream(inputStream);
+            bitmap = decodeSampledBitmapFromStream(inputStream, mImageWidth, mImageHeight, getImageCache());
+
         if (fileInputStream != null) {
             try {
                 fileInputStream.close();
@@ -253,7 +253,7 @@ public class ImageFetcher extends ImageResizer {
         }
         if (inputStream != null) {
             try {
-            	inputStream.close();
+                inputStream.close();
             } catch (IOException e) {}
         }
         return bitmap;
@@ -262,35 +262,35 @@ public class ImageFetcher extends ImageResizer {
     private Bitmap processBitmap(Uri data) {
 
         InputStream inputStream = null;
-		try {
-			inputStream = mContentResolver.openInputStream(data);// new FileInputStream(imageFile);
-		} catch (FileNotFoundException e) {
-			Log.e(TAG, "processBitmap - " + e);
-		} catch (IllegalStateException e) {
-			Log.e(TAG, "processBitmap - " + e);
-		}
+        try {
+            inputStream = mContentResolver.openInputStream(data);// new FileInputStream(imageFile);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "processBitmap - " + e);
+        } catch (IllegalStateException e) {
+            Log.e(TAG, "processBitmap - " + e);
+        }
 
         Bitmap bitmap = null;
 
         if(inputStream!=null)
-        	//bitmap = BitmapFactory.decodeStream(inputStream);
-        	bitmap = decodeSampledBitmapFromStream(inputStream, mImageWidth, mImageHeight, getImageCache());
+            //bitmap = BitmapFactory.decodeStream(inputStream);
+            bitmap = decodeSampledBitmapFromStream(inputStream, mImageWidth, mImageHeight, getImageCache());
 
         if (inputStream != null) {
             try {
-            	inputStream.close();
+                inputStream.close();
             } catch (IOException e) {}
         }
-        
+
 //        Log.w(this,"processBitmap(Uri): Uri: "+data+" mImageWidth: "+mImageWidth+" mImageHeight: "+mImageHeight+" returning bitmap: "+bitmap);
-        
+
         return bitmap;
     }
 
     private Bitmap processBitmap(ImageTask imageTask) {
-    	
+
 //		Log.i(this,"started processBitmap(ImageTask) to getBitmap");
-		return imageTask.getBitmap(this);
+        return imageTask.getBitmap(this);
 //        Bitmap bitmap = null;
 //    	if (imageTask.imageResId != 0){
 //    		if (!imageTask.makeImageByCrop && imageTask.imageTargetHeight>0 && imageTask.imageTargetWidth>0)
@@ -402,10 +402,10 @@ public class ImageFetcher extends ImageResizer {
 //    	//imageTask.sendOnCompletionEvent();
 //        return bitmap;
     }
-    
+
     @Override
     protected Bitmap processBitmap(Object data) {
-    	/* костыль на
+    	/* РєРѕСЃС‚С‹Р»СЊ РЅР°
    	 	0java.lang.RuntimeException: An error occured while executing doInBackground()
    		01at android.image.utils.ImageAsyncTask$3.done(ImageAsyncTask.java:328)
    		02at java.util.concurrent.FutureTask$Sync.innerSetException(FutureTask.java:273)
@@ -424,32 +424,32 @@ public class ImageFetcher extends ImageResizer {
   		15at android.image.utils.ImageWorker$BitmapWorkerTask.doInBackground(ImageWorker.java:1)
   		16at android.image.utils.ImageAsyncTask$2.call(ImageAsyncTask.java:316)
   		17at java.util.concurrent.FutureTask$Sync.innerRun(FutureTask.java:305)
-  		и заодно на возможный Out of memory
+  		Рё Р·Р°РѕРґРЅРѕ РЅР° РІРѕР·РјРѕР¶РЅС‹Р№ Out of memory
     	 */
-		Bitmap bitmap = null;
-		try {
-			if (data instanceof String){
-				bitmap = processBitmap(String.valueOf(data));
+        Bitmap bitmap = null;
+        try {
+            if (data instanceof String){
+                bitmap = processBitmap(String.valueOf(data));
 //				Log.i(this,"got image by processBitmap(String) h: "+bitmap.getHeight()+" w: "+bitmap.getWidth());
-			}
-			else if (data instanceof Uri){
-				bitmap = processBitmap( (Uri)data );
+            }
+            else if (data instanceof Uri){
+                bitmap = processBitmap( (Uri)data );
 //				Log.i(this,"got image by processBitmap(Uri) to getBitmap h: "+bitmap.getHeight()+" w: "+bitmap.getWidth());
-			}
-			else if (data instanceof Integer){
-				bitmap = super.processBitmap( ((Integer)data).intValue() );
+            }
+            else if (data instanceof Integer){
+                bitmap = super.processBitmap( ((Integer)data).intValue() );
 //				Log.i(this,"got image by processBitmap(Integer) to getBitmap h: "+bitmap.getHeight()+" w: "+bitmap.getWidth());
-			}
-			else if (data instanceof ImageTask){
-				bitmap = processBitmap( (ImageTask)data );
+            }
+            else if (data instanceof ImageTask){
+                bitmap = processBitmap( (ImageTask)data );
 //				Log.i(this,"got image by processBitmap(ImageTask) to getBitmap h: "+bitmap.getHeight()+" w: "+bitmap.getWidth());
-			}
-		} catch (Exception e) {
-			// e.printStackTrace();
-		} catch (Throwable e) {
-			// e.printStackTrace();
-		}
-		return bitmap;
+            }
+        } catch (Exception e) {
+            // e.printStackTrace();
+        } catch (Throwable e) {
+            // e.printStackTrace();
+        }
+        return bitmap;
     }
 
     /**
@@ -458,44 +458,44 @@ public class ImageFetcher extends ImageResizer {
      * @param urlString The URL to fetch
      * @return true if successful, false otherwise
      */
-	public static final int TIME_OUT=10000;
+    public static final int TIME_OUT=10000;
     public boolean downloadUrlToFile(final URL imageUrl, final File imageFile) {
         disableConnectionReuseIfNecessary();
         HttpURLConnection urlConnection = null;
         InputStream inputStream = null;
-        
-		try {
-        	final File fullsizedImageFile = SDCardHelper.getFileForImageCaching(imageUrl);
-        	urlConnection = (HttpURLConnection)imageUrl.openConnection();
-        	urlConnection.setConnectTimeout(TIME_OUT);
-        	urlConnection.setReadTimeout(TIME_OUT);
-        	urlConnection.setInstanceFollowRedirects(true);
+
+        try {
+            final File fullsizedImageFile = SDCardHelper.getFileForImageCaching(imageUrl);
+            urlConnection = (HttpURLConnection)imageUrl.openConnection();
+            urlConnection.setConnectTimeout(TIME_OUT);
+            urlConnection.setReadTimeout(TIME_OUT);
+            urlConnection.setInstanceFollowRedirects(true);
             inputStream = urlConnection.getInputStream();
-            
-            // льем поток прямо в файл
+
+            // Р»СЊРµРј РїРѕС‚РѕРє РїСЂСЏРјРѕ РІ С„Р°Р№Р»
             FileUtils.streamToFile(inputStream, fullsizedImageFile);
-            
+
             final File previewImageFile = SDCardHelper.getFileForPreviewImageCaching(imageUrl);
             ImageUtils.makePreviewAndSave(fullsizedImageFile, previewImageFile, DeviceInfo.getDeviceMaxSideSizeByDensity());
-            	
+
             //Bitmap bm = ImageUtils.getBitmapFromFile(fullsizedImageFile);
             processBitmap(imageUrl.toString());
             return true;
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         } finally {
-        	
-          if (urlConnection != null)
-              urlConnection.disconnect();
 
-          if (inputStream != null)
-              try {
-            	  inputStream.close();
-              } catch (final IOException e) {}
+            if (urlConnection != null)
+                urlConnection.disconnect();
+
+            if (inputStream != null)
+                try {
+                    inputStream.close();
+                } catch (final IOException e) {}
         }
-		
+
 //        HttpURLConnection urlConnection = null;
 //        BufferedOutputStream out = null;
 //        BufferedInputStream in = null;
@@ -532,7 +532,7 @@ public class ImageFetcher extends ImageResizer {
         return false;
     }
 
-   
+
     /**
      * Workaround for bug pre-Froyo, see here for more info:
      * http://android-developers.blogspot.com/2011/09/androids-http-clients.html
