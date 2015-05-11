@@ -18,6 +18,7 @@ public class Log {
 	public static void init(final Context context){
 		init(context.getPackageName());
 	}
+
 	/**
 	 * do init for cutting off the app's package name to shorten 
 	 * the resulting Tag string length
@@ -146,5 +147,20 @@ public class Log {
 	public static void e(final Class<?> LOGTAG, final Exception e){
         e(getTag(LOGTAG),e);
 	}
+
+
+    public static String getMethodName(){
+        String methodName = null;
+        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+        if (stackTraceElements==null || stackTraceElements.length==0)
+            return methodName;
+
+        StackTraceElement stackTraceElement = stackTraceElements[1];
+        if (stackTraceElement==null)
+            return methodName;
+
+        methodName = stackTraceElement.getMethodName();
+        return methodName;
+    }
 
 }

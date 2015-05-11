@@ -46,6 +46,8 @@ public class DeviceInfo {
     public static String deviceManufacturer;
     public static String deviceProduct;
     public static String deviceName;
+    public static String deviceARM;
+    public static String[] deviceARMs;
 
     private static float configurationRatio;
 
@@ -110,6 +112,17 @@ public class DeviceInfo {
         screenInches = (int)Math.round(Math.sqrt(xDensity+yDensity));
 
         Log.i(LOGTAG,String.format("Model: %s, Manufacturer: %s Product: %s Name: %s",deviceModel,deviceManufacturer, deviceProduct,deviceName));
+
+        Log.i(LOGTAG, "Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
+
+        deviceARM = Build.CPU_ABI;
+        deviceARMs = new String[]{Build.CPU_ABI,Build.CPU_ABI2};
+        if (hasAPI(21)) {
+            if (Build.SUPPORTED_ABIS!=null);
+                deviceARMs = Build.SUPPORTED_ABIS;
+            if (deviceARMs.length>0)
+                deviceARM = Build.SUPPORTED_ABIS[0];
+        }
 
         Configuration conf = appContext.getResources().getConfiguration();
         int screenLayout = conf.screenLayout;

@@ -1,5 +1,6 @@
 package com.stanko.tools;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,7 +104,8 @@ public class ViewSizeHelper {
 	public static void requestViewSize(final View view, final IViewSize callBack){
 		view.getViewTreeObserver().addOnGlobalLayoutListener( 
         	    new OnGlobalLayoutListener(){
-					@SuppressWarnings("deprecation")
+					@SuppressLint("NewApi")
+                    @SuppressWarnings("deprecation")
 					@Override
         	        public void onGlobalLayout() {
         	            //This method was deprecated in API level 16. Use #removeOnGlobalLayoutListener instead
