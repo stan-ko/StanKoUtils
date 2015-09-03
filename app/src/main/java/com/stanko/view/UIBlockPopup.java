@@ -1,5 +1,6 @@
 package com.stanko.view;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
@@ -13,7 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.ProgressBar;
 
-import com.stanko.R;
+import com.stanko.tools.DeviceInfo;
 import com.stanko.tools.Log;
 
 import java.util.Date;
@@ -49,6 +50,7 @@ public class UIBlockPopup {
         pbar =  new ProgressBar(activity, null, android.R.attr.progressBarStyleLargeInverse);
     }
 
+    @SuppressLint("NewApi")
     public void show() {
         if (popupWindow!=null && popupWindow.isShowing())
             return;
@@ -76,8 +78,12 @@ public class UIBlockPopup {
 
         //popupView = popupWindow.getContentView();
 
-
-        contentLayout.setBackgroundResource(R.drawable.popup_outer);
+        //
+        ColorDrawable colorDrawable = new ColorDrawable(0x80000000);
+        if (DeviceInfo.hasAPI16())
+            contentLayout.setBackground(colorDrawable);
+        else
+            contentLayout.setBackgroundDrawable(colorDrawable);
 
         popupWindow.setFocusable(true);
 

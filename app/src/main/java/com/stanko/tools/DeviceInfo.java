@@ -23,7 +23,7 @@ import java.util.UUID;
  */
 public class DeviceInfo {
 
-    private static final String LOGTAG = Log.getTag(DeviceInfo.class);
+    private static final String LOGTAG = Log.getLogTag(DeviceInfo.class);
 
     private static boolean isInitialzed;
     private static Context appContext;

@@ -1,162 +1,205 @@
 package com.stanko.tools;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 
-import com.stanko.BuildConfig;
-
 public class Log {
-	
-	private static String packageNameToCutOff="";
-	private static boolean doPackageCutOff;
-	
-	/**
-	 * do init for cutting off the app's package name to shorten 
-	 * the resulting Tag string length
-	 * @param context
-	 */
-	public static void init(final Context context){
-		init(context.getPackageName());
-	}
 
-	/**
-	 * do init for cutting off the app's package name to shorten 
-	 * the resulting Tag string length
-	 * @param packageNameToCutOff
-	 */
-	public static void init(final String packageNameToCutOff){
-		if ( doPackageCutOff = !TextUtils.isEmpty(packageNameToCutOff) )
-			Log.packageNameToCutOff = packageNameToCutOff.lastIndexOf(".")==packageNameToCutOff.length()-1 ? packageNameToCutOff : packageNameToCutOff+".";
-	}
-	
-	/**
-	 * method shortens the Tag by cutting off the app's package name 
-	 * if init was fired previously
-	 * @param tagClass
-	 * @return
-	 */
-	public static String getTag(final Class<?> tagClass){
-		if (doPackageCutOff)
-			return tagClass.getName().replace(packageNameToCutOff, "");
-		return tagClass.getName();
-	}
+    private static String packageNameToCutOff = "";
+    private static boolean doPackageCutOff;
+    private static boolean isDebuggable;
 
-	/**
-	 * method shortens The tag by cutting off the app's package name 
-	 * if init was fired previously
-	 * @param tagObject
-	 * @return
-	 */
-	public static String getTag(Object tagObject){
-		if (doPackageCutOff)
-			return tagObject.getClass().getName().replace(packageNameToCutOff, "");
+    /**
+     * do init for cutting off the app's package name to shorten
+     * the resulting Tag string length
+     *
+     * @param context
+     */
+    public static void init(final Context context) {
+        init(context.getPackageName());
+        isDebuggable = (context.getApplicationInfo().flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+    }
+
+    /**
+     * do init for cutting off the app's package name to shorten
+     * the resulting Tag string length
+     *
+     * @param packageNameToCutOff
+     */
+    private static void init(final String packageNameToCutOff) {
+        if (doPackageCutOff = !TextUtils.isEmpty(packageNameToCutOff))
+            Log.packageNameToCutOff = packageNameToCutOff.lastIndexOf(".") == packageNameToCutOff.length() - 1 ? packageNameToCutOff : packageNameToCutOff + ".";
+    }
+
+    /**
+     * method shortens the Tag by cutting off the app's package name
+     * if init was fired previously
+     *
+     * @param tagClass
+     * @return
+     */
+    public static String getLogTag(final Class<?> tagClass) {
+        if (doPackageCutOff)
+            return tagClass.getName().replace(packageNameToCutOff, "");
+        return tagClass.getName();
+    }
+
+    /**
+     * method shortens The tag by cutting off the app's package name
+     * if init was fired previously
+     *
+     * @param tagObject
+     * @return
+     */
+    public static String getLogTag(Object tagObject) {
+        if (doPackageCutOff)
+            return tagObject.getClass().getName().replace(packageNameToCutOff, "");
         return tagObject.getClass().getName();
-	}
-	
-	
-	// String as LOGTAG
-	public static void v(final String LOGTAG, final String msg){
-        if (BuildConfig.DEBUG)
-        	android.util.Log.v(LOGTAG,msg);
-	}
-
-	public static void d(final String LOGTAG, final String msg){
-        if (BuildConfig.DEBUG)
-        	android.util.Log.d(LOGTAG,msg);
-	}
-
-	public static void i(final String LOGTAG, final String msg){
-        if (BuildConfig.DEBUG)
-        	android.util.Log.i(LOGTAG,msg);
-	}
-
-	public static void w(final String LOGTAG, final String msg){
-        if (BuildConfig.DEBUG)
-        	android.util.Log.w(LOGTAG,msg);
-	}
-
-	public static void e(final String LOGTAG, final String msg){
-//        if (BuildConfig.DEBUG)
-        	android.util.Log.e(LOGTAG,msg);
-	}
-
-	public static void e(final String LOGTAG, final Exception e){
-        e(LOGTAG,e.getMessage(),e);
-	}
-	public static void e(final String LOGTAG, final String msg, final Exception e){
-//        if (BuildConfig.DEBUG)
-        	android.util.Log.e(LOGTAG,msg,e);
-	}
-
-	
-	// Object as LOGTAG => Object.getClass().getName()
-	public static void v(final Object LOGTAG, final String msg){
-        v(getTag(LOGTAG),msg);
-	}
-
-	public static void d(final Object LOGTAG, final String msg){
-        d(getTag(LOGTAG),msg);
-	}
-
-	public static void i(final Object LOGTAG, final String msg){
-        i(getTag(LOGTAG),msg);
-	}
-
-	public static void w(final Object LOGTAG, final String msg){
-        w(getTag(LOGTAG),msg);
-	}
-
-	public static void e(final Object LOGTAG, final String msg){
-        e(getTag(LOGTAG),msg);
-	}
-
-	public static void e(final Object LOGTAG, final String msg, final Exception e){
-        e(getTag(LOGTAG),msg,e);
-	}
-
-	public static void e(final Object LOGTAG, final Exception e){
-        e(getTag(LOGTAG),e);
-	}
-
-	
-	// Class as LOGTAG => Class.getName()
-	public static void v(final Class<?> LOGTAG, final String msg){
-        v(getTag(LOGTAG),msg);
-	}
-
-	public static void d(final Class<?> LOGTAG, final String msg){
-        d(getTag(LOGTAG),msg);
-	}
-
-	public static void i(final Class<?> LOGTAG, final String msg){
-        i(getTag(LOGTAG),msg);
-	}
-
-	public static void w(final Class<?> LOGTAG, final String msg){
-        w(getTag(LOGTAG),msg);
-	}
-
-	public static void e(final Class<?> LOGTAG, final String msg){
-        e(getTag(LOGTAG),msg);
-	}
-
-	public static void e(final Class<?> LOGTAG, final String msg, final Exception e){
-        e(getTag(LOGTAG),msg,e);
-	}
-
-	public static void e(final Class<?> LOGTAG, final Exception e){
-        e(getTag(LOGTAG),e);
-	}
+    }
 
 
-    public static String getMethodName(){
+    // Method as logTag
+    public static void v(final String msg) {
+        if (isDebuggable)
+            android.util.Log.v(getMethodName(), msg);
+    }
+
+    public static void d(final String msg) {
+        if (isDebuggable)
+            android.util.Log.d(getMethodName(), msg);
+    }
+
+    public static void i(final String msg) {
+        if (isDebuggable)
+            android.util.Log.i(getMethodName(), msg);
+    }
+
+    public static void w(final String msg) {
+        if (isDebuggable)
+            android.util.Log.w(getMethodName(), msg);
+    }
+
+    public static void e(final String msg) {
+        if (isDebuggable)
+            android.util.Log.e(getMethodName(), msg);
+    }
+
+    public static void e(final Exception e) {
+        if (isDebuggable)
+            android.util.Log.e(getMethodName(), e.getMessage(), e);
+    }
+
+    // String as logTag
+    public static void v(final String logTag, final String msg) {
+        if (isDebuggable)
+            android.util.Log.v(logTag, msg);
+    }
+
+    public static void d(final String logTag, final String msg) {
+        if (isDebuggable)
+            android.util.Log.d(logTag, msg);
+    }
+
+    public static void i(final String logTag, final String msg) {
+        if (isDebuggable)
+            android.util.Log.i(logTag, msg);
+    }
+
+    public static void w(final String logTag, final String msg) {
+        if (isDebuggable)
+            android.util.Log.w(logTag, msg);
+    }
+
+    public static void e(final String logTag, final String msg) {
+        if (isDebuggable)
+            android.util.Log.e(logTag, msg);
+    }
+
+    public static void e(final String logTag, final Exception e) {
+        e(logTag, e.getMessage(), e);
+    }
+
+    public static void e(final String logTag, final String msg, final Exception e) {
+        if (isDebuggable)
+            android.util.Log.e(logTag, msg, e);
+    }
+
+
+    // Object as logTag => Object.getClass().getName()
+    public static void v(final Object logTag, final String msg) {
+        if (isDebuggable)
+            v(getLogTag(logTag), msg);
+    }
+
+    public static void d(final Object logTag, final String msg) {
+        if (isDebuggable)
+            d(getLogTag(logTag), msg);
+    }
+
+    public static void i(final Object logTag, final String msg) {
+        if (isDebuggable)
+            i(getLogTag(logTag), msg);
+    }
+
+    public static void w(final Object logTag, final String msg) {
+        w(getLogTag(logTag), msg);
+    }
+
+    public static void e(final Object logTag, final String msg) {
+        e(getLogTag(logTag), msg);
+    }
+
+    public static void e(final Object logTag, final String msg, final Exception e) {
+        e(getLogTag(logTag), msg, e);
+    }
+
+    public static void e(final Object logTag, final Exception e) {
+        e(getLogTag(logTag), e);
+    }
+
+
+    // Class as logTag => Class.getName()
+    public static void v(final Class<?> logTag, final String msg) {
+        if (isDebuggable)
+            v(getLogTag(logTag), msg);
+    }
+
+    public static void d(final Class<?> logTag, final String msg) {
+        if (isDebuggable)
+            d(getLogTag(logTag), msg);
+    }
+
+    public static void i(final Class<?> logTag, final String msg) {
+        if (isDebuggable)
+            i(getLogTag(logTag), msg);
+    }
+
+    public static void w(final Class<?> logTag, final String msg) {
+        w(getLogTag(logTag), msg);
+    }
+
+    public static void e(final Class<?> logTag, final String msg) {
+        e(getLogTag(logTag), msg);
+    }
+
+    public static void e(final Class<?> logTag, final String msg, final Exception e) {
+        e(getLogTag(logTag), msg, e);
+    }
+
+    public static void e(final Class<?> logTag, final Exception e) {
+        e(getLogTag(logTag), e);
+    }
+
+
+    public static String getMethodName() {
         String methodName = null;
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        if (stackTraceElements==null || stackTraceElements.length==0)
+        if (stackTraceElements == null || stackTraceElements.length == 0)
             return methodName;
 
         StackTraceElement stackTraceElement = stackTraceElements[1];
-        if (stackTraceElement==null)
+        if (stackTraceElement == null)
             return methodName;
 
         methodName = stackTraceElement.getMethodName();

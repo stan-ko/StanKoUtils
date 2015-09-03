@@ -1,5 +1,15 @@
 package com.stanko.tools;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.TextUtils;
+import android.util.Base64;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -13,16 +23,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.text.TextUtils;
-import android.util.Base64;
 
 public class SharedPrefsHelper {
 	
@@ -156,15 +156,17 @@ public class SharedPrefsHelper {
 //		Log.d(LOGTAG,"Saving the key: "+theKey+" with value: "+value);
 		
 		if (value instanceof String)
-			prefsEditor.putString(theKey,(String)value);
+			prefsEditor.putString(theKey, (String) value);
 		else if (value instanceof Integer)
-			prefsEditor.putInt(theKey,(Integer)value);
-		else if (value instanceof Float || value instanceof Double)
-			prefsEditor.putFloat(theKey,(Float)value);
+			prefsEditor.putInt(theKey, (Integer) value);
+		else if (value instanceof Float)
+			prefsEditor.putFloat(theKey, (float) value);
+		else if (value instanceof Double)
+			prefsEditor.putFloat(theKey, (float)((double)value)); //unwrap Double and cast to float
 		else if (value instanceof Long)
-			prefsEditor.putLong(theKey,(Long)value);
+			prefsEditor.putLong(theKey, (long) value);
 		else if (value instanceof Boolean)
-			prefsEditor.putBoolean(theKey,(Boolean)value);
+			prefsEditor.putBoolean(theKey, (Boolean) value);
 		else if (value instanceof JSONObject || value instanceof JSONArray)
 			prefsEditor.putString(theKey,value.toString());
 		else if (value instanceof Serializable)
@@ -220,12 +222,14 @@ public class SharedPrefsHelper {
 					prefsEditor.putString(theKey,(String)value);
 				else if (value instanceof Integer)
 					prefsEditor.putInt(theKey,(Integer)value);
-				else if (value instanceof Float || value instanceof Double)
-					prefsEditor.putFloat(theKey,(Float)value);
+                else if (value instanceof Float)
+                    prefsEditor.putFloat(theKey, (float) value);
+                else if (value instanceof Double)
+                    prefsEditor.putFloat(theKey, (float) ((double) value)); //unwrap Double and cast to float
 				else if (value instanceof Long)
-					prefsEditor.putLong(theKey,(Long)value);
+					prefsEditor.putLong(theKey, (Long) value);
 				else if (value instanceof Boolean)
-					prefsEditor.putBoolean(theKey,(Boolean)value);
+					prefsEditor.putBoolean(theKey, (Boolean) value);
 			}			
 		}
 		
@@ -273,8 +277,10 @@ public class SharedPrefsHelper {
 					prefsEditor.putString(theKey,(String)value);
 				else if (value instanceof Integer)
 					prefsEditor.putInt(theKey,(Integer)value);
-				else if (value instanceof Float || value instanceof Double)
-					prefsEditor.putFloat(theKey,(Float)value);
+                else if (value instanceof Float)
+                    prefsEditor.putFloat(theKey, (float) value);
+                else if (value instanceof Double)
+                    prefsEditor.putFloat(theKey, (float) ((double) value)); //unwrap Double and cast to float
 				else if (value instanceof Long)
 					prefsEditor.putLong(theKey,(Long)value);
 				else if (value instanceof Boolean)

@@ -20,5 +20,42 @@ android {
 dependencies {
 //    compile files('libs/support-v4.jar')
     compile 'com.android.support:support-v4:21+'
+}
 
+// This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054
+task clearJar(type: Delete) {
+    delete 'build/libs/stankoutils.jar'
+}
+
+task makeJar(type: Copy) {
+    from('build/bundles/release/')
+    into('build/libs/')
+    include('classes.jar')
+    rename ('classes.jar', 'stankoutils.jar')
+}
+
+makeJar.dependsOn(clearJar, build)
+//gradlew makeJar
+
+android.libraryVariants.all { variant ->
+    task("generate${variant.name}Javadoc", type: Javadoc) {
+        description "Generates Javadoc for $variant.name."
+        source = variant.javaCompile.source
+        ext.androidJar = "${android.sdkDirectory}/platforms/${android.compileSdkVersion}/android.jar"
+        classpath = files(variant.javaCompile.classpath.files) + files(ext.androidJar)
+    }
+
+    task("javadoc${variant.name}", type: Jar) {
+        classifier = "javadoc"
+        description "Bundles Javadoc into a JAR file for $variant.name."
+        from tasks["generate${variant.name}Javadoc"]
+
+    }
+
+    task("jar${variant.name}", type: Jar) {
+        description "Bundles compiled .class files into a JAR file for $variant.name."
+        dependsOn variant.javaCompile
+        from variant.javaCompile.destinationDir
+        exclude '**/R.class', '**/R$*.class', '**/R.html', '**/R.*.html'
+    }
 }

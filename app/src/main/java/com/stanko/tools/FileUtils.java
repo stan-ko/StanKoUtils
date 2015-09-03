@@ -1,5 +1,16 @@
 package com.stanko.tools;
 
+import android.annotation.SuppressLint;
+import android.content.ContentUris;
+import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
+import android.os.StatFs;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
+import android.text.TextUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,18 +23,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.SequenceInputStream;
 import java.io.SyncFailedException;
-
-import android.annotation.SuppressLint;
-import android.content.ContentUris;
-import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
-import android.os.StatFs;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
-import android.text.TextUtils;
 
 public class FileUtils {
 
@@ -565,6 +566,34 @@ public class FileUtils {
         return false;
     }
 
+    public static boolean syncAndClose(final FileOutputStream stream) {
+        if (stream==null){
+            Log.e(FileUtils.class,"sync(): Null parameter given");
+            return false;
+        }
+        boolean result = false;
+        try {
+            stream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            stream.getFD().sync();
+            result = true;
+        } catch (SyncFailedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        try {
+            stream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 
     /**
      * Method deletes all files and subdirectories recursively from given directory.
@@ -918,4 +947,29 @@ public class FileUtils {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    public static void mergeFiles(final File file1, final File file2, final File outputFile) {
+        if (!isReadable(file1) || !isReadable(file2) || !outputFile.exists() && !makeDirsForFile(outputFile)) {
+            return;
+        }
+        try {
+            FileInputStream fis1 = new FileInputStream(file1);
+            FileInputStream fis2 = new FileInputStream(file2);
+            SequenceInputStream sis = new SequenceInputStream(fis1, fis2);
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            int count;
+            byte[] temp = new byte[4096];
+            while ((count = sis.read(temp)) != -1) {
+                fos.write(temp, 0, count);
+            }
+            FileUtils.sync(fos);
+            fos.close();
+            sis.close();
+            fis1.close();
+            fis2.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
