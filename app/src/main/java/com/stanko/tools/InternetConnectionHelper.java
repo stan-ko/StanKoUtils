@@ -1,4 +1,4 @@
-package com.stanko.network;
+package com.stanko.tools;
 
 import android.annotation.TargetApi;
 import android.app.Activity;

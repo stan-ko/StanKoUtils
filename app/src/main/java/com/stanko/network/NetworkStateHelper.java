@@ -4,6 +4,7 @@ import android.content.Context;
 import android.text.TextUtils;
 
 import com.stanko.tools.BooleanLock;
+import com.stanko.tools.InternetConnectionHelper;
 import com.stanko.tools.Log;
 
 import de.greenrobot.event.EventBus;
