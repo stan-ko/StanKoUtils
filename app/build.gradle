@@ -31,8 +31,8 @@ task clearJar(type: Delete) {
 }
 
 task makeJar(type: Copy) {
-    from('build/bundles/release/')
-    into('build/libs/')
+    from('build/intermediates/bundles/release/')
+    into('build/outputs/jar/')
     include('classes.jar')
     rename ('classes.jar', 'stankoutils.jar')
 }

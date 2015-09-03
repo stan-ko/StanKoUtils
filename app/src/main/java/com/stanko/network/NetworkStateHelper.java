@@ -13,7 +13,7 @@ import de.greenrobot.event.EventBus;
 /**
  * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com> on 03.09.2015.
  */
-class NetworkStateHelper {
+public class NetworkStateHelper {
 
     private static Context appContext;
     private static NetworkState lastNetworkState;

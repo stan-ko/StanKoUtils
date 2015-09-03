@@ -14,7 +14,7 @@ import com.stanko.tools.Log;
 /**
  * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com> on 06.04.2015.
  */
-class NetworkStateReceiver extends BroadcastReceiver {
+public class NetworkStateReceiver extends BroadcastReceiver {
 
     //public static final String TAG="NetworkStateReceiver";
 
