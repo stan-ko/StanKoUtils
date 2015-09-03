@@ -3,7 +3,9 @@ package com.stanko.tools;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
-
+/*
+* Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
+*/
 public class Log {
 
     private static String packageNameToCutOff = "";

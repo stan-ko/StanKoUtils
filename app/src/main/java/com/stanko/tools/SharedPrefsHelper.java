@@ -24,6 +24,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/*
+ * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
+ */
 public class SharedPrefsHelper {
 	
 	private static final Class<SharedPrefsHelper> LOGTAG = SharedPrefsHelper.class;

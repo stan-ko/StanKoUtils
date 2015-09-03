@@ -19,6 +19,9 @@ android {
 
 dependencies {
 //    compile files('libs/support-v4.jar')
+    // EventBus
+    compile 'de.greenrobot:eventbus:2.4.0'
+
     compile 'com.android.support:support-v4:21+'
 }
 

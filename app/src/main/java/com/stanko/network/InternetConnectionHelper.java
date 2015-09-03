@@ -1,4 +1,4 @@
-package com.stanko.tools;
+package com.stanko.network;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -7,6 +7,8 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
+
+import com.stanko.tools.Log;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -240,8 +242,8 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
 
         // check if there is http:// at the start of hostName
         String host = hostName.trim();
-        if (host.startsWith("http://"))
-            host = host.substring(7); // cut off http://
+        if (host.contains("://"))
+            host = host.substring(host.indexOf("://")+3); // cut off http://, https://, ftp:// etc
 
         final int serverIP = getHostIntIP(host);
         //Log.i("ServerChecker", "getHostIntIP("+host+"): "+serverIP);
@@ -325,7 +327,7 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
                 isReachable = true;
 
         } catch (MalformedURLException e) {
-            Log.e("ServerChecker",e);
+            Log.e("ServerChecker", e);
         } catch (IOException e) {
             Log.e("ServerChecker",e);
         }

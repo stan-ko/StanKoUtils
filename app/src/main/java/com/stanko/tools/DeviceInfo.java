@@ -19,6 +19,7 @@ import java.util.Locale;
 import java.util.UUID;
 
 /*
+ * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
  * This class requires INITIALIZATION!!! to work properly
  */
 public class DeviceInfo {
