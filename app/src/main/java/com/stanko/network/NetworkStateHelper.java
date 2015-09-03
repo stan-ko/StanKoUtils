@@ -1,6 +1,7 @@
 package com.stanko.network;
 
 import android.content.Context;
+import android.content.IntentFilter;
 import android.text.TextUtils;
 
 import com.stanko.tools.BooleanLock;
@@ -36,6 +37,12 @@ public class NetworkStateHelper {
         init(context);
         hostToCheck = host;
         return new NetworkStateReceiver(appContext);
+    }
+
+    public static IntentFilter getReceiverIntentFilter(){
+        final IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(android.net.ConnectivityManager.CONNECTIVITY_ACTION); // "android.net.conn.CONNECTIVITY_CHANGE"
+        return intentFilter;
     }
 
     public static boolean isInternetAvailable() {
