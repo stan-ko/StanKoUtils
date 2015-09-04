@@ -158,12 +158,23 @@ public class FileUtils {
     }
 
     /**
-     * Writes a String to a File.
+     * Writes a String to a File (overwrites existing file)
      * @param data - String to write to a file
      * @param targetFile - target File
      * @return true if all OK or false otherwise
      */
     public static boolean stringToFile(final String data, final File targetFile) {
+        return stringToFile(data, targetFile, false);
+    }
+
+    /**
+     * Writes a String to a File.
+     * @param data - String to write to a file
+     * @param targetFile - target File
+     * @param doAppend - append mode on/off
+     * @return true if all OK or false otherwise
+     */
+    public static boolean stringToFile(final String data, final File targetFile, final boolean doAppend) {
         if (targetFile==null || !isWritable(targetFile, true)){
             Log.e(FileUtils.class,"stringToFile(): File is null or cant make path dirs");
             //new IOException("File is null or cant make path dirs").printStackTrace();
@@ -172,7 +183,7 @@ public class FileUtils {
 
         boolean isSucceed = true;
         try {
-            final FileWriter out = new FileWriter(targetFile);
+            final FileWriter out = new FileWriter(targetFile, doAppend);
             out.write(data);
             out.flush();
             out.close();
@@ -185,12 +196,23 @@ public class FileUtils {
     }
 
     /**
-     * Writes a stream to a file
+     * Writes a stream to a file (overwrites existing file)
      * @param inputStream
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
-    public static boolean streamToFile(final InputStream inputStream, final File targetFile)
+    public static boolean streamToFile(final InputStream inputStream, final File targetFile){
+        return streamToFile(inputStream, targetFile, false);
+    }
+
+    /**
+     * Writes a stream to a file
+     * @param inputStream
+     * @param targetFile - File to create
+     * @param doAppend - append mode on/off
+     * @return true if all OK or false otherwise
+     */
+    public static boolean streamToFile(final InputStream inputStream, final File targetFile, final boolean doAppend)
     {
         if (inputStream == null || !isWritable(targetFile, true) ){
             Log.e(FileUtils.class,"streamToFile(): Null parameter or can't make path dirs");
@@ -203,7 +225,7 @@ public class FileUtils {
         OutputStream outputStream = null;
         try
         {
-            outputStream = new FileOutputStream(targetFile);
+            outputStream = new FileOutputStream(targetFile, doAppend);
             byte[] bytes=new byte[buffer_size];
             int count = 0;
             while((count=inputStream.read(bytes, 0, buffer_size))>0)
@@ -232,26 +254,49 @@ public class FileUtils {
     }
 
     /**
-     * Writes a byte array to a file.
+     * Writes a byte array to a file  (overwrites existing file)
      * @param bos - ByteArrayOutputStream
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
     public static boolean byteArrayOutputStreamToFile(final ByteArrayOutputStream bos, final File targetFile) {
+        return byteArrayOutputStreamToFile(bos, targetFile, false);
+    }
+
+    /**
+     * Writes a byte array to a file.
+     * @param bos - ByteArrayOutputStream
+     * @param targetFile - File to create
+     * @param doAppend - append mode on/off
+     * @return true if all OK or false otherwise
+     */
+    public static boolean byteArrayOutputStreamToFile(final ByteArrayOutputStream bos, final File targetFile, final boolean doAppend) {
         if (bos==null || targetFile==null) {
             Log.e(FileUtils.class,"byteArrayOutputStreamToFile(): Null parameters given");
             //new IOException("Null parameters given").printStackTrace();
             return false;
         }
-        return byteArrayToFile(bos.toByteArray(), targetFile);
+        return byteArrayToFile(bos.toByteArray(), targetFile, doAppend);
     }
+
     /**
-     * Writes a byte array to a file.
+     * Writes a byte array to a file  (overwrites existing file)
      * @param array - byte[]
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
     public static boolean byteArrayToFile(final byte[] array, final File targetFile) {
+        return byteArrayToFile(array, targetFile, false);
+    }
+
+    /**
+     * Writes a byte array to a file.
+     * @param array - byte[]
+     * @param targetFile - File to create
+     * @param targetFile - File to create
+     * @return true if all OK or false otherwise
+     */
+    public static boolean byteArrayToFile(final byte[] array, final File targetFile, final boolean doAppend) {
 
         if (array == null || array.length==0 || !isWritable(targetFile, true) ){
             Log.e(FileUtils.class,"byteArrayToFile(): Null parameter or can't make path dirs");
@@ -270,7 +315,7 @@ public class FileUtils {
         boolean isSucceed = false;
         OutputStream outputStream = null;
         try {
-            outputStream = new FileOutputStream(targetFile);
+            outputStream = new FileOutputStream(targetFile, doAppend);
             outputStream.write(array);
             isSucceed = true;
             outputStream.flush();
@@ -328,7 +373,7 @@ public class FileUtils {
         InputStream inputStream = null;
         try {
             inputStream = context.getContentResolver().openInputStream(uri);
-            isSucceed = streamToFile(inputStream, targetFile);
+            isSucceed = streamToFile(inputStream, targetFile, false);
         } catch (IOException e) {
             Log.e("FleUtils.intentDataToFile()", e);
         } finally {
@@ -340,7 +385,6 @@ public class FileUtils {
 
         return isSucceed;
     }
-
 
     /**
      * Method creates the FILE's path dirs and returns true if succeed. The difference
