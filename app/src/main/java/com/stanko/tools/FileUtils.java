@@ -30,6 +30,7 @@ public class FileUtils {
 
     /**
      * Copies an existing file to another destination
+     *
      * @param src - String path of a file to copy from
      * @param dst - String path of a file to copy to
      * @throws IOException
@@ -37,31 +38,32 @@ public class FileUtils {
     public static void copy(final String src, final String dst) throws IOException {
         if (TextUtils.isEmpty(src) || TextUtils.isEmpty(dst))
             throw new IOException("IOException (copy file): source file does not exists or not readable");
-        copy (new File(src), new File(dst));
+        copy(new File(src), new File(dst));
     }
 
     /**
      * Copies an existing file to another destination
+     *
      * @param src - File to copy from
      * @param dst - File to copy to
      * @throws IOException
      */
     public static void copy(final File src, final File dst) throws IOException {
-        if (src==null || !src.exists() || !src.canRead())
+        if (src == null || !src.exists() || !src.canRead())
             throw new IOException("IOException (copy file): source file does not exists or not readable");
 
 //		if ( !makeDirsForFile(dst) )
 //			throw new IOException("IOException (copy file): cant create dirs for destination file");
 
-        if ( !isWritable(dst,true) )
+        if (!isWritable(dst, true))
             throw new IOException("IOException (copy file): destination file not writable");
 
-        Log.w("FileUtils","copying: src: "+src+" to dst: "+dst);
+        Log.w("FileUtils", "copying: src: " + src + " to dst: " + dst);
 
         final FileInputStream fis = new FileInputStream(src);
         final FileOutputStream fos = new FileOutputStream(dst);
-        final InputStream in = new BufferedInputStream( fis );
-        final BufferedOutputStream out = new BufferedOutputStream( fos );
+        final InputStream in = new BufferedInputStream(fis);
+        final BufferedOutputStream out = new BufferedOutputStream(fos);
 
         // Transfer bytes from in to out
         final byte[] buf = new byte[1024];
@@ -71,28 +73,32 @@ public class FileUtils {
         try {
             while ((len = in.read(buf)) > 0)
                 out.write(buf, 0, len);
-        } catch (IOException e1){
+        } catch (IOException e1) {
             e = e1;
         }
 
         // close InputStream in
         try {
             in.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close FileInputStream fis
         try {
             fis.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close BufferedOutputStream out
         try {
             out.flush();
             out.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close FileOutputStream fos
         try {
             fos.flush();
             fos.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         sync(fos);
 
@@ -103,12 +109,13 @@ public class FileUtils {
 
     /**
      * Copies a file to another destination
+     *
      * @param src - File to copy from
      * @param dst - File to copy to
      * @throws IOException
      */
     public static synchronized void copySynchronized(final File src, final File dst) throws IOException {
-        if (src==null || !src.exists() || !src.canRead())
+        if (src == null || !src.exists() || !src.canRead())
             throw new IOException("IOException (copy file): source file does not exists or not readable");
 
 //		if (!makeDirsForFile(dst) )
@@ -119,8 +126,8 @@ public class FileUtils {
 
         final FileInputStream fis = new FileInputStream(src);
         final FileOutputStream fos = new FileOutputStream(dst);
-        final InputStream in = new BufferedInputStream( fis );
-        final BufferedOutputStream out = new BufferedOutputStream( fos );
+        final InputStream in = new BufferedInputStream(fis);
+        final BufferedOutputStream out = new BufferedOutputStream(fos);
 
         // Transfer bytes from in to out
         final byte[] buf = new byte[1024];
@@ -129,27 +136,31 @@ public class FileUtils {
         try {
             while ((len = in.read(buf)) > 0)
                 out.write(buf, 0, len);
-        } catch (IOException e1){
+        } catch (IOException e1) {
             e = e1;
         }
         // close InputStream in
         try {
             in.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close FileInputStream fis
         try {
             fis.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close BufferedOutputStream out
         try {
             out.flush();
             out.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
         // close FileOutputStream fos
         try {
             fos.flush();
             fos.close();
-        } catch (IOException ignored) {}
+        } catch (IOException ignored) {
+        }
 
         sync(fos);
 
@@ -159,7 +170,8 @@ public class FileUtils {
 
     /**
      * Writes a String to a File (overwrites existing file)
-     * @param data - String to write to a file
+     *
+     * @param data       - String to write to a file
      * @param targetFile - target File
      * @return true if all OK or false otherwise
      */
@@ -169,14 +181,15 @@ public class FileUtils {
 
     /**
      * Writes a String to a File.
-     * @param data - String to write to a file
+     *
+     * @param data       - String to write to a file
      * @param targetFile - target File
-     * @param doAppend - append mode on/off
+     * @param doAppend   - append mode on/off
      * @return true if all OK or false otherwise
      */
     public static boolean stringToFile(final String data, final File targetFile, final boolean doAppend) {
-        if (targetFile==null || !isWritable(targetFile, true)){
-            Log.e(FileUtils.class,"stringToFile(): File is null or cant make path dirs");
+        if (targetFile == null || !isWritable(targetFile, true)) {
+            Log.e(FileUtils.class, "stringToFile(): File is null or cant make path dirs");
             //new IOException("File is null or cant make path dirs").printStackTrace();
             return false;
         }
@@ -197,25 +210,26 @@ public class FileUtils {
 
     /**
      * Writes a stream to a file (overwrites existing file)
-     * @param inputStream
-     * @param targetFile - File to create
+     *
+     * @param inputStream - input stream
+     * @param targetFile  - File to create
      * @return true if all OK or false otherwise
      */
-    public static boolean streamToFile(final InputStream inputStream, final File targetFile){
+    public static boolean streamToFile(final InputStream inputStream, final File targetFile) {
         return streamToFile(inputStream, targetFile, false);
     }
 
     /**
      * Writes a stream to a file
-     * @param inputStream
-     * @param targetFile - File to create
-     * @param doAppend - append mode on/off
+     *
+     * @param inputStream - input stream
+     * @param targetFile  - File to create
+     * @param doAppend    - append mode on/off
      * @return true if all OK or false otherwise
      */
-    public static boolean streamToFile(final InputStream inputStream, final File targetFile, final boolean doAppend)
-    {
-        if (inputStream == null || !isWritable(targetFile, true) ){
-            Log.e(FileUtils.class,"streamToFile(): Null parameter or can't make path dirs");
+    public static boolean streamToFile(final InputStream inputStream, final File targetFile, final boolean doAppend) {
+        if (inputStream == null || !isWritable(targetFile, true)) {
+            Log.e(FileUtils.class, "streamToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
@@ -223,31 +237,28 @@ public class FileUtils {
         boolean isSucceed = false;
         final int buffer_size = 1024;
         OutputStream outputStream = null;
-        try
-        {
+        try {
             outputStream = new FileOutputStream(targetFile, doAppend);
-            byte[] bytes=new byte[buffer_size];
+            byte[] bytes = new byte[buffer_size];
             int count = 0;
-            while((count=inputStream.read(bytes, 0, buffer_size))>0)
+            while ((count = inputStream.read(bytes, 0, buffer_size)) > 0)
                 outputStream.write(bytes, 0, count);
 
             isSucceed = true;
             outputStream.flush();
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        }
-        catch(IndexOutOfBoundsException e){
+        } catch (IndexOutOfBoundsException e) {
             e.printStackTrace();
-        }
-        catch(IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
-            if (outputStream!=null)
-                try{
+        } finally {
+            if (outputStream != null)
+                try {
                     sync(outputStream);
                     outputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             //inputStream wasn't opened here so it would not be closed here
         }
         return isSucceed;
@@ -255,7 +266,8 @@ public class FileUtils {
 
     /**
      * Writes a byte array to a file  (overwrites existing file)
-     * @param bos - ByteArrayOutputStream
+     *
+     * @param bos        - ByteArrayOutputStream
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
@@ -265,14 +277,15 @@ public class FileUtils {
 
     /**
      * Writes a byte array to a file.
-     * @param bos - ByteArrayOutputStream
+     *
+     * @param bos        - ByteArrayOutputStream
      * @param targetFile - File to create
-     * @param doAppend - append mode on/off
+     * @param doAppend   - append mode on/off
      * @return true if all OK or false otherwise
      */
     public static boolean byteArrayOutputStreamToFile(final ByteArrayOutputStream bos, final File targetFile, final boolean doAppend) {
-        if (bos==null || targetFile==null) {
-            Log.e(FileUtils.class,"byteArrayOutputStreamToFile(): Null parameters given");
+        if (bos == null || targetFile == null) {
+            Log.e(FileUtils.class, "byteArrayOutputStreamToFile(): Null parameters given");
             //new IOException("Null parameters given").printStackTrace();
             return false;
         }
@@ -281,7 +294,8 @@ public class FileUtils {
 
     /**
      * Writes a byte array to a file  (overwrites existing file)
-     * @param array - byte[]
+     *
+     * @param array      - byte[]
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
@@ -291,20 +305,21 @@ public class FileUtils {
 
     /**
      * Writes a byte array to a file.
-     * @param array - byte[]
+     *
+     * @param array      - byte[]
      * @param targetFile - File to create
-     * @param targetFile - File to create
+     * @param doAppend   - append mode on/off
      * @return true if all OK or false otherwise
      */
     public static boolean byteArrayToFile(final byte[] array, final File targetFile, final boolean doAppend) {
 
-        if (array == null || array.length==0 || !isWritable(targetFile, true) ){
-            Log.e(FileUtils.class,"byteArrayToFile(): Null parameter or can't make path dirs");
+        if (array == null || array.length == 0 || !isWritable(targetFile, true)) {
+            Log.e(FileUtils.class, "byteArrayToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
 
-        if (targetFile.exists() &&  !targetFile.delete())
+        if (targetFile.exists() && !targetFile.delete())
             return false;
 
 //		if (targetFile==null || !makeDirsForFile(targetFile)){
@@ -323,14 +338,13 @@ public class FileUtils {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally {
-            if (outputStream!=null)
-                try{
+        } finally {
+            if (outputStream != null)
+                try {
                     sync(outputStream);
                     outputStream.close();
+                } catch (IOException e) {
                 }
-                catch (IOException e) {}
         }
 
         return isSucceed;
@@ -339,8 +353,9 @@ public class FileUtils {
 
     /**
      * Method creates a File from intent's data
-     * @param context - Context
-     * @param uri - Uri taken from Intent.detData()
+     *
+     * @param context    - Context
+     * @param uri        - Uri taken from Intent.detData()
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
@@ -350,15 +365,16 @@ public class FileUtils {
 
     /**
      * Method creates a File from intent's data
-     * @param context - Context
-     * @param uri - Uri taken from Intent.detData()
+     *
+     * @param context    - Context
+     * @param uri        - Uri taken from Intent.detData()
      * @param targetFile - File to create
      * @return true if all OK or false otherwise
      */
     public static boolean intentDataToFile(final Context context, final Uri uri, final File targetFile) {
 
-        if (context==null || uri == null || uri.toString().length()==0 || !isWritable(targetFile, true)) {
-            Log.e(FileUtils.class,"intentDataToFile(): Null parameter or can't make path dirs");
+        if (context == null || uri == null || uri.toString().length() == 0 || !isWritable(targetFile, true)) {
+            Log.e(FileUtils.class, "intentDataToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
@@ -380,7 +396,8 @@ public class FileUtils {
             if (inputStream != null)
                 try {
                     inputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return isSucceed;
@@ -388,34 +405,37 @@ public class FileUtils {
 
     /**
      * Method creates the FILE's path dirs and returns true if succeed. The difference
-     *  from File.mkdirs() is that mkdirs() returns false in both cases:
-     *  it can't create path OR path already exists. This method will return
-     *  false if path could not be created only.
+     * from File.mkdirs() is that mkdirs() returns false in both cases:
+     * it can't create path OR path already exists. This method will return
+     * false if path could not be created only.
+     *
      * @param file - File only the not a Directory!
-     * @return  true if file's path created/exists or false if path could not be created
+     * @return true if file's path created/exists or false if path could not be created
      */
-    public static boolean makeDirsForFile(final String file){
+    public static boolean makeDirsForFile(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class,"makeDirsForFile(): Null or Empty parameter given");
+            Log.e(FileUtils.class, "makeDirsForFile(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
         return makeDirsForFile(new File(file));
     }
+
     /**
      * Method creates the FILE's path dirs and returns true if succeed. The difference
-     *  from File.mkdirs() is that mkdirs() returns false in both cases:
-     *  it can't create path OR path already exists. This method will return
-     *  false if path could not be created only.
+     * from File.mkdirs() is that mkdirs() returns false in both cases:
+     * it can't create path OR path already exists. This method will return
+     * false if path could not be created only.
+     *
      * @param file - File only the not a Directory!
-     * @return  true if file's path created/exists or false if path could not be created
+     * @return true if file's path created/exists or false if path could not be created
      */
-    public static boolean makeDirsForFile(final File file){
+    public static boolean makeDirsForFile(final File file) {
 
-        if (file==null)
+        if (file == null)
             return false;
 
-        Log.d("FileUtils","file: "+file+" isDirectory(): "+file.isDirectory());
+        Log.d("FileUtils", "file: " + file + " isDirectory(): " + file.isDirectory());
 
         // для файла надо брать parent, папки в этот метод ходить не должны!
         // кроме того, несуществующий файл вернет false в isDirectory() и в isFile()
@@ -424,13 +444,13 @@ public class FileUtils {
         final String fileParentDir = file.getParent();
         final File fileDir = TextUtils.isEmpty(fileParentDir) ? null : new File(file.getParent());
 
-        boolean isSucceed = fileDir==null || fileDir.exists();
+        boolean isSucceed = fileDir == null || fileDir.exists();
         if (isSucceed)
-            Log.d("FileUtils","fileDir: "+fileDir+" already exists(): "+isSucceed);
+            Log.d("FileUtils", "fileDir: " + fileDir + " already exists(): " + isSucceed);
 
-        if (!isSucceed && fileDir!=null){
+        if (!isSucceed && fileDir != null) {
             isSucceed = fileDir.mkdirs();
-            Log.d("FileUtils","fileDir: "+fileDir+" mkdirs(): "+isSucceed);
+            Log.d("FileUtils", "fileDir: " + fileDir + " mkdirs(): " + isSucceed);
         }
 
         return isSucceed;
@@ -438,26 +458,29 @@ public class FileUtils {
 
     /**
      * Method checks if file could be written/deleted or created. Does not create path/mkdirs so if path doesn't exists returns false.
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isWritable(final String file){
+    public static boolean isWritable(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class,"isWritable(): Null or Empty parameter given");
+            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
         return isWritable(new File(file));
     }
+
     /**
      * Method checks if file could be written/deleted or created. Does not create path/mkdirs so if path doesn't exists returns false.
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isWritable(final File file){
+    public static boolean isWritable(final File file) {
 
-        if (file==null){
-            Log.e(FileUtils.class,"isWritable(): Null or Empty parameter given");
+        if (file == null) {
+            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
             return false;
         }
 
@@ -485,12 +508,13 @@ public class FileUtils {
 
     /**
      * Method checks if file could be written/deleted or created. Method will create path/mkdirs if makeDirs set to true and file's path doesn't exists.
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isWritable(final String file, final boolean makeDirs){
+    public static boolean isWritable(final String file, final boolean makeDirs) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class,"isWritable(): Null or Empty parameter given");
+            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
@@ -499,20 +523,21 @@ public class FileUtils {
 
     /**
      * Method checks if file could be written/deleted or created. Method will create path/mkdirs if makeDirs set to true and file's path doesn't exists.
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isWritable(final File file, final boolean makeDirs){
+    public static boolean isWritable(final File file, final boolean makeDirs) {
 
-        if (file==null){
-            Log.e(FileUtils.class,"isWritable(): Null or Empty parameter given");
+        if (file == null) {
+            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
             return false;
         }
 
         final String fileParentDir = file.getParent();
-        if (!TextUtils.isEmpty(fileParentDir)){
+        if (!TextUtils.isEmpty(fileParentDir)) {
             final File fileDir = new File(fileParentDir);
-            if (!fileDir.exists()){
+            if (!fileDir.exists()) {
                 if (makeDirs)
                     return makeDirsForFile(file);
                 else
@@ -524,10 +549,11 @@ public class FileUtils {
 
         if (file.exists())
             isWritable = file.canWrite();
-        else{
-            try{
+        else {
+            try {
                 isWritable = file.createNewFile();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
 
             if (isWritable)
                 isWritable = file.delete();
@@ -538,12 +564,13 @@ public class FileUtils {
 
     /**
      * Method checks if file could be read or created
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isReadable(final String file){
+    public static boolean isReadable(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class,"isReadable(): Null or Empty parameter given");
+            Log.e(FileUtils.class, "isReadable(): Null or Empty parameter given");
             //new Exception("Empty or null parameter").printStackTrace();
             return false;
         }
@@ -552,13 +579,14 @@ public class FileUtils {
 
     /**
      * Method checks if file could be read or created
+     *
      * @param file - File only not a Directory!
-     * @return  true if file's is writable or false otherwise
+     * @return true if file's is writable or false otherwise
      */
-    public static boolean isReadable(final File file){
+    public static boolean isReadable(final File file) {
 
-        if (file==null || !file.isFile()) {
-            Log.e(FileUtils.class,"isReadable(): Null parameter given or not a File");
+        if (file == null || !file.isFile()) {
+            Log.e(FileUtils.class, "isReadable(): Null parameter given or not a File");
             return false;
         }
 
@@ -566,36 +594,36 @@ public class FileUtils {
 //		if (!fileDir.exists())
 //			return false;
 
-        boolean isReadable = file.exists() && file.canRead();
-
-        return isReadable;
+        return file.exists() && file.canRead();
     }
 
     /**
      * Method ensures about file creation from stream. For Samsung like devices
+     *
      * @param stream - OutputStream
-     * @return  true if all OK or false otherwise
+     * @return true if all OK or false otherwise
      */
     public static boolean sync(final OutputStream stream) {
-        if (stream==null){
-            Log.e(FileUtils.class,"sync(): Null parameter given");
+        if (stream == null) {
+            Log.e(FileUtils.class, "sync(): Null parameter given");
             return false;
         }
 
         if (!(stream instanceof FileOutputStream))
             return false;
         else
-            return sync((FileOutputStream)stream);
+            return sync((FileOutputStream) stream);
     }
 
     /**
      * Method ensures about file creation from stream. For Samsung like devices
+     *
      * @param stream - FileOutputStream
-     * @return  true if all OK or false otherwise
+     * @return true if all OK or false otherwise
      */
     public static boolean sync(final FileOutputStream stream) {
-        if (stream==null){
-            Log.e(FileUtils.class,"sync(): Null parameter given");
+        if (stream == null) {
+            Log.e(FileUtils.class, "sync(): Null parameter given");
             return false;
         }
         try {
@@ -611,8 +639,8 @@ public class FileUtils {
     }
 
     public static boolean syncAndClose(final FileOutputStream stream) {
-        if (stream==null){
-            Log.e(FileUtils.class,"sync(): Null parameter given");
+        if (stream == null) {
+            Log.e(FileUtils.class, "sync(): Null parameter given");
             return false;
         }
         boolean result = false;
@@ -641,33 +669,35 @@ public class FileUtils {
 
     /**
      * Method deletes all files and subdirectories recursively from given directory.
+     *
      * @param file - File which represents a directory where to delete all files and dirs
-     * @return  true if all OK or false otherwise
      */
     public static void deleteFilesAndDirsRecursive(final String file) {
-        if (TextUtils.isEmpty(file)){
-            Log.e(FileUtils.class,"deleteFilesAndDirsRecursive(): Null or Empty parameter given");
+        if (TextUtils.isEmpty(file)) {
+            Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null or Empty parameter given");
             return;
         }
         deleteFilesAndDirsRecursive(new File(file));
     }
+
     /**
      * Method deletes all files and subdirectories recursively from given directory.
+     *
      * @param directory - File which represents a directory where to delete all files and dirs
-     * @return  true if all OK or false otherwise
      */
     public static void deleteFilesAndDirsRecursive(final File directory) {
-        if (directory==null || !directory.isDirectory()){
-            Log.e(FileUtils.class,"deleteFilesAndDirsRecursive(): Null parameter given or not a Directory");
+        if (directory == null || !directory.isDirectory()) {
+            Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null parameter given or not a Directory");
             return;
         }
 
         deleteFilesAndDirs(directory);
     }
+
     // recursively called method
     private static void deleteFilesAndDirs(final File fileOrDirectory) {
-        if (fileOrDirectory.isDirectory()){
-            final File [] filesList = fileOrDirectory.listFiles();
+        if (fileOrDirectory.isDirectory()) {
+            final File[] filesList = fileOrDirectory.listFiles();
             for (File child : filesList)
                 deleteFilesAndDirs(child);
         }
@@ -677,18 +707,18 @@ public class FileUtils {
 
     /**
      * Method deletes all files only (but NOT subdirectories) from given directory.
+     *
      * @param targetDir - File with represents a Directory where to delete all files
-     * @return  true if all OK or false otherwise
      */
     public static void deleteFiles(final File targetDir) {
-        if (targetDir==null || !targetDir.isDirectory()){
-            Log.e(FileUtils.class,"deleteFiles(): Null parameter given or not a Directory");
+        if (targetDir == null || !targetDir.isDirectory()) {
+            Log.e(FileUtils.class, "deleteFiles(): Null parameter given or not a Directory");
             return;
         }
         if (!targetDir.isDirectory())
             return;
 
-        final File [] filesList = targetDir.listFiles();
+        final File[] filesList = targetDir.listFiles();
         for (File file2Delete : filesList)
             if (file2Delete.isFile()) // excluding dirs!
                 file2Delete.delete();
@@ -696,12 +726,13 @@ public class FileUtils {
 
     /**
      * Check if given path is a File and if it exists
-     * @param path
+     *
+     * @param path - the path to check
      * @return boolean
      */
     public static boolean isFileExists(final String path) {
-        if (TextUtils.isEmpty(path)){
-            Log.e(FileUtils.class,"isFileExists(): Null or Empty parameter given");
+        if (TextUtils.isEmpty(path)) {
+            Log.e(FileUtils.class, "isFileExists(): Null or Empty parameter given");
             return false;
         }
         final File fileToCheck = new File(path);
@@ -711,9 +742,10 @@ public class FileUtils {
     /**
      * Returns the free space in bytes available at the given file's path
      * or -1 if storage is not available (UNMOUNTED, etc)
+     *
      * @return long
      */
-    public static long getAvailableSpace(final File file){
+    public static long getAvailableSpace(final File file) {
         final String mFileRootPath = file.getAbsolutePath();
         return getAvailableSpace(mFileRootPath);
     }
@@ -721,9 +753,10 @@ public class FileUtils {
     /**
      * Returns the free space in bytes available at the given file's path
      * or -1 if storage is not available (UNMOUNTED, etc)
+     *
      * @return long
      */
-    public static long getAvailableSpace(final Uri uri){
+    public static long getAvailableSpace(final Uri uri) {
         final String mFileRootPath = uri.getPath();
         return getAvailableSpace(mFileRootPath);
     }
@@ -731,11 +764,12 @@ public class FileUtils {
     /**
      * Returns the free space in bytes available at the given file's path
      * or -1 if storage is not available (UNMOUNTED, etc)
+     *
      * @return long
      */
     @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
-    public static long getAvailableSpace(String mFileRootPath){
+    public static long getAvailableSpace(String mFileRootPath) {
         final File file = new File(mFileRootPath);
         if (!file.exists())
             mFileRootPath = file.getParent();
@@ -775,19 +809,20 @@ public class FileUtils {
 
 
     /**
-     * returns list of given directory files as String[] 
+     * returns list of given directory files as String[]
+     *
      * @param directory - File representing directory
      * @param extension - String representing file's extension, e.g. "png" or ".jpeg" (including or excluding starting dot)
-     * @return
+     * @return String [] with files list
      */
-    public static String[] getFilenamesByExtension(final File directory, final String extension){
-        if (directory==null || !directory.isDirectory() || TextUtils.isEmpty(extension)) {
-            Log.e(FileUtils.class,"getFilenamesByExtension(): Null, not a directory or empty extension");
+    public static String[] getFilenamesByExtension(final File directory, final String extension) {
+        if (directory == null || !directory.isDirectory() || TextUtils.isEmpty(extension)) {
+            Log.e(FileUtils.class, "getFilenamesByExtension(): Null, not a directory or empty extension");
             //new IOException("Null not a directory or empty extension").printStackTrace();
             return null;
         }
 
-        final ExtensionFilter filter = new ExtensionFilter(extension.startsWith(".") ? extension : "."+extension);
+        final ExtensionFilter filter = new ExtensionFilter(extension.startsWith(".") ? extension : "." + extension);
 
         return directory.list(filter);
         //return null;
@@ -795,13 +830,14 @@ public class FileUtils {
 
     /**
      * creates File[] containing files located in given directory
+     *
      * @param directory - File representing directory
      * @param extension - String representing file's extension, e.g. "png" or ".jpeg" (including or excluding starting dot)
-     * @return
+     * @return File[] with files list
      */
-    public static File[] getFilesByExtension(final File directory, final String extension){
-        if (directory==null || !directory.isDirectory() || TextUtils.isEmpty(extension)){
-            Log.e(FileUtils.class,"getFilesByExtension(): Null not a directory or empty extension");
+    public static File[] getFilesByExtension(final File directory, final String extension) {
+        if (directory == null || !directory.isDirectory() || TextUtils.isEmpty(extension)) {
+            Log.e(FileUtils.class, "getFilesByExtension(): Null not a directory or empty extension");
             //new IOException("Null not a directory or empty extension").printStackTrace();
             return null;
         }
@@ -810,8 +846,8 @@ public class FileUtils {
 //    	if (listOfFileNames == null)
 //    		return null;
 
-        final ExtensionFilter filter = new ExtensionFilter(extension.startsWith(".") ? extension : "."+extension);
-        return  directory.listFiles(filter);
+        final ExtensionFilter filter = new ExtensionFilter(extension.startsWith(".") ? extension : "." + extension);
+        return directory.listFiles(filter);
 //    	
 //    	if (filesList.length==0 )
 //    		return new File[]{};
@@ -837,26 +873,6 @@ public class FileUtils {
 //    	//return null;
 //    }
 
-    /**
-     * Represents extension for filtering for File.list()
-     * @author Stan Koshutsky
-     *
-     */
-    public static class ExtensionFilter implements FilenameFilter {
-
-        private final String ext;
-
-        public ExtensionFilter(String ext) {
-            this.ext = ext;
-        }
-
-        @Override
-        public boolean accept(File dir, String filename) {
-            return (filename.endsWith(ext));
-        }
-    }
-
-
     public static File getFileFromUri(final Context context, final Uri uri) {
         final String path = getPathFromUri(context, uri);
         if (TextUtils.isEmpty(path))
@@ -869,7 +885,7 @@ public class FileUtils {
     public static String getPathFromUri(final Context context, final Uri uri) {
 //    	if (ctx==null || uri==null)
 //    		return null;
-//    	
+//
 //    	final Context context = ctx.getApplicationContext();
 
         //final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
@@ -912,7 +928,7 @@ public class FileUtils {
                 }
 
                 final String selection = "_id=?";
-                final String[] selectionArgs = new String[] { split[1] };
+                final String[] selectionArgs = new String[]{split[1]};
 
                 return getDataColumn(context, contentUri, selection,
                         selectionArgs);
@@ -934,21 +950,17 @@ public class FileUtils {
      * Get the value of the data column for this Uri. This is useful for
      * MediaStore Uris, and other file-based ContentProviders.
      *
-     * @param context
-     *            The context.
-     * @param uri
-     *            The Uri to query.
-     * @param selection
-     *            (Optional) Filter used in the query.
-     * @param selectionArgs
-     *            (Optional) Selection arguments used in the query.
+     * @param context       The context.
+     * @param uri           The Uri to query.
+     * @param selection     (Optional) Filter used in the query.
+     * @param selectionArgs (Optional) Selection arguments used in the query.
      * @return The value of the _data column, which is typically a file path.
      */
     public static String getDataColumn(final Context context, final Uri uri, final String selection, final String[] selectionArgs) {
 
         Cursor cursor = null;
         final String column = "_data";
-        final String[] projection = { column };
+        final String[] projection = {column};
 
         try {
             cursor = context.getContentResolver().query(uri, projection,
@@ -965,8 +977,7 @@ public class FileUtils {
     }
 
     /**
-     * @param uri
-     *            The Uri to check.
+     * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
     public static boolean isExternalStorageDocument(final Uri uri) {
@@ -974,8 +985,7 @@ public class FileUtils {
     }
 
     /**
-     * @param uri
-     *            The Uri to check.
+     * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
     public static boolean isDownloadsDocument(final Uri uri) {
@@ -983,14 +993,19 @@ public class FileUtils {
     }
 
     /**
-     * @param uri
-     *            The Uri to check.
+     * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
     public static boolean isMediaDocument(final Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
+    /**
+     * Merge two files into a new file
+     * @param file1 - File to merge (will be first in resulting file)
+     * @param file2 - File to merge (will be second in resulting file)
+     * @param outputFile - resulting File
+     */
     public static void mergeFiles(final File file1, final File file2, final File outputFile) {
         if (!isReadable(file1) || !isReadable(file2) || !outputFile.exists() && !makeDirsForFile(outputFile)) {
             return;
@@ -1014,6 +1029,51 @@ public class FileUtils {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * Appends one file to another.
+     *
+     * @param file1 - file to append to
+     * @param file2 - file being append to file1
+     */
+    public static void appendFileToFile(final File file1, final File file2) {
+        if (!isReadable(file1) || !isReadable(file2) || !isWritable(file1)) {
+            return;
+        }
+        try {
+            FileInputStream inputStream = new FileInputStream(file2);
+            FileOutputStream outputStream = new FileOutputStream(file1, true);
+            int count;
+            final int buffer_size = 4096;
+            byte[] bytes = new byte[buffer_size];
+            while ((count = inputStream.read(bytes, 0, buffer_size)) > 0)
+                outputStream.write(bytes, 0, count);
+            FileUtils.sync(outputStream);
+            outputStream.close();
+            inputStream.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Represents extension for filtering for File.list()
+     */
+    public static class ExtensionFilter implements FilenameFilter {
+
+        private final String ext;
+
+        public ExtensionFilter(String ext) {
+            this.ext = ext;
+        }
+
+        @Override
+        public boolean accept(File dir, String filename) {
+            return (filename.endsWith(ext));
         }
     }
 }
