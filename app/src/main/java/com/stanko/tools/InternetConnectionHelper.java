@@ -323,7 +323,14 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             httpURLConnection.setRequestProperty("Connection", "close");
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
-            isReachable = httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK; //200
+            final int responseCode = httpURLConnection.getResponseCode();
+            isReachable = responseCode == HttpURLConnection.HTTP_OK //200
+                            || responseCode == HttpURLConnection.HTTP_BAD_METHOD
+                            || responseCode == HttpURLConnection.HTTP_BAD_REQUEST
+                            || responseCode == HttpURLConnection.HTTP_ACCEPTED
+                            || responseCode == HttpURLConnection.HTTP_FORBIDDEN
+                            || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
+
         } catch (MalformedURLException e) {
             isExceptionHappens = true;
             Log.e("ServerChecker", e);
