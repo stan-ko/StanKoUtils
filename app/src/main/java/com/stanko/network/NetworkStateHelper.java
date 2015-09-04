@@ -69,7 +69,7 @@ public class NetworkStateHelper {
      *
      * @return true if connection persists or false otherwise
      */
-    public static boolean isIsNetworkAvailable() {
+    public static boolean isNetworkAvailable() {
         if (!isNetworkAvailable) {
             final boolean wasNetworkAvailable = isNetworkAvailable;
             final boolean isNetworkConnectionAvailable = InternetConnectionHelper.checkIsNetworkAvailable(appContext);
