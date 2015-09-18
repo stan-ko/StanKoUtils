@@ -2,6 +2,7 @@ package com.stanko.network;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.os.Looper;
 import android.text.TextUtils;
 
 import com.stanko.tools.BooleanLock;
@@ -151,6 +152,7 @@ public class NetworkStateHelper {
             @Override
             public void run() {
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                Looper.prepare();
                 final StoppableThread thisThread = ((StoppableThread) Thread.currentThread());
                 boolean doesHostRespond = isHostReachable(hostToCheck);
                 // if thread stop requested task result will be ignored
@@ -162,6 +164,7 @@ public class NetworkStateHelper {
                         checkIfHostRespondsLock.setFinished();
                     }
                 }
+                Looper.loop();
             }
         });
         checkIfHostRespondsThread.start();
@@ -191,10 +194,12 @@ public class NetworkStateHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Looper.prepare();
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 boolean doesHostRespond = isHostReachable(hostToCheck);
                 // sending check result using callback
                 callback.doesHostRespond(doesHostRespond);
+                Looper.loop();
             }
         }).start();
     }
