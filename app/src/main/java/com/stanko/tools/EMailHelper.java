@@ -110,11 +110,19 @@ public class EMailHelper {
 								 final String receiver, //TODO: String[] of receivers
 								 final String subject,
 								 final String text,
-								 final String pickerTitle,
-								 final String securityErrorMessage,
-								 final String noAssociatedAppErrorMessage
+								 String pickerTitle,
+								 String securityErrorMessage,
+								 String noAssociatedAppErrorMessage
 								 )
 	{
+		if (TextUtils.isEmpty(pickerTitle))
+			pickerTitle = EMH_DEFAULT_PICKER_TITLE;
+		if (TextUtils.isEmpty(securityErrorMessage))
+			securityErrorMessage = EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+		if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
+			noAssociatedAppErrorMessage = EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
+
+
 		final Intent emailIntent = new Intent(Intent.ACTION_SEND);
 		if (!TextUtils.isEmpty(receiver))
 			emailIntent.putExtra(Intent.EXTRA_EMAIL, new String[]{receiver});
@@ -271,6 +279,21 @@ public class EMailHelper {
 								 final String receiver,
 								 final String subject,
 								 final String text,
+								 final File... files) {
+		sendEmail(context,
+				new String[]{receiver},
+				subject,
+				text,
+				EMH_DEFAULT_PICKER_TITLE,
+				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
+				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
+				files);
+	}
+
+	public static void sendEmail(Context context,
+								 final String receiver,
+								 final String subject,
+								 final String text,
 								 final String pickerTitle,
 								 final String securityErrorMessage,
 								 final String noAssociatedAppErrorMessage,
@@ -282,15 +305,22 @@ public class EMailHelper {
 								 final String[] receivers,
 								 final String subject,
 								 final String text,
-								 final String pickerTitle,
-								 final String securityErrorMessage,
-								 final String noAssociatedAppErrorMessage,
-								 final File... files) {
+								 String pickerTitle,
+								 String securityErrorMessage,
+								 String noAssociatedAppErrorMessage,
+								 final File... files)
+	{
+		if (TextUtils.isEmpty(pickerTitle))
+			pickerTitle = EMH_DEFAULT_PICKER_TITLE;
+		if (TextUtils.isEmpty(securityErrorMessage))
+			securityErrorMessage = EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+		if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
+			noAssociatedAppErrorMessage = EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
 
 		final Intent emailIntent;
 		if (files != null && files.length > 0) {
 			emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-			ArrayList<Uri> uris = new ArrayList<Uri>();
+			final ArrayList<Uri> uris = new ArrayList<Uri>();
 			//convert from files to Android friendly Parcelable Uri's
 			for (File file : files)
 				uris.add(Uri.fromFile(file));
