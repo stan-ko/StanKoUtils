@@ -275,6 +275,148 @@ public class EMailHelper {
 
 
 	// mail with attaches
+	/**
+	 * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
+	 *
+	 * @param context
+	 * @param receiver - Receiver EMail address or addresses
+	 * @param subjectResId - EMail subject string Resource Id (R.string.xxx)
+	 * @param textResId - EMail text/body string Resource Id (R.string.xxx)
+	 */
+	public static void sendEmail(Context context,
+								 final String receiver,
+								 final int subjectResId,
+								 final int textResId,
+								 final File... files
+	) {
+		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
+		final String text = textResId > 0 ? context.getString(textResId) : null;
+		sendEmail(context,
+				receiver,
+				subject,
+				text,
+				EMH_DEFAULT_PICKER_TITLE,
+				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
+				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
+				files);
+	}
+
+	/**
+	 * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
+	 *
+	 * @param context
+	 * @param receiver
+	 * @param subjectResId
+	 * @param textResId
+	 */
+	public static void sendEmail(Context context,
+								 final String receiver,
+								 final int subjectResId,
+								 final int textResId,
+								 final int pickerTitleResId,
+								 final int securityErrorResId,
+								 final int noAssociatedAppErrorResId,
+								 final File... files
+	) {
+		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
+		final String text = textResId > 0 ? context.getString(textResId) : null;
+		final String pickerTitle = pickerTitleResId > 0 ? context.getString(textResId) : EMH_DEFAULT_PICKER_TITLE;
+		final String securityError = securityErrorResId > 0 ? context.getString(textResId) : EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+		final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(textResId) : EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
+		sendEmail(context,
+				receiver,
+				subject,
+				text,
+				pickerTitle,
+				securityError,
+				noAssociatedAppError,
+				files);
+	}
+
+	/**
+	 * Starts EMail intent with filled by given R.string.ids: subject and text
+	 *
+	 * @param context
+	 * @param subjectResId
+	 * @param textResId
+	 */
+	public static void sendEmail(Context context,
+								 final int subjectResId,
+								 final int textResId,
+								 final File... files)
+	{
+		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
+		final String text = textResId > 0 ? context.getString(textResId) : null;
+		sendEmail(context,
+				"",
+				subject,
+				text,
+				EMH_DEFAULT_PICKER_TITLE,
+				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
+				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
+				files);
+	}
+
+	/**
+	 * Starts EMail intent with filled by given R.string.ids: email address, subject and text
+	 *
+	 * @param context
+	 * @param emailResId
+	 * @param subjectResId
+	 * @param textResId
+	 */
+	public static void sendEmail(Context context,
+								 final int emailResId,
+								 final int subjectResId,
+								 final int textResId,
+								 final int pickerTitleResId,
+								 final int securityErrorResId,
+								 final int noAssociatedAppErrorResId,
+								 final File... files) {
+		final String email = emailResId > 0 ? context.getString(emailResId) : null;
+		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
+		final String text = textResId > 0 ? context.getString(textResId) : null;
+		final String pickerTitle = pickerTitleResId > 0 ? context.getString(textResId) : EMH_DEFAULT_PICKER_TITLE;
+		final String securityError = securityErrorResId > 0 ? context.getString(textResId) : EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+		final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(textResId) : EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
+		sendEmail(context,
+				email,
+				subject,
+				text,
+				pickerTitle,
+				securityError,
+				noAssociatedAppError,
+				files);
+	}
+
+	/**
+	 * Starts EMail intent with filled by given R.string.ids: email address, subject and text
+	 *
+	 * @param context
+	 * @param emailResId
+	 * @param subjectResId
+	 * @param textResId
+	 */
+	public static void sendEmail(Context context,
+								 final int emailResId,
+								 final int subjectResId,
+								 final int textResId,
+								 final File... files) {
+		final String email = emailResId > 0 ? context.getString(emailResId) : null;
+		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
+		final String text = textResId > 0 ? context.getString(textResId) : null;
+		sendEmail(context,
+				email,
+				subject,
+				text,
+				EMH_DEFAULT_PICKER_TITLE,
+				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
+				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
+				files);
+	}
+
+
+
 	public static void sendEmail(Context context,
 								 final String receiver,
 								 final String subject,
