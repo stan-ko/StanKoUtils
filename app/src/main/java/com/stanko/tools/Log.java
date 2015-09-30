@@ -78,17 +78,14 @@ public class Log {
     }
 
     public static void w(final String msg) {
-        if (isDebuggable)
             android.util.Log.w(getMethodName(), msg);
     }
 
     public static void e(final String msg) {
-        if (isDebuggable)
             android.util.Log.e(getMethodName(), msg);
     }
 
     public static void e(final Exception e) {
-        if (isDebuggable)
             android.util.Log.e(getMethodName(), e.getMessage(), e);
     }
 
@@ -109,12 +106,10 @@ public class Log {
     }
 
     public static void w(final String logTag, final String msg) {
-        if (isDebuggable)
             android.util.Log.w(logTag, msg);
     }
 
     public static void e(final String logTag, final String msg) {
-        if (isDebuggable)
             android.util.Log.e(logTag, msg);
     }
 
@@ -123,7 +118,6 @@ public class Log {
     }
 
     public static void e(final String logTag, final String msg, final Exception e) {
-        if (isDebuggable)
             android.util.Log.e(logTag, msg, e);
     }
 
