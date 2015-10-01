@@ -189,16 +189,21 @@ public class Log {
 
 
     public static String getMethodName() {
-        String methodName = null;
+        String methodName;
         StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        if (stackTraceElements == null || stackTraceElements.length == 0)
-            return methodName;
+        if (stackTraceElements == null || stackTraceElements.length <2) {
+            stackTraceElements = new Throwable().getStackTrace();
+            if (stackTraceElements == null || stackTraceElements.length < 2)
+                return "U/D";
+        }
 
-        StackTraceElement stackTraceElement = stackTraceElements[1];
+        final StackTraceElement stackTraceElement = stackTraceElements[1];
         if (stackTraceElement == null)
-            return methodName;
+            return "U/D";
 
-        methodName = stackTraceElement.getMethodName();
+//        // class.method()
+//        methodName =  stackTraceElements[1].getFileName()+"."+stackTraceElement.getMethodName()+"()";
+        methodName = stackTraceElement.getMethodName()+"()";
         return methodName;
     }
 
