@@ -190,28 +190,11 @@ public class Log {
 
 
     public static String getMethodName() {
-//        String methodName;
-//        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-//        if (stackTraceElements == null || stackTraceElements.length <2) {
-//            stackTraceElements = new Throwable().getStackTrace();
-//            if (stackTraceElements == null || stackTraceElements.length < 2)
-//                return "U/D";
-//        }
-//
-//        final StackTraceElement stackTraceElement = stackTraceElements[1];
-//        if (stackTraceElement == null)
-//            return "U/D";
-//
-//        // class.method()
-//        methodName =  stackTraceElements[1].getFileName()+"."+stackTraceElement.getMethodName()+"()";
-//        methodName = stackTraceElement.getMethodName()+"()";
-//        return methodName;
-
         String methodName = "U/D";
         StackTraceElement[] stackTraceElements;
         StackTraceElement stackTraceElement;
         stackTraceElements = Thread.currentThread().getStackTrace();
-        if (stackTraceElements == null || stackTraceElements.length < 3) {
+        if (stackTraceElements == null || stackTraceElements.length < 4) {
             stackTraceElements = (new Throwable()).getStackTrace();
             if (stackTraceElements == null || stackTraceElements.length < 2) {
                 return methodName;
@@ -219,10 +202,10 @@ public class Log {
                 stackTraceElement = stackTraceElements[2];
             }
         } else {
-            stackTraceElement = stackTraceElements[3];
+            stackTraceElement = stackTraceElements[4];
         }
         if (stackTraceElement != null) {
-            methodName = stackTraceElement.getMethodName() + "()";
+            methodName = String.format("%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
         }
         return methodName;
     }
