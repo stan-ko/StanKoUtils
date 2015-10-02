@@ -3,6 +3,7 @@ package com.stanko.tools;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
+
 /*
 * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
 */
@@ -78,15 +79,15 @@ public class Log {
     }
 
     public static void w(final String msg) {
-            android.util.Log.w(getMethodName(), msg);
+        android.util.Log.w(getMethodName(), msg);
     }
 
     public static void e(final String msg) {
-            android.util.Log.e(getMethodName(), msg);
+        android.util.Log.e(getMethodName(), msg);
     }
 
     public static void e(final Exception e) {
-            android.util.Log.e(getMethodName(), e.getMessage(), e);
+        android.util.Log.e(getMethodName(), e.getMessage(), e);
     }
 
     // String as logTag
@@ -106,11 +107,11 @@ public class Log {
     }
 
     public static void w(final String logTag, final String msg) {
-            android.util.Log.w(logTag, msg);
+        android.util.Log.w(logTag, msg);
     }
 
     public static void e(final String logTag, final String msg) {
-            android.util.Log.e(logTag, msg);
+        android.util.Log.e(logTag, msg);
     }
 
     public static void e(final String logTag, final Exception e) {
@@ -118,7 +119,7 @@ public class Log {
     }
 
     public static void e(final String logTag, final String msg, final Exception e) {
-            android.util.Log.e(logTag, msg, e);
+        android.util.Log.e(logTag, msg, e);
     }
 
 
@@ -189,21 +190,40 @@ public class Log {
 
 
     public static String getMethodName() {
-        String methodName;
-        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-        if (stackTraceElements == null || stackTraceElements.length <2) {
-            stackTraceElements = new Throwable().getStackTrace();
-            if (stackTraceElements == null || stackTraceElements.length < 2)
-                return "U/D";
-        }
-
-        final StackTraceElement stackTraceElement = stackTraceElements[1];
-        if (stackTraceElement == null)
-            return "U/D";
-
+//        String methodName;
+//        StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+//        if (stackTraceElements == null || stackTraceElements.length <2) {
+//            stackTraceElements = new Throwable().getStackTrace();
+//            if (stackTraceElements == null || stackTraceElements.length < 2)
+//                return "U/D";
+//        }
+//
+//        final StackTraceElement stackTraceElement = stackTraceElements[1];
+//        if (stackTraceElement == null)
+//            return "U/D";
+//
 //        // class.method()
 //        methodName =  stackTraceElements[1].getFileName()+"."+stackTraceElement.getMethodName()+"()";
-        methodName = stackTraceElement.getMethodName()+"()";
+//        methodName = stackTraceElement.getMethodName()+"()";
+//        return methodName;
+
+        String methodName = "U/D";
+        StackTraceElement[] stackTraceElements;
+        StackTraceElement stackTraceElement;
+        stackTraceElements = Thread.currentThread().getStackTrace();
+        if (stackTraceElements == null || stackTraceElements.length < 3) {
+            stackTraceElements = (new Throwable()).getStackTrace();
+            if (stackTraceElements == null || stackTraceElements.length < 2) {
+                return methodName;
+            } else {
+                stackTraceElement = stackTraceElements[2];
+            }
+        } else {
+            stackTraceElement = stackTraceElements[3];
+        }
+        if (stackTraceElement != null) {
+            methodName = stackTraceElement.getMethodName() + "()";
+        }
         return methodName;
     }
 
