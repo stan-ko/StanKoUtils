@@ -39,6 +39,11 @@ public class SmsMmsHelper {
 //        sendSMS(context,phoneNumber,text2Send,context.getString(securityExceptionMessageResId),context.getString(noSupportMessageResId));
 //    }
 
+    public static void sendSMS(final Context context,
+                               final String phoneNumber,
+                               final String text2Send) {
+        sendSMS(context, phoneNumber, text2Send, null, null, null);
+    }
 
     public static void sendSMS(final Context context,
                                final String phoneNumber,
@@ -53,28 +58,57 @@ public class SmsMmsHelper {
         if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
             noAssociatedAppErrorMessage = SMSH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
 
-        final Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setData(Uri.parse("smsto:" + phoneNumber));
-        intent.putExtra("address", phoneNumber);
-        intent.putExtra("sms_body", text2Send);
-        intent.putExtra("exit_on_sent", true);
-        if (applyKnownPackage(context, intent)) {
+        final Intent sendIntent = new Intent(Intent.ACTION_VIEW);
+        sendIntent.setData(Uri.parse("smsto:" + phoneNumber));
+        sendIntent.putExtra("address", phoneNumber);
+        sendIntent.putExtra("sms_body", text2Send);
+        sendIntent.putExtra("exit_on_sent", true);
+
+        if (applyKnownPackage(context, sendIntent)) {
             try {
-                context.startActivity(Intent.createChooser(intent, pickerTitle));
-                //context.startActivity(intent);
+                context.startActivity(Intent.createChooser(sendIntent, pickerTitle));
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
-        } else if (intent.resolveActivity(context.getPackageManager()) != null)
+        } else if (sendIntent.resolveActivity(context.getPackageManager()) != null)
             try {
-                context.startActivity(intent);
+                context.startActivity(sendIntent);
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             }
-        else
-            Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_SHORT).show();
+        else {
+            // since no sms-app was found we will try to send using any other app
+            sendIntent.putExtra(Intent.EXTRA_TEXT, text2Send);
+            try {
+                context.startActivity(Intent.createChooser(sendIntent, pickerTitle));
+            } catch (SecurityException e) {
+                Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
+            } catch (Throwable e) {
+                Toast.makeText(context, SMSH_DEFAULT_UNEXPECTED_ERROR_MESSAGE, Toast.LENGTH_LONG).show();
+            }
+        }
+
+//        if (applyKnownPackage(context, intent)) {
+//            try {
+//                context.startActivity(Intent.createChooser(intent, pickerTitle));
+//                //context.startActivity(intent);
+//            } catch (SecurityException e) {
+//                Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
+//            }
+//        } else if (intent.resolveActivity(context.getPackageManager()) != null)
+//            try {
+//                context.startActivity(intent);
+//            } catch (SecurityException e) {
+//                Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
+//            } catch (ActivityNotFoundException e) {
+//                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
+//            }
+//        else
+//            Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_SHORT).show();
     }
 
 //    public static void sendMMS(Context context,
@@ -90,6 +124,14 @@ public class SmsMmsHelper {
 //                context.getString(noSupportMessageResId),
 //                file);
 //    }
+
+    public static void sendMMS(Context context,
+                               final String phoneNumbers,
+                               final String text2Send,
+                               final File file) {
+        sendMMS(context, phoneNumbers, text2Send, null, null, null, file);
+
+    }
 
     public static void sendMMS(Context context,
                                final String phoneNumbers,
@@ -121,8 +163,7 @@ public class SmsMmsHelper {
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
-        }
-        else if (sendIntent.resolveActivity(context.getPackageManager()) != null)
+        } else if (sendIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(sendIntent);
             } catch (SecurityException e) {
@@ -199,8 +240,8 @@ public class SmsMmsHelper {
             sendIntent.setPackage(resInfo.get(0).activityInfo.packageName);
             return true;
         }
-        int count=0;
-        String targetPackage=null;
+        int count = 0;
+        String targetPackage = null;
         // found some apps: lets check these app looking for known knownPackages
         for (ResolveInfo info : resInfo) {
             for (String aPackage : knownPackages) {
@@ -212,8 +253,8 @@ public class SmsMmsHelper {
                 }
             }
         }
-        if (count==1)
+        if (count == 1)
             sendIntent.setPackage(targetPackage);
-        return count==1;
+        return count == 1;
     }
 }
