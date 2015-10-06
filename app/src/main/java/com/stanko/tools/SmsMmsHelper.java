@@ -20,65 +20,92 @@ import java.util.Locale;
 
 public class SmsMmsHelper {
 
-    public static void sendSMS(Context context,
-                               final String phoneNumber,
-                               final String text2Send,
-                               final int securityExceptionMessageResId,
-                               final int noSupportMessageResId)
-    {
-        sendSMS(context,phoneNumber,text2Send,context.getString(securityExceptionMessageResId),context.getString(noSupportMessageResId));
-    }
+    private static String SMSH_DEFAULT_PICKER_TITLE = "Send SMS using:";
+    private static String SMSH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE = "Sending SMS has been forbidden by permissions";
+    private static String SMSH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE = "No SMS app has been found";
+    private static String MMSH_DEFAULT_PICKER_TITLE = "Send MMS using:";
+    private static String MMSH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE = "Sending MMS has been forbidden by permissions";
+    private static String MMSH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE = "No MMS app has been found";
 
-    public static void sendSMS(Context context,
+    private static String SMSH_DEFAULT_UNEXPECTED_ERROR_MESSAGE = "Unexpected error while sending SMS";
+    private static String MMSH_DEFAULT_UNEXPECTED_ERROR_MESSAGE = "Unexpected error while sending MMS";
+
+//    public static void sendSMS(final Context context,
+//                               final String phoneNumber,
+//                               final String text2Send,
+//                               final int securityExceptionMessageResId,
+//                               final int noSupportMessageResId)
+//    {
+//        sendSMS(context,phoneNumber,text2Send,context.getString(securityExceptionMessageResId),context.getString(noSupportMessageResId));
+//    }
+
+
+    public static void sendSMS(final Context context,
                                final String phoneNumber,
                                final String text2Send,
-                               final String securityExceptionMessage,
-                               final String noSupportMessage)
-    {
+                               String pickerTitle,
+                               String securityExceptionMessage,
+                               String noAssociatedAppErrorMessage) {
+        if (TextUtils.isEmpty(pickerTitle))
+            pickerTitle = SMSH_DEFAULT_PICKER_TITLE;
+        if (TextUtils.isEmpty(securityExceptionMessage))
+            securityExceptionMessage = SMSH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+        if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
+            noAssociatedAppErrorMessage = SMSH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
+
         final Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(Uri.parse("smsto:" + phoneNumber));
         intent.putExtra("address", phoneNumber);
         intent.putExtra("sms_body", text2Send);
         intent.putExtra("exit_on_sent", true);
-        if (applyKnownPackage(context, intent)){
+        if (applyKnownPackage(context, intent)) {
             try {
-                context.startActivity(intent);
+                context.startActivity(Intent.createChooser(intent, pickerTitle));
+                //context.startActivity(intent);
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
-        }
-        else if (intent.resolveActivity(context.getPackageManager()) != null)
+        } else if (intent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(intent);
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             }
         else
-            Toast.makeText(context, noSupportMessage, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_SHORT).show();
     }
+
+//    public static void sendMMS(Context context,
+//                               final String phoneNumbers,
+//                               final String text2Send,
+//                               final int pickerTitleResId,
+//                               final int securityExceptionMessageResId,
+//                               final int noSupportMessageResId,
+//                               final File file) {
+//        sendMMS(context, phoneNumbers, text2Send,
+//                context.getString(pickerTitleResId),
+//                context.getString(securityExceptionMessageResId),
+//                context.getString(noSupportMessageResId),
+//                file);
+//    }
 
     public static void sendMMS(Context context,
                                final String phoneNumbers,
                                final String text2Send,
-                               final int pickerTitleResId,
-                               final int securityExceptionMessageResId,
-                               final int noSupportMessageResId,
+                               String pickerTitle,
+                               String securityExceptionMessage,
+                               String noAssociatedAppErrorMessage,
                                final File file) {
-        sendMMS(context, phoneNumbers, text2Send,
-                context.getString(pickerTitleResId),
-                context.getString(securityExceptionMessageResId),
-                context.getString(noSupportMessageResId),
-                file);
-    }
+        if (TextUtils.isEmpty(pickerTitle))
+            pickerTitle = MMSH_DEFAULT_PICKER_TITLE;
+        if (TextUtils.isEmpty(securityExceptionMessage))
+            securityExceptionMessage = MMSH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
+        if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
+            noAssociatedAppErrorMessage = MMSH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
 
-    public static void sendMMS(Context context,
-                               final String phoneNumbers,
-                               final String text2Send,
-                               final String pickerTitle,
-                               final String securityExceptionMessage,
-                               final String noSupportMessage,
-                               final File file) {
-        final Intent sendIntent = new Intent(Intent.ACTION_SEND);
+        Intent sendIntent = new Intent(Intent.ACTION_SEND);
         sendIntent.setData(Uri.parse("smsto:" + phoneNumbers));
         sendIntent.putExtra("address", phoneNumbers);
         sendIntent.putExtra("sms_body", text2Send);
@@ -88,13 +115,21 @@ public class SmsMmsHelper {
         //sendIntent.setClassName("com.android.mms", "com.android.mms.ui.ComposeMessageActivity"); // not working in most cases
         //sendIntent.setType("vnd.android-dir/mms-sms");
 
-        if (applyKnownPackage(context,sendIntent)){
+        if (applyKnownPackage(context, sendIntent)) {
             try {
                 context.startActivity(Intent.createChooser(sendIntent, pickerTitle));
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
         }
+        else if (sendIntent.resolveActivity(context.getPackageManager()) != null)
+            try {
+                context.startActivity(sendIntent);
+            } catch (SecurityException e) {
+                Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
+            } catch (ActivityNotFoundException e) {
+                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
+            }
         else {
             // since no sms-app was found we will try to send using any other app
             sendIntent.putExtra(Intent.EXTRA_TEXT, text2Send);
@@ -103,10 +138,11 @@ public class SmsMmsHelper {
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             } catch (ActivityNotFoundException e) {
-                Toast.makeText(context, noSupportMessage, Toast.LENGTH_LONG).show();
+                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
+            } catch (Throwable e) {
+                Toast.makeText(context, MMSH_DEFAULT_UNEXPECTED_ERROR_MESSAGE, Toast.LENGTH_LONG).show();
             }
         }
-
     }
 
 
@@ -143,14 +179,14 @@ public class SmsMmsHelper {
     };
 
     @SuppressLint("NewApi")
-    private static boolean applyKnownPackage(final Context context, final Intent sendIntent){
+    private static boolean applyKnownPackage(final Context context, final Intent sendIntent) {
         // At least KitKat. Need to change the build to API 19
         // still no package of sms-app
         if (DeviceInfo.hasAPI(19)) {
             final String smsPackageName = Telephony.Sms.getDefaultSmsPackage(context);
             // Can be null in case that there is no default, then the user
             // would be able to choose any app that support this intent.
-            if (!TextUtils.isEmpty(smsPackageName)){
+            if (!TextUtils.isEmpty(smsPackageName)) {
                 sendIntent.setPackage(smsPackageName);
                 return true;
             }
@@ -159,21 +195,25 @@ public class SmsMmsHelper {
         final List<ResolveInfo> resInfo = context.getPackageManager().queryIntentActivities(sendIntent, 0);
         if (resInfo.size() == 0)
             return false;
-        if (resInfo.size()==1){
+        if (resInfo.size() == 1) {
             sendIntent.setPackage(resInfo.get(0).activityInfo.packageName);
             return true;
         }
+        int count=0;
+        String targetPackage=null;
         // found some apps: lets check these app looking for known knownPackages
         for (ResolveInfo info : resInfo) {
             for (String aPackage : knownPackages) {
                 if (info.activityInfo.packageName.toLowerCase(Locale.US).contains(aPackage)
                         || info.activityInfo.name.toLowerCase(Locale.US).contains(aPackage)) {
                     // found listed in known knownPackages app! Will use it
-                    sendIntent.setPackage(info.activityInfo.packageName);
-                    return true;
+                    targetPackage = info.activityInfo.packageName;
+                    count++;
                 }
             }
         }
-        return true;
+        if (count==1)
+            sendIntent.setPackage(targetPackage);
+        return count==1;
     }
 }
