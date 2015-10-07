@@ -125,7 +125,7 @@ public class SmsMmsHelper {
 //                file);
 //    }
 
-    public static void sendMMS(Context context,
+    public static void sendMMS(final Context context,
                                final String phoneNumbers,
                                final String text2Send,
                                final File file) {
@@ -133,7 +133,7 @@ public class SmsMmsHelper {
 
     }
 
-    public static void sendMMS(Context context,
+    public static void sendMMS(final Context context,
                                final String phoneNumbers,
                                final String text2Send,
                                String pickerTitle,
