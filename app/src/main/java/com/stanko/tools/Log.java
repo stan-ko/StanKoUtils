@@ -63,6 +63,43 @@ public class Log {
 
 
     // Method as logTag
+    public static void v() {
+        if (isDebuggable){
+            final String [] classDotMethod = getClassDotMethod();
+            android.util.Log.v(classDotMethod[0],classDotMethod[1]);
+        }
+    }
+
+    public static void d() {
+        if (isDebuggable){
+            final String [] classDotMethod = getClassDotMethod();
+            android.util.Log.d(classDotMethod[0],classDotMethod[1]);
+        }
+    }
+
+    public static void i() {
+        if (isDebuggable){
+            final String [] classDotMethod = getClassDotMethod();
+            android.util.Log.i(classDotMethod[0],classDotMethod[1]);
+        }
+    }
+
+    public static void w() {
+//        if (isDebuggable){
+            final String [] classDotMethod = getClassDotMethod();
+            android.util.Log.w(classDotMethod[0],classDotMethod[1]);
+//        }
+    }
+
+    public static void e() {
+//        if (isDebuggable){
+            final String [] classDotMethod = getClassDotMethod();
+            android.util.Log.e(classDotMethod[0],classDotMethod[1]);
+//        }
+    }
+
+
+    // Method as logTag
     public static void v(final String msg) {
         if (isDebuggable)
             android.util.Log.v(getMethodName(), msg);
@@ -205,9 +242,32 @@ public class Log {
             stackTraceElement = stackTraceElements[4];
         }
         if (stackTraceElement != null) {
-            methodName = String.format("%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
+            methodName = String.format("%s.%s():%d", stackTraceElement.getFileName(), stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
         }
         return methodName;
+    }
+
+    public static String[] getClassDotMethod() {
+        final String[] classMethod = new String[]{"U/D","U/D"};
+        //String methodName = "U/D";
+        StackTraceElement[] stackTraceElements;
+        StackTraceElement stackTraceElement;
+        stackTraceElements = Thread.currentThread().getStackTrace();
+        if (stackTraceElements == null || stackTraceElements.length < 4) {
+            stackTraceElements = (new Throwable()).getStackTrace();
+            if (stackTraceElements == null || stackTraceElements.length < 2) {
+                return classMethod;
+            } else {
+                stackTraceElement = stackTraceElements[2];
+            }
+        } else {
+            stackTraceElement = stackTraceElements[4];
+        }
+        if (stackTraceElement != null) {
+            classMethod[0] = stackTraceElement.getFileName();
+            classMethod[1] = String.format("%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
+        }
+        return classMethod;
     }
 
 }
