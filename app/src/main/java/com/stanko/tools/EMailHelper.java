@@ -136,31 +136,6 @@ public class EMailHelper {
      * @param subject
      * @param text
      */
-    public static void sendEmail(final Context context,
-                                 final String receiver,
-                                 final String subject,
-                                 final String text,
-                                 final String pickerTitle,
-                                 final String securityErrorMessage,
-                                 final String noAssociatedAppErrorMessage
-    ) {
-        sendEmail(context,
-                !TextUtils.isEmpty(receiver) ? new String[]{receiver} : null,
-                subject,
-                text,
-                pickerTitle,
-                securityErrorMessage,
-                noAssociatedAppErrorMessage);
-    }
-
-    /**
-     * Starts EMail intent with filled by given receiver, subject and text
-     *
-     * @param context
-     * @param receiver
-     * @param subject
-     * @param text
-     */
     public static void sendEmail(Context context,
                                  final String receiver,
                                  final String subject,
@@ -332,6 +307,32 @@ public class EMailHelper {
 //        final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : null;
 //        sendEmail(context, receivers, subject, text, pickerTitle, securityError, noAssociatedAppError);
 //    }
+
+
+    /**
+     * Starts EMail intent with filled by given receiver, subject and text
+     *
+     * @param context
+     * @param receiver
+     * @param subject
+     * @param text
+     */
+    public static void sendEmail(final Context context,
+                                 final String receiver,
+                                 final String subject,
+                                 final String text,
+                                 final String pickerTitle,
+                                 final String securityErrorMessage,
+                                 final String noAssociatedAppErrorMessage
+    ) {
+        sendEmail(context,
+                !TextUtils.isEmpty(receiver) ? new String[]{receiver} : null,
+                subject,
+                text,
+                pickerTitle,
+                securityErrorMessage,
+                noAssociatedAppErrorMessage);
+    }
 
 
     /**

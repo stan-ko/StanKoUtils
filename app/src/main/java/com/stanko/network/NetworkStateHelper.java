@@ -115,11 +115,11 @@ public class NetworkStateHelper {
             checkIfHostResponds(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
             return;
         }
+        NetworkStateHelper.isNetworkAvailable = isNetworkAvailable;
+        NetworkStateHelper.lastNetworkState = newNetworkState;
         final EventBus eventBus = EventBus.getDefault();
         if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-            NetworkStateHelper.isNetworkAvailable = isNetworkAvailable;
             eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
-            NetworkStateHelper.lastNetworkState = newNetworkState;
         }
     }
 
@@ -158,7 +158,10 @@ public class NetworkStateHelper {
                 // if thread stop requested task result will be ignored
                 if (!thisThread.isStopped) {
                     synchronized (checkIfHostRespondsLock) {
-                        EventBus.getDefault().post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, doesHostRespond, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
+                        final EventBus eventBus = EventBus.getDefault();
+                        if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
+                            eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, doesHostRespond, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
+                        }
                         NetworkStateHelper.isNetworkAvailable = isNetworkAvailable;
                         NetworkStateHelper.lastNetworkState = newNetworkState;
                         checkIfHostRespondsLock.setFinished();
