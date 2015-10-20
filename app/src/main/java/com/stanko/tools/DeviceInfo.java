@@ -42,6 +42,7 @@ public class DeviceInfo {
 
     public static int screenSize;
     public static int screenInches;
+    public static float screenInchesFloat;
 
     public static String deviceModel;
     public static String deviceManufacturer;
@@ -110,10 +111,10 @@ public class DeviceInfo {
 
         double xDensity = Math.pow(displayWidth/displayMetrics.xdpi,2);
         double yDensity = Math.pow(displayHeight/displayMetrics.ydpi,2);
-        screenInches = (int)Math.round(Math.sqrt(xDensity+yDensity));
+        screenInchesFloat = Math.round(Math.sqrt(xDensity+yDensity)*100f)/100f;
+        screenInches = Math.round(screenInchesFloat);
 
         Log.i(LOGTAG,String.format("Model: %s, Manufacturer: %s Product: %s Name: %s",deviceModel,deviceManufacturer, deviceProduct,deviceName));
-
         Log.i(LOGTAG, "Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
 
         deviceARM = Build.CPU_ABI;
