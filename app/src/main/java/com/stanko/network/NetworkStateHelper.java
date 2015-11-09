@@ -10,6 +10,8 @@ import com.stanko.tools.InternetConnectionHelper;
 import com.stanko.tools.Log;
 import com.stanko.tools.StoppableThread;
 
+import java.net.SocketTimeoutException;
+
 import de.greenrobot.event.EventBus;
 
 /**

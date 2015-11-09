@@ -315,7 +315,7 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             hostUrl = "http://" + hostUrl;
 
         boolean isReachable = false;
-        boolean isExceptionHappens = false;
+//        boolean isExceptionHappens = false;
         try {
             final URL url = new URL(hostUrl);
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -324,19 +324,22 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
             final int responseCode = httpURLConnection.getResponseCode();
-            isReachable = responseCode == HttpURLConnection.HTTP_OK //200
-                            || responseCode == HttpURLConnection.HTTP_BAD_METHOD
-                            || responseCode == HttpURLConnection.HTTP_BAD_REQUEST
-                            || responseCode == HttpURLConnection.HTTP_ACCEPTED
-                            || responseCode == HttpURLConnection.HTTP_FORBIDDEN
-                            || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
+            isReachable = responseCode >0;
+// https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+// there are too many codes, guess checking if its gt 0 is enough
+//            == HttpURLConnection.HTTP_OK //200
+//                            || responseCode == HttpURLConnection.HTTP_BAD_METHOD
+//                            || responseCode == HttpURLConnection.HTTP_BAD_REQUEST
+//                            || responseCode == HttpURLConnection.HTTP_ACCEPTED
+//                            || responseCode == HttpURLConnection.HTTP_FORBIDDEN
+//                            || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
 
         } catch (MalformedURLException e) {
-            isExceptionHappens = true;
-            Log.e("ServerChecker", e);
+//            isExceptionHappens = true;
+//            Log.e("ServerChecker", e);
         } catch (IOException e) {
-            isExceptionHappens = true;
-            Log.e("ServerChecker", e);
+//            isExceptionHappens = true;
+//            Log.e("ServerChecker", e);
         }
 
 //        // maybe host is not reachable using GET method? Lets try with POST
