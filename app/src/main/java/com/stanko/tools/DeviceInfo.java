@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Build;
 import android.provider.Settings.Secure;
@@ -13,6 +14,8 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -42,7 +45,8 @@ public class DeviceInfo {
 
     public static int screenSize;
     public static int screenInches;
-    public static float screenInchesFloat;
+    public static float screenInchesByMetrics;
+    public static float screenInchesByConfig;
 
     public static String deviceModel;
     public static String deviceManufacturer;
@@ -85,34 +89,43 @@ public class DeviceInfo {
             return false;
 
         appContext = context.getApplicationContext();
-//		Display display = activity.getWindowManager().getDefaultDisplay();
-        //display.getMetrics(displayMetrics);
         displayMetrics =  appContext.getResources().getDisplayMetrics();
         displayDensity = displayMetrics.densityDpi;
-
-        //Display display = getWindowManager().getDefaultDisplay();
-//		if (Build.VERSION.SDK_INT < 13){
-//			displayHeight = display.getHeight(); //displayMetrics.heightPixels; //
-//			displayWidth =  display.getWidth(); //displayMetrics.widthPixels;
-//		}
-//		else{
         displayHeight = displayMetrics.heightPixels;
         displayWidth =  displayMetrics.widthPixels;
-//			Point size = new Point();
-//			display.getSize(size);
-//			displayHeight = size.x;
-//			displayWidth = size.y;
-//		}
+
+        final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
+        if (Build.VERSION.SDK_INT < 14) {
+//            realDisplayHeight = displayMetrics.heightPixels;
+//            realDisplayWidth =  displayMetrics.widthPixels;
+        } else if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 17) {
+            // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
+            try {
+                realDisplayWidth = (Integer) Display.class.getMethod("getRawWidth").invoke(display);
+                realDisplayHeight = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
+            } catch (Exception ignored) {
+            }
+        } else /*if (Build.VERSION.SDK_INT >= 17)*/ {
+            // includes window decorations (statusbar bar/menu bar)
+            try {
+                final Point realSize = new Point();
+                Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
+                realDisplayWidth = realSize.x;
+                realDisplayHeight = realSize.y;
+            } catch (Exception ignored) {
+            }
+        }
 
         deviceModel = android.os.Build.MODEL.toLowerCase(Locale.US);
         deviceManufacturer = android.os.Build.MANUFACTURER.toLowerCase(Locale.US);
         deviceProduct = android.os.Build.PRODUCT.toLowerCase(Locale.US);
         deviceName = android.os.Build.DEVICE.toLowerCase(Locale.US);
 
-        double xDensity = Math.pow(displayWidth/displayMetrics.xdpi,2);
-        double yDensity = Math.pow(displayHeight/displayMetrics.ydpi,2);
-        screenInchesFloat = Math.round(Math.sqrt(xDensity+yDensity)*100f)/100f;
-        screenInches = Math.round(screenInchesFloat);
+        final double xDensity = Math.pow(realDisplayWidth/displayMetrics.xdpi,2);
+        final double yDensity = Math.pow(realDisplayHeight/displayMetrics.ydpi,2);
+        screenInchesByMetrics = Math.round(Math.sqrt(xDensity+yDensity)*10f)/10f;
+        screenInches = Math.round(screenInchesByMetrics);
 
         Log.i(LOGTAG,String.format("Model: %s, Manufacturer: %s Product: %s Name: %s",deviceModel,deviceManufacturer, deviceProduct,deviceName));
         Log.i(LOGTAG, "Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
@@ -126,14 +139,18 @@ public class DeviceInfo {
                 deviceARM = Build.SUPPORTED_ABIS[0];
         }
 
-        Configuration conf = appContext.getResources().getConfiguration();
-        int screenLayout = conf.screenLayout;
+        final Configuration conf = appContext.getResources().getConfiguration();
+        Log.i(LOGTAG,String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s",conf.screenHeightDp,conf.screenWidthDp));
+        screenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp*conf.screenHeightDp+conf.screenWidthDp*conf.screenWidthDp)*10f)/10f;
+
+        final int screenLayout = conf.screenLayout;
 //        int screenLayout = 1; // application default behavior
 //        try {
 //            Field field = conf.getClass().getDeclaredField("screenLayout");
 //            screenLayout = field.getInt(conf);
 //        } catch (Exception e) {
 //        	e.printStackTrace();
+
         // NoSuchFieldException or related stuff
 //        }
 
