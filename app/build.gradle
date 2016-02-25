@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    buildToolsVersion "23.0.1"
 
     defaultConfig {
         minSdkVersion 8
@@ -22,7 +22,7 @@ dependencies {
     // EventBus
     compile 'de.greenrobot:eventbus:2.4.0'
 
-    compile 'com.android.support:support-v4:21+'
+    compile 'com.android.support:support-v4:23.0.1'
 }
 
 // This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054

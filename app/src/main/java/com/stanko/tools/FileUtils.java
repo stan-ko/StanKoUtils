@@ -669,59 +669,61 @@ public class FileUtils {
 
     /**
      * Method deletes all files and subdirectories recursively from given directory.
-     *
+     * Returns true if all files deleted false if at least one doesn't
      * @param file - File which represents a directory where to delete all files and dirs
      */
-    public static void deleteFilesAndDirsRecursive(final String file) {
+    public static boolean deleteFilesAndDirsRecursive(final String file) {
         if (TextUtils.isEmpty(file)) {
             Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null or Empty parameter given");
-            return;
+            return false;
         }
-        deleteFilesAndDirsRecursive(new File(file));
+        return deleteFilesAndDirsRecursive(new File(file));
     }
 
     /**
      * Method deletes all files and subdirectories recursively from given directory.
-     *
+     * Returns true if all files deleted false if at least one doesn't
      * @param directory - File which represents a directory where to delete all files and dirs
      */
-    public static void deleteFilesAndDirsRecursive(final File directory) {
+    public static boolean deleteFilesAndDirsRecursive(final File directory) {
         if (directory == null || !directory.isDirectory()) {
             Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null parameter given or not a Directory");
-            return;
+            return false;
         }
 
-        deleteFilesAndDirs(directory);
+        return deleteFilesAndDirs(directory);
     }
 
     // recursively called method
-    private static void deleteFilesAndDirs(final File fileOrDirectory) {
+    // Returns true if all files deleted false if at least one doesn't
+    private static boolean deleteFilesAndDirs(final File fileOrDirectory) {
+        boolean isDeleted = true;
         if (fileOrDirectory.isDirectory()) {
             final File[] filesList = fileOrDirectory.listFiles();
             for (File child : filesList)
-                deleteFilesAndDirs(child);
+                isDeleted &= deleteFilesAndDirs(child);
         }
 
-        fileOrDirectory.delete();
+        return isDeleted &= fileOrDirectory.delete();
     }
 
     /**
      * Method deletes all files only (but NOT subdirectories) from given directory.
-     *
+     * Returns true if all files deleted false if at least one doesn't
      * @param targetDir - File with represents a Directory where to delete all files
      */
-    public static void deleteFiles(final File targetDir) {
+    public static boolean deleteFiles(final File targetDir) {
         if (targetDir == null || !targetDir.isDirectory()) {
             Log.e(FileUtils.class, "deleteFiles(): Null parameter given or not a Directory");
-            return;
+            return false;
         }
-        if (!targetDir.isDirectory())
-            return;
 
+        boolean isDeleted = true;
         final File[] filesList = targetDir.listFiles();
         for (File file2Delete : filesList)
             if (file2Delete.isFile()) // excluding dirs!
-                file2Delete.delete();
+                isDeleted &= file2Delete.delete();
+        return isDeleted;
     }
 
     /**
@@ -1002,8 +1004,9 @@ public class FileUtils {
 
     /**
      * Merge two files into a new file
-     * @param file1 - File to merge (will be first in resulting file)
-     * @param file2 - File to merge (will be second in resulting file)
+     *
+     * @param file1      - File to merge (will be first in resulting file)
+     * @param file2      - File to merge (will be second in resulting file)
      * @param outputFile - resulting File
      */
     public static void mergeFiles(final File file1, final File file2, final File outputFile) {
