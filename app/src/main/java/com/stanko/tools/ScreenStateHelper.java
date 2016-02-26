@@ -8,15 +8,54 @@ import android.content.IntentFilter;
 /**
  * Created by stan on 26.02.16.
  */
-public class ScreenStateHelper {
+public class ScreenStateHelper extends BroadcastReceiver {
 
-    public static BroadcastReceiver registerAndGetScreenStateReceiver(final Context context){
+    private boolean mIsScreenOff;
+
+    private IScreenStateReceiver mIScreenStateReceiver;
+    public ScreenStateHelper(IScreenStateReceiver callback) {
+        mIScreenStateReceiver = callback;
+    }
+
+    public ScreenStateHelper() {}
+
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        if (intent.getAction().equals(Intent.ACTION_SCREEN_OFF)) {
+            mIsScreenOff = true;
+            if (mIScreenStateReceiver!=null)
+                mIScreenStateReceiver.onStateReceived(true);
+        } else if (intent.getAction().equals(Intent.ACTION_SCREEN_ON)){
+            mIsScreenOff = false;
+            if (mIScreenStateReceiver!=null)
+                mIScreenStateReceiver.onStateReceived(false);
+        }
+    }
+
+    public boolean isScreenOff(){
+        return mIsScreenOff;
+    }
+
+
+    public static BroadcastReceiver registerAndGetReceiver(final Context context){
         // INITIALIZE RECEIVER
         final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        final BroadcastReceiver broadcastReceiver = new ScreenReceiver();
+        final BroadcastReceiver broadcastReceiver = new ScreenStateHelper();
         context.registerReceiver(broadcastReceiver, filter);
         return broadcastReceiver;
     }
 
+    public static BroadcastReceiver registerAndGetReceiver(final Context context, final ScreenStateHelper.IScreenStateReceiver callback){
+        // INITIALIZE RECEIVER
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        final BroadcastReceiver broadcastReceiver = new ScreenStateHelper(callback);
+        context.registerReceiver(broadcastReceiver, filter);
+        return broadcastReceiver;
+    }
+
+    public interface IScreenStateReceiver {
+        void onStateReceived(boolean isScreenOff);
+    }
 }
