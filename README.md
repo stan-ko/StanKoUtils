@@ -25,7 +25,7 @@ Or use Gradle jCenter:
 
 Or Gradle Maven Central:
 
-    compile 'com.github.stankoutils:app:1.0.0'
+    compile 'com.github.stankoutils:app:1.3.0'
 
 Or Maven:
 
