@@ -23,7 +23,7 @@ import java.util.UUID;
 
 /*
  * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
- * This class requires INITIALIZATION!!! to work properly
+ * This class requires INITIALIZATION with Application Context to work properly
  */
 public class DeviceInfo {
 
@@ -40,6 +40,8 @@ public class DeviceInfo {
     public static int displayDensity;
     public static int displayHeight;
     public static int displayWidth;
+    public static int displayPortraitHeight;
+    public static int displayPortraitWidth;
 
     //public static int statusBarHeight;
 
@@ -59,18 +61,18 @@ public class DeviceInfo {
 
     private static DisplayMetrics displayMetrics;
 
-    public static final int hasAPILievel = Build.VERSION.SDK_INT;
+    public static final int hasAPILevel = Build.VERSION.SDK_INT;
 
     /**
      * Obtaining screen width and height.
      * Determining the type of the device e.g. hdpi,mdpi,ldpi
-     * This will be saved in a sharedPreferences
      */
     public static Boolean isHiResDisplay() {
         return isHiResDisplay;
     }
 
-    /** Returns the smallest device screen side size
+    /**
+     * To determine device portrait width
      *
      * @return int  smallest device screen side size
      */
@@ -78,21 +80,34 @@ public class DeviceInfo {
         return Math.min(displayHeight, displayWidth);
     }
 
-    //@SuppressWarnings("deprecation")
+    /**
+     * To determine device portrait height
+     *
+     * @return int  greatest device screen side size
+     */
+    public static int getBiggestScreenSideSize() {
+        return Math.max(displayHeight, displayWidth);
+    }
+
+    /**
+     * @return boolean  true if initialized successfully
+     */
     @SuppressLint("NewApi")
     public static synchronized boolean init(final Context context) {
 
         if (isInitialzed)
             return true;
 
-        if (context==null)
+        if (context == null)
             return false;
 
-        appContext = context.getApplicationContext();
-        displayMetrics =  appContext.getResources().getDisplayMetrics();
+        appContext = context.getApplicationContext(); // to be sure its appContext
+        displayMetrics = appContext.getResources().getDisplayMetrics();
         displayDensity = displayMetrics.densityDpi;
         displayHeight = displayMetrics.heightPixels;
-        displayWidth =  displayMetrics.widthPixels;
+        displayWidth = displayMetrics.widthPixels;
+        displayPortraitHeight = getBiggestScreenSideSize();
+        displayPortraitWidth = getSmallestScreenSideSize();
 
         final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
@@ -102,8 +117,8 @@ public class DeviceInfo {
         } else if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 17) {
             // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
             try {
-                realDisplayWidth = (Integer) Display.class.getMethod("getRawWidth").invoke(display);
-                realDisplayHeight = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
+                realDisplayWidth = (int) Display.class.getMethod("getRawWidth").invoke(display);
+                realDisplayHeight = (int) Display.class.getMethod("getRawHeight").invoke(display);
             } catch (Exception ignored) {
             }
         } else /*if (Build.VERSION.SDK_INT >= 17)*/ {
@@ -122,26 +137,26 @@ public class DeviceInfo {
         deviceProduct = android.os.Build.PRODUCT.toLowerCase(Locale.US);
         deviceName = android.os.Build.DEVICE.toLowerCase(Locale.US);
 
-        final double xDensity = Math.pow(realDisplayWidth/displayMetrics.xdpi,2);
-        final double yDensity = Math.pow(realDisplayHeight/displayMetrics.ydpi,2);
-        screenInchesByMetrics = Math.round(Math.sqrt(xDensity+yDensity)*10f)/10f;
+        final double xDensity = Math.pow(realDisplayWidth / displayMetrics.xdpi, 2);
+        final double yDensity = Math.pow(realDisplayHeight / displayMetrics.ydpi, 2);
+        screenInchesByMetrics = Math.round(Math.sqrt(xDensity + yDensity) * 10f) / 10f;
         screenInches = Math.round(screenInchesByMetrics);
 
-        Log.i(LOGTAG,String.format("Model: %s, Manufacturer: %s Product: %s Name: %s",deviceModel,deviceManufacturer, deviceProduct,deviceName));
+        Log.i(LOGTAG, String.format("Model: %s, Manufacturer: %s Product: %s Name: %s", deviceModel, deviceManufacturer, deviceProduct, deviceName));
         Log.i(LOGTAG, "Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
 
         deviceARM = Build.CPU_ABI;
-        deviceARMs = new String[]{Build.CPU_ABI,Build.CPU_ABI2};
+        deviceARMs = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
         if (hasAPI(21)) {
-            if (Build.SUPPORTED_ABIS!=null);
-                deviceARMs = Build.SUPPORTED_ABIS;
-            if (deviceARMs.length>0)
+            if (Build.SUPPORTED_ABIS != null) ;
+            deviceARMs = Build.SUPPORTED_ABIS;
+            if (deviceARMs.length > 0)
                 deviceARM = Build.SUPPORTED_ABIS[0];
         }
 
         final Configuration conf = appContext.getResources().getConfiguration();
-        Log.i(LOGTAG,String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s",conf.screenHeightDp,conf.screenWidthDp));
-        screenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp*conf.screenHeightDp+conf.screenWidthDp*conf.screenWidthDp)*10f)/10f;
+        Log.i(LOGTAG, String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s", conf.screenHeightDp, conf.screenWidthDp));
+        screenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp * conf.screenHeightDp + conf.screenWidthDp * conf.screenWidthDp) * 10f) / 10f;
 
         final int screenLayout = conf.screenLayout;
 //        int screenLayout = 1; // application default behavior
@@ -183,8 +198,8 @@ public class DeviceInfo {
                 break;
         }
 
-        Log.i(LOGTAG,String.format("Display: Density %d, Width: %d Height: %d configurationRatio: %f",displayDensity,displayWidth, displayHeight,configurationRatio));
-        Log.i(LOGTAG,String.format("Display: DensityDpi %d, Density %f, Width: %d Height: %d",displayMetrics.densityDpi,displayMetrics.density,displayMetrics.widthPixels, displayMetrics.heightPixels));
+        Log.i(LOGTAG, String.format("Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
+        Log.i(LOGTAG, String.format("Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
         checkHasTelephony(appContext);
 
@@ -193,89 +208,94 @@ public class DeviceInfo {
         return true;
     }
 
-    public static int getstatusBarHeight(final Activity activity){
+    public static int getstatusBarHeight(final Activity activity) {
         Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
         return rect.top;
     }
 
-    public static float px2dp(float px){
-        if(isInitialzed)
-            return (float)((px /displayMetrics.density) + 0.5);
+    public static float px2dp(float px) {
+        if (isInitialzed)
+            return (float) ((px / displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, displayMetrics);
-        else{
-            Log.w(LOGTAG,"Class is not initialized!!! Method  px2dp() returns 0");
+        else {
+            Log.w(LOGTAG, "Class is not initialized!!! Method  px2dp() returns 0");
             return 0;
         }
     }
-    public static float dp2px(float dp){
-        if(isInitialzed)
+
+    public static float dp2px(float dp) {
+        if (isInitialzed)
             return (float) ((dp * displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
-        else{
-            Log.w(LOGTAG,"Class is not initialized!!! Method  dp2px() returns 0");
+        else {
+            Log.w(LOGTAG, "Class is not initialized!!! Method  dp2px() returns 0");
             return 0;
         }
     }
-    public static float sp2px(float sp){
-        if(isInitialzed)
+
+    public static float sp2px(float sp) {
+        if (isInitialzed)
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics);
-        else{
-            Log.w(LOGTAG,"Class is not initialized!!! Method  dp2px() returns 0");
+        else {
+            Log.w(LOGTAG, "Class is not initialized!!! Method  dp2px() returns 0");
             return 0;
         }
     }
 
 
-    public static boolean isScreenSizeSmall(){
+    public static boolean isScreenSizeSmall() {
         return screenSize == Configuration.SCREENLAYOUT_SIZE_SMALL;
     }
-    public static boolean isScreenSizeNormal(){
+
+    public static boolean isScreenSizeNormal() {
         return screenSize == Configuration.SCREENLAYOUT_SIZE_NORMAL;
     }
-    public static boolean isScreenSizeLarge(){
+
+    public static boolean isScreenSizeLarge() {
         return screenSize == Configuration.SCREENLAYOUT_SIZE_LARGE;
     }
-    public static boolean isScreenSizeXLarge(){
+
+    public static boolean isScreenSizeXLarge() {
         return screenSize == 4; //Configuration.SCREENLAYOUT_SIZE_XLARGE;
     }
-    public static float getConfigurationRatio(){
+
+    public static float getConfigurationRatio() {
         return configurationRatio;
     }
 
-    public static boolean hasTelephony(){
+    public static boolean hasTelephony() {
         return hasTelephony;
     }
 
-    public static void checkHasTelephony(){
+    public static void checkHasTelephony() {
         checkHasTelephony(appContext);
     }
-    public static void checkHasTelephony(Context context)
-    {
-        if(!isInitialzed)
-        {
+
+    public static void checkHasTelephony(Context context) {
+        if (!isInitialzed) {
             TelephonyManager telephonyManager = null;
-            try{ // for the firecase
-                telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-            } catch(Exception e){
+            try { // for the firecase
+                telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            } catch (Exception e) {
                 hasTelephony = false;
                 return;
-            } catch(Throwable e){
+            } catch (Throwable e) {
                 hasTelephony = false;
                 return;
             }
 
-            if (telephonyManager == null || telephonyManager.getPhoneType()==TelephonyManager.PHONE_TYPE_NONE){
+            if (telephonyManager == null || telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_NONE) {
                 hasTelephony = false;
                 if (telephonyManager == null)
                     Log.i(LOGTAG, "Has NO telephony via telephonyManager == null!");
                 else
                     Log.i(LOGTAG, "Has NO telephony via getPhoneType==PHONE_TYPE_NONE");
                 return;
-            } else{
+            } else {
                 //Phone Type
                 // The getPhoneType() returns the device type. This method returns one of the following values:
-                if (telephonyManager.getPhoneType()!=TelephonyManager.PHONE_TYPE_NONE){
+                if (telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE) {
                     hasTelephony = true;
                     Log.i(LOGTAG, "HAS!!! Telephony!");
                     return;
@@ -286,10 +306,9 @@ public class DeviceInfo {
 
             PackageManager pm = context.getPackageManager();
 
-            if(pm!=null)
-            {
+            if (pm != null) {
                 hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-                Log.i(LOGTAG, "PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):"+hasTelephony);
+                Log.i(LOGTAG, "PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
                 //hasCamera = Boolean.valueOf(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA));
 
 //	            try
@@ -321,29 +340,32 @@ public class DeviceInfo {
     private static String uuid;
 
     /**
-     * Returns a unique String UUID for the current android device.  
+     * Returns a unique String UUID for the current android device.
      * http://android-developers.blogspot.com/2011/03/identifying-app-installations.html
+     *
      * @return an UUID that may be used to uniquely identify your device for most purposes.
      */
     public static synchronized String getDeviceUuid() {
         return getDeviceUuid(appContext);
     }
+
     /**
      * Returns a unique String UUID for the current android device.
      * http://android-developers.blogspot.com/2011/03/identifying-app-installations.html
+     *
      * @param context - Context (to be able to work with SharedPrefs)
      * @return an UUID that may be used to uniquely identify your device for most purposes.
      */
     public static synchronized String getDeviceUuid(Context context) {
         // 1st start it'd b null
-        if(uuid != null)
+        if (uuid != null)
             return uuid;
 
         // lets try to restore DeviceUuid from SharedPrefs
         final SharedPreferences prefs = context.getApplicationContext().getSharedPreferences(PREFS_DEVICE_INFO_KEY, Context.MODE_PRIVATE);
-        final String id = prefs.getString(PREFS_DEVICE_UUID_KEY, null );
+        final String id = prefs.getString(PREFS_DEVICE_UUID_KEY, null);
 
-        if ( !TextUtils.isEmpty(id) )
+        if (!TextUtils.isEmpty(id))
             // Use the DeviceUuid previously computed and stored in SharedPrefs
             uuid = id;
         else {
@@ -358,39 +380,45 @@ public class DeviceInfo {
 
     /**
      * Returns a unique String ID for the current android device based on IMEI or Secure.ANDROID_ID
+     *
      * @return a ID that may be used to uniquely identify your device for most purposes.
      */
-    public static String getDeviceId(){
+    public static String getDeviceId() {
         return getDeviceId(appContext);
     }
+
     /**
      * Returns a unique String ID for the current android device based on IMEI or Secure.ANDROID_ID
+     *
      * @param context - Context (to be able to work with SharedPrefs)
      * @return an ID that may be used to uniquely identify your device for most purposes.
      */
-    public static String getDeviceId(Context context){
+    public static String getDeviceId(Context context) {
 
         String deviceId = getDeviceIMEI(context);
 
-        if (TextUtils.isEmpty(deviceId) || deviceId.length()<8)
-            deviceId = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID);
+        if (TextUtils.isEmpty(deviceId) || deviceId.length() < 8)
+            deviceId = Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
 
         return deviceId;
     }
 
     /**
      * Returns a unique String ID for the current android device based on IMEI or null
+     *
      * @return a ID that may be used to uniquely identify your device for most purposes.
      */
-    public static String getDeviceIMEI(){
+    public static String getDeviceIMEI() {
         return getDeviceIMEI(appContext);
     }
+
     /**
      * Returns a unique String ID for the current android device based on IMEI or null
+     *
      * @param context - Context (to be able to work with SharedPrefs)
      * @return an ID that may be used to uniquely identify your device for most purposes.
      */
-    public static String getDeviceIMEI(Context context){
+    public static String getDeviceIMEI(Context context) {
 
         if (!isInitialzed)
             checkHasTelephony(context);
@@ -398,8 +426,8 @@ public class DeviceInfo {
         String deviceId = null;
 
         if (hasTelephony) {
-            final TelephonyManager telephonyManager = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
-            if (telephonyManager!=null)
+            final TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (telephonyManager != null)
                 deviceId = telephonyManager.getDeviceId();
         }
 
@@ -411,10 +439,9 @@ public class DeviceInfo {
      *
      * @return
      */
-    public static int getDeviceMaxSideSizeByDensity(){
-        int maxSideSize=128;
-        if (isHiResDisplay!=null)
-        {
+    public static int getDeviceMaxSideSizeByDensity() {
+        int maxSideSize = 128;
+        if (isHiResDisplay != null) {
             switch (displayDensity) {
                 case 120:
                     maxSideSize = 64;
@@ -441,13 +468,13 @@ public class DeviceInfo {
      *
      * @return
      */
-    public static Boolean isTabletByScreen(){
+    public static Boolean isTabletByScreen() {
 
         if (!isInitialzed)
             return null;
 
         boolean byScreen = screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE
-                & screenInches >=7
+                & screenInches >= 7
                 & (displayDensity == DisplayMetrics.DENSITY_DEFAULT
                 || displayDensity == DisplayMetrics.DENSITY_HIGH
                 || displayDensity == DisplayMetrics.DENSITY_MEDIUM
@@ -491,7 +518,7 @@ public class DeviceInfo {
     private static Boolean isSamsungGalaxyShit;
 
     public static boolean isSamsungGalaxyShit() {
-        if (isSamsungGalaxyShit!=null)
+        if (isSamsungGalaxyShit != null)
             return isSamsungGalaxyShit;
 
         deviceManufacturer = android.os.Build.MANUFACTURER.toLowerCase(Locale.US);
@@ -501,7 +528,7 @@ public class DeviceInfo {
 
         // нуллы случаются в deviceManufacturer и/или deviceName/deviceModel когда на выходе
         // умирающий сервис пытается что-то выведать, а именно запускает этот метод
-        if (deviceManufacturer==null || deviceName==null || deviceModel==null)
+        if (deviceManufacturer == null || deviceName == null || deviceModel == null)
             return false;
 
 
@@ -568,7 +595,7 @@ public class DeviceInfo {
 
 
             if (deviceName.contains("DEVICE_ID_GALAXY_PFX") || deviceModel.contains(DEVICE_ID_GALAXY_PFX)) {
-                Log.i(LOGTAG, "Samsung unknown "+deviceName+" detected");
+                Log.i(LOGTAG, "Samsung unknown " + deviceName + " detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
@@ -624,7 +651,6 @@ public class DeviceInfo {
     }
 
 
-
     /**
      SDK VERSION
 
@@ -664,79 +690,80 @@ public class DeviceInfo {
      * @param mApiLevel
      * @return
      */
-    public static boolean hasAPI(final int mApiLevel){
+    public static boolean hasAPI(final int mApiLevel) {
         return Build.VERSION.SDK_INT >= mApiLevel;
     }
 
     /**
      * If device SUPPORTS API level 7, these are all devices starting from API level 7
+     *
      * @return
      */
-    public static boolean hasAPI7(){ //ECLAIR_MR1
+    public static boolean hasAPI7() { //ECLAIR_MR1
         return hasAPI(7);
     }
 
-    public static boolean hasAPI8(){ //FROYO;
+    public static boolean hasAPI8() { //FROYO;
         return hasAPI(8);
     }
 
-    public static boolean hasAPI9(){ //GINGERBREAD
+    public static boolean hasAPI9() { //GINGERBREAD
         return hasAPI(9);
     }
 
-    public static boolean hasAPI10(){ //GINGERBREAD_MR1
+    public static boolean hasAPI10() { //GINGERBREAD_MR1
         return hasAPI(10);
     }
 
-    public static boolean hasAPI11(){ //HONEYCOMB
+    public static boolean hasAPI11() { //HONEYCOMB
         return hasAPI(11);
     }
 
-    public static boolean hasAPI12(){ //HONEYCOMB_MR1
+    public static boolean hasAPI12() { //HONEYCOMB_MR1
         return hasAPI(12);
     }
 
-    public static boolean hasAPI13(){ //HONEYCOMB_MR2
+    public static boolean hasAPI13() { //HONEYCOMB_MR2
         return hasAPI(13);
     }
 
-    public static boolean hasAPI14(){ //ICE_CREAM_SANDWICH
+    public static boolean hasAPI14() { //ICE_CREAM_SANDWICH
         return hasAPI(14);
     }
 
-    public static boolean hasAPI15(){ //ICE_CREAM_SANDWICH_MR1
+    public static boolean hasAPI15() { //ICE_CREAM_SANDWICH_MR1
         return hasAPI(15);
     }
 
-    public static boolean hasAPI16(){ //JELLY_BEAN
+    public static boolean hasAPI16() { //JELLY_BEAN
         return hasAPI(16);
     }
 
-    public static boolean hasAPI17(){ //JELLY_BEAN_MR1
+    public static boolean hasAPI17() { //JELLY_BEAN_MR1
         return hasAPI(17);
     }
 
-    public static boolean hasAPI18(){ //JELLY_BEAN_MR2
+    public static boolean hasAPI18() { //JELLY_BEAN_MR2
         return hasAPI(18);
     }
 
-    public static boolean hasAPI19(){ //KITKAT
+    public static boolean hasAPI19() { //KITKAT
         return hasAPI(19);
     }
 
-    public static boolean hasAPI20(){
+    public static boolean hasAPI20() {
         return hasAPI(20);
     }
 
-    public static boolean hasAPI21(){ //LOL
+    public static boolean hasAPI21() { //LOL
         return hasAPI(21);
     }
 
-    public static boolean hasAPI22(){
+    public static boolean hasAPI22() {
         return hasAPI(22);
     }
 
-    public static boolean isAPI7(){ //ECLAIR_MR1
+    public static boolean isAPI7() { //ECLAIR_MR1
         return Build.VERSION.SDK_INT == 7;
 //        Boolean isAPI7 = null;
 //        try{
@@ -749,7 +776,7 @@ public class DeviceInfo {
 //        return isAPI7.booleanValue();
     }
 
-    public static boolean isAPI8(){ //FROYO;
+    public static boolean isAPI8() { //FROYO;
         return Build.VERSION.SDK_INT == 8;
 //        Boolean isAPI8 = null;
 //        try{
@@ -762,7 +789,7 @@ public class DeviceInfo {
 //        return isAPI8.booleanValue();
     }
 
-    public static boolean isAPI9(){ //GINGERBREAD
+    public static boolean isAPI9() { //GINGERBREAD
         return Build.VERSION.SDK_INT == 9;
 //        Boolean isAPI9 = null;
 //        try{
@@ -775,7 +802,7 @@ public class DeviceInfo {
 //        return isAPI9.booleanValue();
     }
 
-    public static boolean isAPI10(){ //GINGERBREAD_MR1
+    public static boolean isAPI10() { //GINGERBREAD_MR1
         return Build.VERSION.SDK_INT == 10;
 //        Boolean isAPI10 = null;
 //        try{
@@ -788,7 +815,7 @@ public class DeviceInfo {
 //        return isAPI10.booleanValue();
     }
 
-    public static boolean isAPI11(){ //HONEYCOMB
+    public static boolean isAPI11() { //HONEYCOMB
         return Build.VERSION.SDK_INT == 11;
 //        Boolean isAPI11 = null;
 //        try{
@@ -801,7 +828,7 @@ public class DeviceInfo {
 //        return isAPI11.booleanValue();
     }
 
-    public static boolean isAPI12(){ //HONEYCOMB_MR1
+    public static boolean isAPI12() { //HONEYCOMB_MR1
         return Build.VERSION.SDK_INT == 12;
 //        Boolean isAPI12 = null;
 //        try{
@@ -814,7 +841,7 @@ public class DeviceInfo {
 //        return isAPI12.booleanValue();
     }
 
-    public static boolean isAPI13(){ //HONEYCOMB_MR2
+    public static boolean isAPI13() { //HONEYCOMB_MR2
         return Build.VERSION.SDK_INT == 13;
 //        Boolean isAPI13 = null;
 //        try{
@@ -827,7 +854,7 @@ public class DeviceInfo {
 //        return isAPI13.booleanValue();
     }
 
-    public static boolean isAPI14(){ //ICE_CREAM_SANDWICH
+    public static boolean isAPI14() { //ICE_CREAM_SANDWICH
         return Build.VERSION.SDK_INT == 14;
 //        Boolean isAPI14 = null;
 //        try{
@@ -840,7 +867,7 @@ public class DeviceInfo {
 //        return isAPI14.booleanValue();
     }
 
-    public static boolean isAPI15(){ //ICE_CREAM_SANDWICH_MR1
+    public static boolean isAPI15() { //ICE_CREAM_SANDWICH_MR1
         return Build.VERSION.SDK_INT == 15;
 //        Boolean isAPI15 = null;
 //        try{
@@ -853,7 +880,7 @@ public class DeviceInfo {
 //        return isAPI15.booleanValue();
     }
 
-    public static boolean isAPI16(){ //JELLY_BEAN
+    public static boolean isAPI16() { //JELLY_BEAN
         return Build.VERSION.SDK_INT == 16;
 //        Boolean isAPI16 = null;
 //        try{
@@ -866,7 +893,7 @@ public class DeviceInfo {
 //        return isAPI16.booleanValue();
     }
 
-    public static boolean isAPI17(){ //JELLY_BEAN_MR1
+    public static boolean isAPI17() { //JELLY_BEAN_MR1
         return Build.VERSION.SDK_INT == 17;
 //        Boolean isAPI17 = null;
 //        try{
@@ -879,7 +906,7 @@ public class DeviceInfo {
 //        return isAPI17.booleanValue();
     }
 
-    public static boolean isAPI18(){ //JELLY_BEAN_MR2
+    public static boolean isAPI18() { //JELLY_BEAN_MR2
         return Build.VERSION.SDK_INT == 18;
 //        Boolean isAPI18 = null;
 //        try{
@@ -892,7 +919,7 @@ public class DeviceInfo {
 //        return isAPI18.booleanValue();
     }
 
-    public static boolean isAPI19(){ //KITKAT
+    public static boolean isAPI19() { //KITKAT
         return Build.VERSION.SDK_INT == 18;
 //        Boolean isAPI19 = null;
 //        try{
@@ -905,19 +932,19 @@ public class DeviceInfo {
 //        return isAPI19.booleanValue();
     }
 
-    public static boolean isAPI20(){
+    public static boolean isAPI20() {
         return Build.VERSION.SDK_INT == 20;
 //        Boolean isAPI20 = hasAPILievel >= 20;
 //        return isAPI20.booleanValue();
     }
 
-    public static boolean isAPI21(){ //LOLIPOP
+    public static boolean isAPI21() { //LOLIPOP
         return Build.VERSION.SDK_INT == 21;
 //        Boolean isAPI21 = hasAPILievel >= 21;
 //        return isAPI21.booleanValue();
     }
 
-    public static boolean isAPI22(){
+    public static boolean isAPI22() {
         return Build.VERSION.SDK_INT == 22;
 //        Boolean isAPI22 = hasAPILievel >= 22;
 //        return isAPI22.booleanValue();
