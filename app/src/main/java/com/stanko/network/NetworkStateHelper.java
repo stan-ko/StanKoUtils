@@ -2,6 +2,8 @@ package com.stanko.network;
 
 import android.content.Context;
 import android.content.IntentFilter;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Looper;
 import android.text.TextUtils;
 
@@ -225,4 +227,143 @@ public class NetworkStateHelper {
     public interface ICheckIfHostResponds {
         void doesHostRespond(boolean doestIt);
     }
+
+
+
+    public static boolean isNetworkConnectionAvailable(final Context context) {
+        if (context == null)
+            return false;
+
+        ConnectivityManager cm = null;
+        try {
+            cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        } catch (Exception e) {
+        } // like method not found?
+
+        if (cm == null)
+            return false;
+
+        NetworkInfo networkInfo = null;
+        try {
+            networkInfo = cm.getActiveNetworkInfo();
+        } catch (Exception e) {
+        } // like method not found?
+
+        return networkInfo != null && networkInfo.isConnected();
+    }
+
+
+    /**
+     * method checks if any (INTERNET_OVER_WIFI,INTERNET_OVER_MOBILE,
+     * INTERNET_OVER_OTHER) network connection is available.
+     * 1) issue1: assumes the network connection is an Internet connection
+     * 2) issue2: fails if a connection requires a login/password (like hotels WiFi)
+     *
+     * @return
+     */
+    public static boolean isNetworkConnectionAvailableExt(final Context context) {
+
+        boolean isInternetWiFi = false;
+        boolean isInternetMobile = false;
+        boolean isInternetWiMax = false;
+        boolean isInternetOther = false;
+        int connectionType = 0;
+
+        if (context == null)
+            return false;
+
+        ConnectivityManager cm = null;
+        try {
+            cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        } catch (Exception e) {
+        }// like method not found?
+
+        if (cm == null)
+            return false;
+
+        // determine the type of network
+//		int TYPE_BLUETOOTH		The Bluetooth data connection.
+//		int TYPE_DUMMY			Dummy data connection.
+//		int TYPE_ETHERNET		The Ethernet data connection.
+//		int TYPE_MOBILE			The Mobile data connection.
+//		int TYPE_MOBILE_DUN		A DUN-specific Mobile data connection.
+//		int TYPE_MOBILE_HIPRI	A High Priority Mobile data connection.
+//		int TYPE_MOBILE_MMS		An MMS-specific Mobile data connection.
+//		int TYPE_MOBILE_SUPL	A SUPL-specific Mobile data connection.
+//		int TYPE_WIFI			The WIFI data connection.
+//		int TYPE_WIMAX			The WiMAX data connection.
+
+        final NetworkInfo niMobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        final NetworkInfo niWiFi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo niWiMax = cm.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
+        final NetworkInfo niOther = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+
+        if (niOther != null)
+            connectionType = niOther.getType();
+
+        isInternetWiFi = niWiFi != null && niWiFi.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+        isInternetMobile = niMobile != null && niMobile.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+        isInternetWiMax = niWiMax != null && niWiMax.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+        isInternetOther = niOther != null && niOther.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+
+        return (isInternetWiFi || isInternetWiMax || isInternetMobile || isInternetOther);
+    }
+
+    /**
+     * method checks if an Internet connection is available via WiFi
+     * 1) issue1: assumes the WiFi connection is an Internet connection
+     * 2) issue2: fails if a WiFi connection requires a login/password
+     *
+     * @return
+     */
+    public static boolean isNetworkAvailableViaWiFi(final Context context) {
+
+        boolean isInternetWiFi = false;
+//        boolean isInternetMobile = false;
+        boolean isInternetWiMax = false;
+//        boolean isInternetOther = false;
+//        int connectionType = 0;
+
+
+        if (context == null)
+            return false;
+
+        ConnectivityManager cm = null;
+        try {
+            cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        } catch (Exception e) {
+        }// like method not found?
+
+        if (cm == null)
+            return false;
+
+        // determine the type of network
+//		int TYPE_BLUETOOTH		The Bluetooth data connection.
+//		int TYPE_DUMMY			Dummy data connection.
+//		int TYPE_ETHERNET		The Ethernet data connection.
+//		int TYPE_MOBILE			The Mobile data connection.
+//		int TYPE_MOBILE_DUN		A DUN-specific Mobile data connection.
+//		int TYPE_MOBILE_HIPRI	A High Priority Mobile data connection.
+//		int TYPE_MOBILE_MMS		An MMS-specific Mobile data connection.
+//		int TYPE_MOBILE_SUPL	A SUPL-specific Mobile data connection.
+//		int TYPE_WIFI			The WIFI data connection.
+//		int TYPE_WIMAX			The WiMAX data connection.
+
+//        final NetworkInfo niMobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        final NetworkInfo niWiFi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo niWiMax = cm.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
+//        final NetworkInfo niOther = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+
+//        if (niOther != null)
+//            connectionType = niOther.getType();
+
+        isInternetWiFi = niWiFi != null && niWiFi.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+        isInternetWiMax = niWiMax != null && niWiMax.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+//        isInternetMobile = niMobile != null && niMobile.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+//        isInternetOther = niOther != null && niOther.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
+
+        return (isInternetWiFi || isInternetWiMax);
+    }
+
+
 }
