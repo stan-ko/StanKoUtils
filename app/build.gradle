@@ -18,11 +18,8 @@ android {
 }
 
 dependencies {
-//    compile files('libs/support-v4.jar')
     // EventBus
     compile 'de.greenrobot:eventbus:2.4.0'
-
-    compile 'com.android.support:support-v4:23.0.1'
 }
 
 // This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054

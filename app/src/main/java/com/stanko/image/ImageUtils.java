@@ -32,7 +32,6 @@ import android.widget.ImageView;
 import com.stanko.tools.DeviceInfo;
 import com.stanko.tools.FileUtils;
 import com.stanko.tools.Log;
-import com.stanko.view.RecyclingBitmapDrawable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -210,42 +209,6 @@ public class ImageUtils {
             return null;
         return getBitmapFromFile(new File(bitmapFile),sideSizeLimit, isOptimistic);
     }
-
-
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final String bitmapFile){
-        if (resources==null || bitmapFile==null || bitmapFile.length()==0)
-            return null;
-        return getRecylcingBitmapFromFile(resources, new File(bitmapFile), 0 );
-    }
-
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final File bitmapFile){
-        if (resources==null)
-            return null;
-        return getRecylcingBitmapFromFile(resources, bitmapFile, 0 );
-    }
-
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final String bitmapFile, final int sideSizeLimit){
-        if (resources==null)
-            return null;
-        return getRecylcingBitmapFromFile(resources, bitmapFile, sideSizeLimit, false);
-    }
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final String bitmapFile, final int sideSizeLimit, final boolean isOptimistic){
-        if (resources==null || bitmapFile==null || bitmapFile.length()==0)
-            return null;
-        return new RecyclingBitmapDrawable(resources, getBitmapFromFile( new File(bitmapFile),sideSizeLimit, isOptimistic) );
-    }
-
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final File bitmapFile, final int sideSizeLimit){
-        if (resources==null)
-            return null;
-        return getRecylcingBitmapFromFile(resources, bitmapFile, sideSizeLimit, false);
-    }
-    public static BitmapDrawable getRecylcingBitmapFromFile(final Resources resources, final File bitmapFile, final int sideSizeLimit, final boolean isOptimistic){
-        if (resources==null)
-            return null;
-        return new RecyclingBitmapDrawable(resources, getBitmapFromFile(bitmapFile,sideSizeLimit, isOptimistic) );
-    }
-
 
     public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit) {
         return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
@@ -522,35 +485,6 @@ public class ImageUtils {
     }
 
     /**
-     * Returns scaled (stretched) @RecyclingBitmapDrawable from source bitmap using parameter maxSideSize
-     *
-     * @param context
-     * @param bitmap
-     * @param maxSideSize
-     * @return
-     */
-    public static BitmapDrawable getScaledRecyclingBitmap(final Context context, final Bitmap bitmap, final int maxSideSize) {
-        if (context==null || bitmap==null)
-            return null;
-        Resources resources = context.getResources();
-        return getScaledRecyclingBitmap(resources, bitmap, maxSideSize);
-    }
-
-    /**
-     * Returns scaled (stretched) RecyclingBitmapDrawable from source bitmap using parameter maxSideSize
-     *
-     * @param resources
-     * @param bitmap
-     * @param maxSideSize
-     * @return
-     */
-    public static BitmapDrawable getScaledRecyclingBitmap(final Resources resources, final Bitmap bitmap, final int maxSideSize) {
-        if (resources==null)
-            return null;
-        return new RecyclingBitmapDrawable (resources, getScaledBitmap(bitmap, maxSideSize, true) );
-    }
-
-    /**
      * Returns scaled (stretched) @Bitmap from source bitmap using parameter maxSideSize
      *
      * @param bitmap
@@ -614,35 +548,6 @@ public class ImageUtils {
         }
     }
 
-
-    /**
-     * Returns @RecyclingBitmapDrawable compressed to Jpeg with quality of targetJpegQuality
-     *
-     * @param context
-     * @param bitmap
-     * @param targetJpegQuality
-     * @return
-     */
-    public static BitmapDrawable getReducedQualityJpegRecyclingFromBitmap(final Context context, final Bitmap bitmap, final int targetJpegQuality){
-        if (context == null || bitmap==null)
-            return null;
-        Resources resources = context.getResources();
-        return getReducedQualityJpegRecyclingFromBitmap(resources, bitmap, targetJpegQuality );
-    }
-
-    /**
-     * Returns @RecyclingBitmapDrawable compressed to Jpeg with quality of targetJpegQuality
-     *
-     * @param resources
-     * @param bitmap
-     * @param targetJpegQuality
-     * @return
-     */
-    public static BitmapDrawable getReducedQualityJpegRecyclingFromBitmap(final Resources resources, final Bitmap bitmap, final int targetJpegQuality){
-        if (resources == null)
-            return null;
-        return new RecyclingBitmapDrawable ( resources, getReducedQualityJpegFromBitmap(bitmap, targetJpegQuality) );
-    }
 
     /**
      * Returns @Bitmap compressed to Jpeg with quality of targetJpegQuality
@@ -722,38 +627,6 @@ public class ImageUtils {
 //	 }
 
     /**
-     * Returns given @RecyclingBitmapDrawable resized the to given size.
-     *
-     * @param context
-     * @param bitmap
-     * @param newHeight
-     * @param newWidth
-     * @return
-     */
-    public static RecyclingBitmapDrawable getResizedRecyclingBitmap(final Context context, final Bitmap bitmap, final int newHeight, final int newWidth){
-        if (context == null || bitmap==null)
-            return null;
-        Resources resources = context.getResources();
-        return getResizedRecyclingBitmap(resources, bitmap, newHeight, newWidth);
-    }
-
-    /**
-     * Returns given @RecyclingBitmapDrawable resized the to given size.
-     *
-     * @param resources
-     * @param bitmap
-     * @param newHeight
-     * @param newWidth
-     * @return
-     */
-    public static RecyclingBitmapDrawable getResizedRecyclingBitmap(final Resources resources, final Bitmap bitmap, final int newHeight, final int newWidth){
-        if (resources == null)
-            return null;
-        return new RecyclingBitmapDrawable(resources, getResizedBitmap(bitmap, newHeight, newWidth) );
-    }
-
-
-    /**
      * Returns given @Bitmap resized the to given size.
      *
      * @param bitmap : Bitmap to resize.
@@ -798,85 +671,6 @@ public class ImageUtils {
         }
 
         return resizedBitmap;
-    }
-
-    /**
-     * Returns @RecyclingBitmapDrawable resized to newHeight and newWidth
-     * OR resized by only newHeight if newWidth==0
-     * OR resized by only newWidth if newHeight==0
-     * according to aspect ratio
-     *
-     * @param context
-     * @param bitmapResId
-     * @param newHeight
-     * @param newWidth
-     * @return
-     */
-    public static BitmapDrawable getResizedRecyclingBitmapFromResources(final Context context, final int bitmapResId, final int newHeight, final int newWidth) {
-        if (context==null || bitmapResId==0)
-            return null;
-        return getResizedRecyclingBitmapFromResources(context, bitmapResId, newHeight, newWidth, false);
-    }
-    /**
-     * Returns @RecyclingBitmapDrawable resized to newHeight and newWidth
-     * OR resized by only newHeight if newWidth==0
-     * OR resized by only newWidth if newHeight==0
-     * according to aspect ratio
-     * If isOptimistic is true then bimtap wont be resized by Options to lower than target resolution
-     *
-     * @param context
-     * @param bitmapResId
-     * @param newHeight
-     * @param newWidth
-     * @param isOptimistic
-     * @return
-     */
-    public static BitmapDrawable getResizedRecyclingBitmapFromResources(final Context context, final int bitmapResId, final int newHeight, final int newWidth, final boolean isOptimistic) {
-        if (context == null || bitmapResId==0)
-            return null;
-        Resources resources = context.getResources();
-        ContentResolver contentResolver = context.getContentResolver();
-        return getResizedRecyclingBitmapFromResources(resources, contentResolver, bitmapResId, newHeight, newWidth, isOptimistic);
-    }
-
-    /**
-     * Returns @RecyclingBitmapDrawable resized to newHeight and newWidth
-     * OR resized by only newHeight if newWidth==0
-     * OR resized by only newWidth if newHeight==0
-     * according to aspect ratio
-     *
-     * @param resources
-     * @param contentResolver
-     * @param bitmapResId
-     * @param newHeight
-     * @param newWidth
-     * @return
-     */
-    public static BitmapDrawable getResizedRecyclingBitmapFromResources(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, final int newHeight, final int newWidth) {
-        if (resources==null)
-            return null;
-        return getResizedRecyclingBitmapFromResources(resources, contentResolver, bitmapResId, newHeight, newWidth, false);
-    }
-
-    /**
-     * Returns @RecyclingBitmapDrawable resized to newHeight and newWidth
-     * OR resized by only newHeight if newWidth==0
-     * OR resized by only newWidth if newHeight==0
-     * according to aspect ratio
-     * If isOptimistic is true then bimtap wont be resized by Options to lower than target resolution
-     *
-     * @param resources
-     * @param contentResolver
-     * @param bitmapResId
-     * @param newHeight
-     * @param newWidth
-     * @param isOptimistic
-     * @return
-     */
-    public static BitmapDrawable getResizedRecyclingBitmapFromResources(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, final int newHeight, final int newWidth, final boolean isOptimistic) {
-        if (resources==null)
-            return null;
-        return new RecyclingBitmapDrawable( resources, getResizedBitmapFromResources(resources, contentResolver, bitmapResId, newHeight, newWidth, isOptimistic) );
     }
 
     /**
@@ -935,32 +729,6 @@ public class ImageUtils {
         return getResizedBitmap(bitmap, newHeight, newWidth);
     }
 
-//	/**
-//	  * This method returns a bitmap related to resource id. 
-//	  * It is ready to use method, you can 
-//	  * use it by simply copying in your project.
-//	  * 
-//	  * @param context Context of calling activity
-//	  * @param drawableId Resource ID of bitmap drawable
-//	  * @return Bitmap whose resource id was passed to method.
-//	  */
-//	 public static Bitmap getBitmapFromDrawableId(Context context,int drawableId){
-//		 if (drawableId==0)
-//			 return null;
-//		 
-//	     Bitmap bitmap = null;
-//	     Resources resources = context.getResources();
-//	     try {
-//	         //BitmapDrawable drawable = (BitmapDrawable)context.getResources().getDrawable(drawableId);
-//	    	 BitmapDrawable drawable = new RecyclingBitmapDrawable(resources, getBitmapFromResources(resources, drawableId));
-//	         bitmap = drawable.getBitmap();
-//
-//	     } catch (Exception e) {
-//	         e.printStackTrace();
-//	     }
-//	     return bitmap;
-//	 }
-
     /**
      * Returns @Bitmap obtained from Raw resources folder
      *
@@ -976,34 +744,6 @@ public class ImageUtils {
         try {
             inputStream = context.getResources().openRawResource(mBitmapResId);
             bitmap = BitmapFactory.decodeStream(inputStream);
-        }
-        catch(Resources.NotFoundException  e){
-            e.printStackTrace();
-        } finally {
-            if (inputStream!=null)
-                try {
-                    inputStream.close();
-                } catch (IOException e) {}
-        }
-
-        return bitmap;
-    }
-
-    public static BitmapDrawable getRecyclingBitmapFromRawResources(final Context context, final int mBitmapResId) {
-        if (context==null || mBitmapResId==0)
-            return null;
-        Resources resources = context.getResources();
-        return getRecyclingBitmapFromRawResources(resources, mBitmapResId);
-    }
-
-    public static BitmapDrawable getRecyclingBitmapFromRawResources(final Resources resources, final int mBitmapResId) {
-        if (resources==null || mBitmapResId==0)
-            return null;
-        RecyclingBitmapDrawable bitmap = null;
-        InputStream inputStream = null;
-        try {
-            inputStream = resources.openRawResource(mBitmapResId);
-            bitmap = new RecyclingBitmapDrawable(resources,BitmapFactory.decodeStream(inputStream));
         }
         catch(Resources.NotFoundException  e){
             e.printStackTrace();
@@ -1455,18 +1195,6 @@ public class ImageUtils {
     }
 
     /**
-     * Returns @Bitmap being set to given @ImageView
-     *
-     * @param imageView
-     * @return
-     */
-    public static BitmapDrawable getRecyclingBitmapFromImageView(ImageView imageView){
-        if (imageView==null)
-            return null;
-        return new RecyclingBitmapDrawable(imageView.getResources(),  getBitmapFromDrawable(imageView.getDrawable()) );
-    }
-
-    /**
      * This method returns a @Bitmap related to given @Drawable.
      *
      * @param drawable @Drawable resource of image
@@ -1488,20 +1216,6 @@ public class ImageUtils {
         return bitmap;
     }
 
-    /**
-     * Merge the two images into a single.
-     *
-     * @param context   -Application context.
-     * @param mBitmap1	- image one.
-     * @param mBitmap2ResId	-resource id of image two.
-     * @return -returns the Bitmap image.
-     */
-    public static BitmapDrawable getRecyclingBitmapByAddImages(final Context context, final Bitmap mBitmap1, final int mBitmap2ResId) {
-        if (context==null || mBitmap1==null)
-            return null;
-        return new RecyclingBitmapDrawable(context.getResources(),  getBitmapByAddImages(context, mBitmap1, mBitmap2ResId));
-    }
-
     public static Bitmap getBitmapByAddImages(final Context context, final Bitmap mBitmap1, final int mBitmap2ResId) {
         if (context==null || mBitmap1==null)
             return null;
@@ -1511,13 +1225,6 @@ public class ImageUtils {
         return result;
     }
 
-
-    public static BitmapDrawable getRecyclingBitmapByAddImages(final Context context, final int mBitmap1ResId, final Bitmap mBitmap2) {
-        if (context==null || mBitmap2==null)
-            return null;
-        return new RecyclingBitmapDrawable(context.getResources(),  getBitmapByAddImages(context, mBitmap1ResId, mBitmap2)  );
-    }
-
     public static Bitmap getBitmapByAddImages(final Context context, final int mBitmap1ResId, final Bitmap mBitmap2) {
         if (context==null || mBitmap2==null)
             return null;
@@ -1525,12 +1232,6 @@ public class ImageUtils {
         final Bitmap result = getBitmapByAddImages(context,mBitmap1,mBitmap2);
         //mBitmap1.recycle();
         return result;
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByMergeImagesToTheRight(final Context context, final Bitmap mLeftBitmap, final Bitmap mRightBitmap) {
-        if (context==null || mLeftBitmap ==  null && mRightBitmap == null)
-            return null;
-        return new RecyclingBitmapDrawable(context.getResources(),  getBitmapByMergeImagesToTheRight(context, mLeftBitmap, mRightBitmap)  );
     }
 
     public static Bitmap getBitmapByMergeImagesToTheRight(final Context context, final Bitmap mLeftBitmap, final Bitmap mRightBitmap) {
@@ -1555,12 +1256,6 @@ public class ImageUtils {
         m_comboImage.drawBitmap(mLeftBitmap, 0f, 0f, null);
         m_comboImage.drawBitmap(mRightBitmap, mLeftBitmap.getWidth(), 0f, null);
         return m_combinedImages;
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByAddImages(final Context context, Bitmap mBitmap1, final Bitmap mBitmap2) {
-        if (context==null || mBitmap1==null && mBitmap2==null)
-            return null;
-        return new RecyclingBitmapDrawable(context.getResources(), getBitmapByAddImages(context, mBitmap1, mBitmap2) );
     }
 
     public static Bitmap getBitmapByAddImages(final Context context, Bitmap mBitmap1, final Bitmap mBitmap2) {
@@ -1608,34 +1303,6 @@ public class ImageUtils {
         return m_combinedImages;
     }
 
-    public static BitmapDrawable makeRecyclingPreviewAndSave(Context context, File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize){
-        if (context==null)
-            return null;
-        Resources resources = context.getResources();
-        return makeRecyclingPreviewAndSave(resources, fullsizedImageFile, previewImageFile, maxAllowedSideSize, 90);
-    }
-
-    public static BitmapDrawable makeRecyclingPreviewAndSave(Resources resources, File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize){
-        if (resources==null)
-            return null;
-        Bitmap bitmap = makePreviewAndSave(fullsizedImageFile, previewImageFile, maxAllowedSideSize, 90);
-        return new RecyclingBitmapDrawable(resources, bitmap);
-    }
-
-    public static BitmapDrawable makeRecyclingPreviewAndSave(Context context, File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize, int maxAllowedQuality){
-        if (context==null)
-            return null;
-        Resources resources = context.getResources();
-        return makeRecyclingPreviewAndSave(resources, fullsizedImageFile, previewImageFile, maxAllowedSideSize, maxAllowedQuality);
-    }
-
-    public static BitmapDrawable makeRecyclingPreviewAndSave(Resources resources, File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize, int maxAllowedQuality){
-        if (resources==null)
-            return null;
-        Bitmap bitmap = makePreviewAndSave(fullsizedImageFile, previewImageFile, maxAllowedSideSize, maxAllowedQuality);
-        return new RecyclingBitmapDrawable(resources, bitmap);
-    }
-
     public static Bitmap makePreviewAndSave(File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize){
         return makePreviewAndSave(fullsizedImageFile, previewImageFile, maxAllowedSideSize, 90);
     }
@@ -1659,12 +1326,6 @@ public class ImageUtils {
         //bitmap.recycle();
 
         return bitmap;
-    }
-
-    public static BitmapDrawable getPreviewRecyclingBitmapFromFile(Context context, File fullsizedImageFile, int maxAllowedSideSize){
-        if (context==null)
-            return null;
-        return new RecyclingBitmapDrawable( context.getResources(), getPreviewBitmapFromFile(fullsizedImageFile, maxAllowedSideSize, false, false, false) );
     }
 
     public static Bitmap getPreviewBitmapFromFile(File fullsizedImageFile, int maxAllowedSideSize){
@@ -1887,14 +1548,6 @@ public class ImageUtils {
         }
     }
 
-
-    public static BitmapDrawable getBluredRecyclingBitmap(final Resources res, final int imageId, final int radius){
-        return new RecyclingBitmapDrawable(res, getBluredBitmap(res, imageId, radius) );
-    }
-
-    public static BitmapDrawable getBluredRecyclingBitmap(final Resources res, final Bitmap sentBitmap, final int radius){
-        return new RecyclingBitmapDrawable(res, getBluredBitmap(res, sentBitmap, radius) );
-    }
 
     public static Bitmap getBluredBitmap(final Resources res, final int imageId, final int radius){
         Bitmap sentBitmap = BitmapFactory.decodeResource(res, imageId);
@@ -2149,19 +1802,6 @@ public class ImageUtils {
     }
 
 
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Context contex, final File bitmapFile, final int cropToHeight, final int cropToWidth){
-        if (contex==null || !FileUtils.isReadable(bitmapFile) || cropToHeight==0 || cropToWidth == 0)
-            return null;
-        final Resources resources = contex.getResources();
-        return new RecyclingBitmapDrawable(resources, getBitmapByCropFromCenterWithScaling(bitmapFile, cropToHeight, cropToWidth) );
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Resources resources, final File bitmapFile, final int cropToHeight, final int cropToWidth){
-        if (resources==null || !FileUtils.isReadable(bitmapFile) || cropToHeight==0 || cropToWidth == 0)
-            return null;
-        return new RecyclingBitmapDrawable(resources, getBitmapByCropFromCenterWithScaling(bitmapFile, cropToHeight, cropToWidth) );
-    }
-
     public static Bitmap getBitmapByCropFromCenterWithScaling(final File bitmapFile, int cropToHeight, int cropToWidth){
         if (bitmapFile==null || !FileUtils.isReadable(bitmapFile) || cropToHeight==0 || cropToWidth == 0)
             return null;
@@ -2303,20 +1943,6 @@ public class ImageUtils {
         }
         else
             return bitmapToCrop;
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth){
-        if (context==null || bitmapResId==0)
-            return null;
-        Resources resources = context.getResources();
-        ContentResolver contentResolver = context.getContentResolver();
-        return getRecyclingBitmapByCropFromCenterWithScaling(resources, contentResolver, bitmapResId, cropToHeight, cropToWidth);
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, final int cropToHeight, final int cropToWidth){
-        if (resources==null || contentResolver==null )
-            return null;
-        return new RecyclingBitmapDrawable( resources, getBitmapByCropFromCenterWithScaling(resources, contentResolver, bitmapResId, cropToHeight, cropToWidth) );
     }
 
     public static Bitmap getBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth){
@@ -2473,19 +2099,6 @@ public class ImageUtils {
             return bitmapToCrop;
     }
 
-
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Context context, final Bitmap bitmapToScale, final int cropToHeight, final int cropToWidth){
-        if (context==null || bitmapToScale==null)
-            return null;
-        Resources resources = context.getResources();
-        return getRecyclingBitmapByCropFromCenterWithScaling(resources, bitmapToScale, cropToHeight, cropToWidth );
-    }
-
-    public static BitmapDrawable getRecyclingBitmapByCropFromCenterWithScaling(final Resources resources, final Bitmap bitmapToScale, final int cropToHeight, final int cropToWidth){
-        if (resources==null || bitmapToScale==null)
-            return null;
-        return new RecyclingBitmapDrawable(resources, getBitmapByCropFromCenterWithScaling(bitmapToScale, cropToHeight, cropToWidth) );
-    }
 
     public static Bitmap getBitmapByCropFromCenterWithScaling(final Bitmap bitmapToScale, int cropToHeight, int cropToWidth){
         if (bitmapToScale==null || cropToHeight==0 || cropToWidth == 0)
