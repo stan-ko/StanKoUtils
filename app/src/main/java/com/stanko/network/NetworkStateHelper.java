@@ -12,7 +12,7 @@ import com.stanko.tools.InternetConnectionHelper;
 import com.stanko.tools.Log;
 import com.stanko.tools.StoppableThread;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 /**
  * Created by Stan Koshutsky <stan.koshutsky@gmail.com> on 03.09.2015.
