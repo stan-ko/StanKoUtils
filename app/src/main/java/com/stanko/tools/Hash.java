@@ -369,4 +369,24 @@ public class Hash {
         }
         return keyHash;
     }
+
+    /**
+     * Checks if given string is a valid SHA1 hash string using pattern
+     *
+     * @param s
+     * @return
+     */
+    public static boolean isValidSHA1(String s) {
+        return s.matches("[a-fA-F0-9]{40}");
+    }
+
+    /**
+     * Checks if given string is a valid MD5 hash string using pattern
+     *
+     * @param s
+     * @return
+     */
+    public static boolean isValidMD5(String s) {
+        return s.matches("[a-fA-F0-9]{32}");
+    }
 }
