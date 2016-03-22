@@ -17,6 +17,8 @@ import android.util.TypedValue;
 import android.view.Display;
 import android.view.WindowManager;
 
+import com.stanko.R;
+
 import java.util.ArrayList;
 import java.util.Locale;
 import java.util.UUID;
@@ -212,6 +214,17 @@ public class DeviceInfo {
         Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
         return rect.top;
+    }
+
+    public static boolean isTablet() {
+        Log.i("this device DeviceInfo.screenSize: " + DeviceInfo.screenSize + " " + DeviceInfo.displayDensity);
+        Log.i("this device screenInchesByMetrics: " + DeviceInfo.screenInchesByMetrics + " screenInchesByConfig: " + DeviceInfo.screenInchesByConfig);
+        final boolean isTabletByResources = appContext.getResources().getBoolean(R.bool.isTablet);
+        //final boolean isTabletByTelephony = !DeviceInfo.hasTelephony();
+        final boolean isTabletByScreen = DeviceInfo.screenSize > 2 && DeviceInfo.screenInchesByMetrics > 7f;
+        //DeviceInfo.isTabletByScreen();
+        Log.i("isTabletByResources: " + isTabletByResources + " isTabletByScreen: " + isTabletByScreen + " DeviceInfo.screenSize: " + DeviceInfo.screenSize);
+        return isTabletByResources || isTabletByScreen;
     }
 
     public static float px2dp(float px) {
@@ -649,6 +662,7 @@ public class DeviceInfo {
         return devices.contains(android.os.Build.BRAND + "/"
                 + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
     }
+
 
 
     /**
