@@ -8,33 +8,45 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.stanko.tools.BooleanLock;
-import com.stanko.tools.InternetConnectionHelper;
 import com.stanko.tools.Log;
 import com.stanko.tools.StoppableThread;
 
 import org.greenrobot.eventbus.EventBus;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Created by Stan Koshutsky <stan.koshutsky@gmail.com> on 03.09.2015.
  */
 public class NetworkStateHelper {
 
+    public static final int TIME_OUT = 1000 * 3; //3s
+
     final static BooleanLock checkIfHostRespondsLock = new BooleanLock();
     private static Context sAppContext;
     private static NetworkState sLastNetworkState;
     private static String sHostToCheck;
     private static boolean isNetworkAvailable;
+    private static boolean isHostReachable;
     private static StoppableThread sCheckIfHostRespondsThread;
 
     public static void init(final Context context) {
-        init(context,null);
+        init(context, null);
     }
 
     public static void init(final Context context, final String hostToCheck) {
         if (sAppContext == null)
             sAppContext = context.getApplicationContext();
-        if (!TextUtils.isEmpty(hostToCheck))
+        isNetworkAvailable = isNetworkConnectionAvailable(sAppContext);
+        if (!TextUtils.isEmpty(hostToCheck)) {
             sHostToCheck = hostToCheck;
+            if (isNetworkAvailable) {
+                checkIfHostResponds(null, NetworkState.NRGotNetwork, null, null);
+            }
+        }
     }
 
     /**
@@ -83,22 +95,16 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isNetworkAvailable() {
+        Log.i("isNetworkAvailable(): isNetworkAvailable: " + isNetworkAvailable);
         if (!isNetworkAvailable) {
-            final boolean wasNetworkAvailable = isNetworkAvailable;
-            final boolean isNetworkConnectionAvailable = InternetConnectionHelper.checkIsNetworkAvailable(sAppContext);
-//            Log.i(NetworkStateReceiver.class, "static isInternetAvailable(): false, isNetworkConnectionAvailable: " + isNetworkConnectionAvailable);
-            if (isNetworkConnectionAvailable) {
-                checkIfHostResponds(wasNetworkAvailable,
-                        isNetworkAvailable,
-                        sLastNetworkState,
-                        NetworkState.NRGotNetwork,
-                        null,
-                        null);
-            }
+            final boolean isNetworkConnectionAvailable = isNetworkConnectionAvailable(sAppContext);
+            Log.i("isNetworkConnectionAvailable(): " + isNetworkConnectionAvailable);
+            // if network connection available but it wasn't
+            if (isNetworkConnectionAvailable)
+                checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
             return isNetworkConnectionAvailable;
         } else {
-            //Log.i(NetworkStateHelper.class, "static isInternetAvailable(): true");
-            return true;
+            return isNetworkAvailable && isHostReachable;
         }
     }
 
@@ -112,7 +118,12 @@ public class NetworkStateHelper {
      * @param newNetworkID
      * @param lastNetworkID
      */
-    static void handleNetworkState(final boolean wasNetworkAvailable, final boolean isNetworkAvailable, final NetworkState lastNetworkState, final NetworkState newNetworkState, String newNetworkID, final String lastNetworkID) {
+    static void handleNetworkState(final boolean wasNetworkAvailable,
+                                   final boolean isNetworkAvailable,
+                                   final NetworkState lastNetworkState,
+                                   final NetworkState newNetworkState,
+                                   final String newNetworkID,
+                                   final String lastNetworkID) {
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i(NetworkStateHelper.class, "handleNetworkState(): same state -> ignoring");
             return;
@@ -123,29 +134,34 @@ public class NetworkStateHelper {
         // and it could be a LAN via WiFi (with no Internet connection available)
         // boolean isWiFiNetworkChanged = !newNetworkID.equals(lastNetworkID);
 
-        if (isNetworkAvailable && !TextUtils.isEmpty(sHostToCheck)) {
-            checkIfHostResponds(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
-            return;
-        }
         NetworkStateHelper.isNetworkAvailable = isNetworkAvailable;
         NetworkStateHelper.sLastNetworkState = newNetworkState;
-        final EventBus eventBus = EventBus.getDefault();
-        if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-            eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
+        if (isNetworkAvailable && !TextUtils.isEmpty(sHostToCheck)) {
+            checkIfHostResponds(lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+        } else {
+            final EventBus eventBus = EventBus.getDefault();
+            if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
+                eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, isHostReachable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
+            }
         }
     }
 
     /**
      * Handles request to Host to check if it responds called by NetworkStateReceiver
      *
-     * @param wasNetworkAvailable
-     * @param isNetworkAvailable
      * @param lastNetworkState
      * @param newNetworkState
      * @param lastNetworkID
      * @param newNetworkID
      */
-    static void checkIfHostResponds(final boolean wasNetworkAvailable, final boolean isNetworkAvailable, final NetworkState lastNetworkState, final NetworkState newNetworkState, final String lastNetworkID, final String newNetworkID) {
+    static void checkIfHostResponds(final NetworkState lastNetworkState,
+                                    final NetworkState newNetworkState,
+                                    final String lastNetworkID,
+                                    final String newNetworkID) {
+        if (TextUtils.isEmpty(sHostToCheck)) {
+            Log.e(new Exception("NetworkStateHelper: Can't start checkIfHostResponds() task - sHostToCheck is empty"));
+        }
+
         synchronized (checkIfHostRespondsLock) {
             // cancel current Host responding check thread if any
             if (checkIfHostRespondsLock.isRunning() && sCheckIfHostRespondsThread != null) {
@@ -154,47 +170,65 @@ public class NetworkStateHelper {
             }
 
             if (!checkIfHostRespondsLock.setRunning()) {
-                Log.e(new Exception("NetworkStateHelper: Can't start thread in checkIfHostResponds() - checkIfHostRespondsLock is locked"));
+                Log.e(new Exception("NetworkStateHelper: Can't start checkIfHostResponds() task - checkIfHostRespondsLock is locked"));
                 return;
             }
         }
 
         // Creating and starting a thread for sending a request to Host
-        if (!TextUtils.isEmpty(sHostToCheck)) {
-            sCheckIfHostRespondsThread = new StoppableThread(new Runnable() {
-                @Override
-                public void run() {
-                    android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                    Looper.prepare();
-                    final StoppableThread thisThread = ((StoppableThread) Thread.currentThread());
-                    boolean doesHostRespond = isHostReachable(sHostToCheck);
-                    // if thread stop requested task result will be ignored
-                    if (!thisThread.isStopped) {
-                        synchronized (checkIfHostRespondsLock) {
-                            final EventBus eventBus = EventBus.getDefault();
-                            if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-                                eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, doesHostRespond, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
-                            }
-                            NetworkStateHelper.isNetworkAvailable = isNetworkAvailable;
-                            NetworkStateHelper.sLastNetworkState = newNetworkState;
-                            checkIfHostRespondsLock.setFinished();
-                        }
+        sCheckIfHostRespondsThread = new StoppableThread(new Runnable() {
+            @Override
+            public void run() {
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                Looper.prepare();
+                final StoppableThread thisThread = ((StoppableThread) Thread.currentThread());
+                final boolean doesHostRespond = isHostReachable(sHostToCheck);
+                // if thread stop requested task result will be ignored
+                if (thisThread.isStopped)
+                    return;
+
+                synchronized (checkIfHostRespondsLock) {
+                    NetworkStateHelper.isHostReachable = doesHostRespond;
+                    final EventBus eventBus = EventBus.getDefault();
+                    if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
+                        eventBus.post(new NetworkStateReceiverEvent(false, isNetworkAvailable, doesHostRespond, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
                     }
-                    Looper.loop();
+                    checkIfHostRespondsLock.setFinished();
                 }
-            });
-            sCheckIfHostRespondsThread.start();
-        }
+
+                Looper.loop();
+            }
+        });
+        sCheckIfHostRespondsThread.start();
     }
 
     /**
-     * Checks if Host responds. Method uses networking and thus could not be run on a main thread.
-     * Should be run in AsyncTask or any other Thread.
+     * Checks host by connection to using HttpURLConnection. Method should not be run
+     * on a Main/UIThread otherwise exception will be thrown.
+     *
+     * @param hostUrl - the host to check. By default http:// prefix will be added if no any
+     * @return true if host reachable (connection were established)
      */
     public static boolean isHostReachable(final String hostUrl) {
         boolean doesHostRespond = false;
         try {
-            doesHostRespond = InternetConnectionHelper.isHostReachable(hostUrl);
+            // adding http:// if its just a pure host name like google.com instead of http://google.com
+            final URL url = new URL(hostUrl.contains("://") ? hostUrl : "http://" + hostUrl);
+            final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
+            httpURLConnection.setRequestProperty("Connection", "close");
+            httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
+            httpURLConnection.connect();
+            final int responseCode = httpURLConnection.getResponseCode();
+            // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+            // there are too many codes, guess checking if its gt 0 is enough
+            doesHostRespond = responseCode > 0;
+        } catch (MalformedURLException e) {
+//            isExceptionHappens = true;
+//            Log.e("ServerChecker", e);
+        } catch (IOException e) {
+//            isExceptionHappens = true;
+//            Log.e("ServerChecker", e);
         } catch (SecurityException e) {
             // user could limit Internet access so app could crash here
             Log.e(e);
@@ -222,14 +256,18 @@ public class NetworkStateHelper {
     }
 
     /**
-     * Interface to deliver result of {@link #checkIfHostResponds(String,ICheckIfHostResponds)}
+     * Interface to deliver result of {@link #checkIfHostResponds(String, ICheckIfHostResponds)}
      */
     public interface ICheckIfHostResponds {
         void doesHostRespond(boolean doestIt);
     }
 
 
-
+    /**
+     * Checks if currently device has any network connection without ensuring it has Internet access
+     *
+     * @return true if connection persists or false otherwise
+     */
     public static boolean isNetworkConnectionAvailable(final Context context) {
         if (context == null)
             return false;

@@ -12,46 +12,25 @@ package com.stanko.tools;
 
 public class BooleanLock {
 
-    private boolean value;
+    private boolean isLocked;
 
-    public boolean setRunning() {
-        if (this.value)
+    public synchronized boolean setRunning() {
+        if (isLocked) // already locked/running
             return false;
-        this.value = true;
+        this.isLocked = true;
         return true;
     }
 
     public boolean isRunning() {
-        return value;
+        return isLocked;
     }
 
     public void setFinished() {
-        this.value = false;
+        this.isLocked = false;
     }
 
     public boolean isFinished() {
-        return !value;
+        return !isLocked;
     }
-
-//    public BooleanLock(boolean b) {
-//        value = b;
-//    }
-//
-//    public boolean isTrue() {
-//        return value;
-//    }
-//    public boolean isValue() {
-//        return value;
-//    }
-//
-//    public void setTrue() {
-//        this.value = true;
-//    }
-//    public void setFalse() {
-//        this.value = false;
-//    }
-//    public void setValue(boolean value) {
-//        this.value = value;
-//    }
 
 }
