@@ -14,9 +14,9 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by Stan
  */
-public class ZipHlper {
+public class ZipHelper {
 
-    private final static String LOG_TAG = ZipHlper.class.getSimpleName();
+    private final static String LOG_TAG = ZipHelper.class.getSimpleName();
 
     public static final int BUFFER = 1024;
 

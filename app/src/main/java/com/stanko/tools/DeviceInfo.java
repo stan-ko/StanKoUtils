@@ -29,9 +29,7 @@ import java.util.UUID;
  */
 public class DeviceInfo {
 
-    private static final String LOGTAG = Log.getLogTag(DeviceInfo.class);
-
-    private static boolean isInitialzed;
+    private static boolean isInitialized;
     private static Context appContext;
 
     private static Boolean isHiResDisplay;
@@ -59,9 +57,9 @@ public class DeviceInfo {
     public static String deviceARM;
     public static String[] deviceARMs;
 
-    private static float configurationRatio;
+    public static float configurationRatio;
 
-    private static DisplayMetrics displayMetrics;
+    public static DisplayMetrics displayMetrics;
 
     public static final int hasAPILevel = Build.VERSION.SDK_INT;
 
@@ -97,7 +95,7 @@ public class DeviceInfo {
     @SuppressLint("NewApi")
     public static synchronized boolean init(final Context context) {
 
-        if (isInitialzed)
+        if (isInitialized)
             return true;
 
         if (context == null)
@@ -144,20 +142,20 @@ public class DeviceInfo {
         screenInchesByMetrics = Math.round(Math.sqrt(xDensity + yDensity) * 10f) / 10f;
         screenInches = Math.round(screenInchesByMetrics);
 
-        Log.i(LOGTAG, String.format("Model: %s, Manufacturer: %s Product: %s Name: %s", deviceModel, deviceManufacturer, deviceProduct, deviceName));
-        Log.i(LOGTAG, "Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
+        Log.i(String.format("Model: %s, Manufacturer: %s Product: %s Name: %s", deviceModel, deviceManufacturer, deviceProduct, deviceName));
+        Log.i("Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
 
         deviceARM = Build.CPU_ABI;
         deviceARMs = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
         if (hasAPI(21)) {
-            if (Build.SUPPORTED_ABIS != null) ;
-            deviceARMs = Build.SUPPORTED_ABIS;
+            if (Build.SUPPORTED_ABIS != null)
+                deviceARMs = Build.SUPPORTED_ABIS;
             if (deviceARMs.length > 0)
                 deviceARM = Build.SUPPORTED_ABIS[0];
         }
 
         final Configuration conf = appContext.getResources().getConfiguration();
-        Log.i(LOGTAG, String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s", conf.screenHeightDp, conf.screenWidthDp));
+        Log.i(String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s", conf.screenHeightDp, conf.screenWidthDp));
         screenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp * conf.screenHeightDp + conf.screenWidthDp * conf.screenWidthDp) * 10f) / 10f;
 
         final int screenLayout = conf.screenLayout;
@@ -200,17 +198,17 @@ public class DeviceInfo {
                 break;
         }
 
-        Log.i(LOGTAG, String.format("Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
-        Log.i(LOGTAG, String.format("Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
+        Log.i(String.format("Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
+        Log.i(String.format("Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
         checkHasTelephony(appContext);
 
-        isInitialzed = true;
+        isInitialized = true;
 
         return true;
     }
 
-    public static int getstatusBarHeight(final Activity activity) {
+    public static int getStatusBarHeight(final Activity activity) {
         Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
         return rect.top;
@@ -228,30 +226,30 @@ public class DeviceInfo {
     }
 
     public static float px2dp(float px) {
-        if (isInitialzed)
+        if (isInitialized)
             return (float) ((px / displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, displayMetrics);
         else {
-            Log.w(LOGTAG, "Class is not initialized!!! Method  px2dp() returns 0");
+            Log.w("Class is not initialized!!! Method  px2dp() returns 0");
             return 0;
         }
     }
 
     public static float dp2px(float dp) {
-        if (isInitialzed)
+        if (isInitialized)
             return (float) ((dp * displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
         else {
-            Log.w(LOGTAG, "Class is not initialized!!! Method  dp2px() returns 0");
+            Log.w("Class is not initialized!!! Method  dp2px() returns 0");
             return 0;
         }
     }
 
     public static float sp2px(float sp) {
-        if (isInitialzed)
+        if (isInitialized)
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics);
         else {
-            Log.w(LOGTAG, "Class is not initialized!!! Method  dp2px() returns 0");
+            Log.w("Class is not initialized!!! Method  dp2px() returns 0");
             return 0;
         }
     }
@@ -286,7 +284,7 @@ public class DeviceInfo {
     }
 
     public static void checkHasTelephony(Context context) {
-        if (!isInitialzed) {
+        if (!isInitialized) {
             TelephonyManager telephonyManager = null;
             try { // for the firecase
                 telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -301,16 +299,16 @@ public class DeviceInfo {
             if (telephonyManager == null || telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_NONE) {
                 hasTelephony = false;
                 if (telephonyManager == null)
-                    Log.i(LOGTAG, "Has NO telephony via telephonyManager == null!");
+                    Log.i("Has NO telephony via telephonyManager == null!");
                 else
-                    Log.i(LOGTAG, "Has NO telephony via getPhoneType==PHONE_TYPE_NONE");
+                    Log.i("Has NO telephony via getPhoneType==PHONE_TYPE_NONE");
                 return;
             } else {
                 //Phone Type
                 // The getPhoneType() returns the device type. This method returns one of the following values:
                 if (telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE) {
                     hasTelephony = true;
-                    Log.i(LOGTAG, "HAS!!! Telephony!");
+                    Log.i("HAS!!! Telephony!");
                     return;
                 }
 //				if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM || 
@@ -321,7 +319,7 @@ public class DeviceInfo {
 
             if (pm != null) {
                 hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-                Log.i(LOGTAG, "PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
+                Log.i("PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
                 //hasCamera = Boolean.valueOf(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA));
 
 //	            try
@@ -433,7 +431,7 @@ public class DeviceInfo {
      */
     public static String getDeviceIMEI(Context context) {
 
-        if (!isInitialzed)
+        if (!isInitialized)
             checkHasTelephony(context);
 
         String deviceId = null;
@@ -483,7 +481,7 @@ public class DeviceInfo {
      */
     public static Boolean isTabletByScreen() {
 
-        if (!isInitialzed)
+        if (!isInitialized)
             return null;
 
         boolean byScreen = screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE
@@ -547,98 +545,98 @@ public class DeviceInfo {
 
         if (deviceManufacturer.equals(MANUFACTURER_SAMSUNG)) {
             if (deviceName.equals(DEVICE_ID_GALAXY_S) || deviceModel.equals(DEVICE_ID_GALAXY_S)) {
-                Log.i(LOGTAG, "Samsung Galaxy S detected");
+                Log.i("Samsung Galaxy S detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_PLUS) || deviceModel.equals(DEVICE_ID_GALAXY_S_PLUS)) {
-                Log.i(LOGTAG, "Samsung Galaxy S+ detected");
+                Log.i("Samsung Galaxy S+ detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_CRAFT) || deviceModel.equals(DEVICE_ID_GALAXY_S_CRAFT)) {
-                Log.i(LOGTAG, "Samsung Galaxy S Craftman detected");
+                Log.i("Samsung Galaxy S Craftman detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_SL) || deviceModel.equals(DEVICE_ID_GALAXY_SL)) {
-                Log.i(LOGTAG, "Samsung Galaxy SL detected");
+                Log.i("Samsung Galaxy SL detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_II) || deviceModel.equals(DEVICE_ID_GALAXY_S_II)) {
-                Log.i(LOGTAG, "Samsung Galaxy S II detected");
+                Log.i("Samsung Galaxy S II detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_II_PLUS) || deviceModel.equals(DEVICE_ID_GALAXY_S_II_PLUS)) {
-                Log.i(LOGTAG, "Samsung Galaxy S II+ detected");
+                Log.i("Samsung Galaxy S II+ detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_ADVANCE) || deviceModel.equals(DEVICE_ID_GALAXY_S_ADVANCE)) {
-                Log.i(LOGTAG, "Samsung Galaxy S Advance detected");
+                Log.i("Samsung Galaxy S Advance detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_III) || deviceModel.equals(DEVICE_ID_GALAXY_S_III)) {
-                Log.i(LOGTAG, "Samsung Galaxy S III detected");
+                Log.i("Samsung Galaxy S III detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_GRAND) || deviceModel.equals(DEVICE_ID_GALAXY_S_GRAND)) {
-                Log.i(LOGTAG, "Samsung Galaxy Grand detected");
+                Log.i("Samsung Galaxy Grand detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_GALAXY_S_ARMANI) || deviceModel.equals(DEVICE_ID_GALAXY_S_ARMANI)) {
-                Log.i(LOGTAG, "Samsung Galaxy S Giorgio Armani detected");
+                Log.i("Samsung Galaxy S Giorgio Armani detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
 
             if (deviceName.contains("DEVICE_ID_GALAXY_PFX") || deviceModel.contains(DEVICE_ID_GALAXY_PFX)) {
-                Log.i(LOGTAG, "Samsung unknown " + deviceName + " detected");
+                Log.i("Samsung unknown " + deviceName + " detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_CAPTIVATE) || deviceModel.equals(DEVICE_ID_CAPTIVATE)) {
-                Log.i(LOGTAG, "ATT, Samsung Captivate detected");
+                Log.i("ATT, Samsung Captivate detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_VIBRANT) || deviceModel.equals(DEVICE_ID_VIBRANT)) {
-                Log.i(LOGTAG, "T-Mobile US, Samsung Vibrant detected");
+                Log.i("T-Mobile US, Samsung Vibrant detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_EPIC) || deviceModel.equals(DEVICE_ID_EPIC)) {
-                Log.i(LOGTAG, "Sprint, Samsung Epic 4G detected");
+                Log.i("Sprint, Samsung Epic 4G detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_FASCINATE) || deviceModel.equals(DEVICE_ID_FASCINATE)) {
-                Log.i(LOGTAG, "Verizon, Samsung Fascinate detected");
+                Log.i("Verizon, Samsung Fascinate detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
 
             if (deviceName.equals(DEVICE_ID_MESMERIZE) || deviceModel.equals(DEVICE_ID_MESMERIZE)) {
-                Log.i(LOGTAG, "Samsung Mesmerize detected");
+                Log.i("Samsung Mesmerize detected");
                 isSamsungGalaxyShit = true;
                 return true;
             }
@@ -662,7 +660,6 @@ public class DeviceInfo {
         return devices.contains(android.os.Build.BRAND + "/"
                 + android.os.Build.PRODUCT + "/" + android.os.Build.DEVICE);
     }
-
 
 
     /**
