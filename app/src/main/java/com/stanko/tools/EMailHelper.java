@@ -45,12 +45,13 @@ public class EMailHelper {
 //		}
 //	}
 
-    public static boolean isValidEmail(String email) {
-        String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+    public static boolean isValidEmail(final String email) {
+        if (TextUtils.isEmpty(email))
+            return false;
 
-        Pattern p = Pattern.compile(expression);
-        Matcher m = p.matcher(email);
-
+        final String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+        final Pattern p = Pattern.compile(expression);
+        final Matcher m = p.matcher(email);
         return m.matches();
     }
 
