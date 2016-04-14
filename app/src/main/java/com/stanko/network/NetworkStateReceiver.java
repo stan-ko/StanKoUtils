@@ -14,7 +14,7 @@ import com.stanko.tools.Log;
 /**
  * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com> on 06.04.2015.
  */
-public class NetworkStateReceiver extends BroadcastReceiver {
+class NetworkStateReceiver extends BroadcastReceiver {
 
     //public static final String TAG="NetworkStateReceiver";
 
@@ -24,19 +24,19 @@ public class NetworkStateReceiver extends BroadcastReceiver {
     public static final String NETWORK_ID_MOBILE = "MOBILE";
     public static final String NETWORK_ID_OTHER = "OTHER";
 
-    private final ConnectivityManager connectivityManager;
-    private static Context appContext;
+    private final ConnectivityManager mConnectivityManager;
+    private static Context sAppContext;
 
     private String lastNetworkID;
     private boolean wasNetworkAvailable;
 
     public NetworkStateReceiver(final Context context) {
 //            lastNetworkID = initialNetworkID;
-        connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        appContext = context.getApplicationContext();
-        final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        sAppContext = context.getApplicationContext();
+        mConnectivityManager = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
-            lastNetworkID = getNetworkID(appContext, activeNetworkInfo);
+            lastNetworkID = getNetworkID(sAppContext, activeNetworkInfo);
             Log.i(this, "NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " -> checkIfServerResponds()");
             lastNetworkState = NetworkState.NRGotNetwork;
             wasNetworkAvailable = true;
@@ -63,7 +63,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
         String newNetworkID;
         NetworkState newNetworkState;
 
-        final NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
             Log.i(this, "NO! ActiveNetwork (null) -> NRNoNetwork");
             if (!wasNetworkAvailable && lastNetworkID == null && lastNetworkState == NetworkState.NRNoNetwork) {
@@ -83,7 +83,7 @@ public class NetworkStateReceiver extends BroadcastReceiver {
                 //final NetworkState wasCheckNetworkReason = checkNetworkReason;
                 switch (receivedNetworkInfo.getState()) {
                     case CONNECTED:
-                        newNetworkID = getNetworkID(appContext, receivedNetworkInfo);
+                        newNetworkID = getNetworkID(sAppContext, receivedNetworkInfo);
                         // determine the type of network
                         switch (receivedNetworkInfo.getType()) {
 

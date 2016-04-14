@@ -1,6 +1,7 @@
 package com.stanko.tools;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -8,6 +9,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.hardware.Camera;
+import android.hardware.camera2.CameraAccessException;
+import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -285,12 +289,9 @@ public class DeviceInfo {
 
     public static void checkHasTelephony(Context context) {
         if (!isInitialized) {
-            TelephonyManager telephonyManager = null;
+            TelephonyManager telephonyManager;
             try { // for the firecase
                 telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            } catch (Exception e) {
-                hasTelephony = false;
-                return;
             } catch (Throwable e) {
                 hasTelephony = false;
                 return;
@@ -306,22 +307,22 @@ public class DeviceInfo {
             } else {
                 //Phone Type
                 // The getPhoneType() returns the device type. This method returns one of the following values:
-                if (telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE) {
-                    hasTelephony = true;
-                    Log.i("HAS!!! Telephony!");
-                    return;
-                }
+//                if (telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE) {
+                hasTelephony = true;
+                Log.i("HAS!!! Telephony!");
+                return;
+//                }
 //				if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM || 
 //						telephonyManager.getPhoneType()TelephonyManager.PHONE_TYPE_CDMA
             }
 
-            PackageManager pm = context.getPackageManager();
-
-            if (pm != null) {
-                hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-                Log.i("PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
-                //hasCamera = Boolean.valueOf(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA));
-
+//            final PackageManager pm = context.getPackageManager();
+//
+//            if (pm != null) {
+//                hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+//                Log.i("PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
+//                //hasCamera = Boolean.valueOf(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA));
+//
 //	            try
 //	            {
 //	                Class[] parameters=new Class[1];
@@ -339,9 +340,60 @@ public class DeviceInfo {
 //	            {
 //	                hasTelephony=Boolean.valueOf(false);
 //	            }
+//            }
+        }
+//        return;
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static Boolean hasCamera() {
+        final PackageManager pm = appContext.getPackageManager();
+        boolean hasCameraByPM;
+        if (pm == null)
+            return null;
+        else
+            hasCameraByPM = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+
+        if (hasCameraByPM) {
+            if (hasAPI(21)) {
+                try {
+                    return ((CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE)).getCameraIdList().length > 0;
+                } catch (CameraAccessException e) {
+                    Log.e("", "", e);
+                }
+            }
+            return Camera.getNumberOfCameras() > 0;
+        } else
+            return false;
+
+    }
+
+    public static Boolean hasBackCamera() {
+        final Boolean hasCamera = hasCamera();
+        if (hasCamera == null)
+            return null;
+        else if (!hasCamera)
+            return false;
+
+        int backCameraId = -1;
+        for (int i = 0; i < Camera.getNumberOfCameras(); i++) {
+            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            Camera.getCameraInfo(i, cameraInfo);
+            if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                backCameraId = i;
+                break;
             }
         }
-        return;
+        return backCameraId > -1;
+    }
+
+
+    public static Boolean hasFlash() {
+        final PackageManager pm = appContext.getPackageManager();
+        if (pm == null)
+            return null;
+        else
+            return pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH);
     }
 
 
