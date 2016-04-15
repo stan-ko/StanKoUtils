@@ -33,7 +33,6 @@ public class NetworkStateHelper {
     private static String sHostToCheck;
     private static boolean isNetworkConnectionAvailable;
     private static boolean isHostReachable;
-
     private static StoppableThread sCheckIfHostRespondsThread;
     private static NetworkStateReceiver sNetworkStateReceiver;
 
@@ -47,17 +46,15 @@ public class NetworkStateHelper {
             sAppContext = context.getApplicationContext();
         isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-        registerReceiver(); // will trigger the handleNetworkState()
+        registerReceiver(); // will trigger handleNetworkState() method
     }
 
-    private static synchronized void registerReceiver() {
-        synchronized (networkStateReceiverSyncObj) {
-            if (sNetworkStateReceiver != null)
-                return;
-            final IntentFilter mIFNetwork = NetworkStateHelper.getReceiverIntentFilter();
-            sNetworkStateReceiver = new NetworkStateReceiver(sAppContext);
-            sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
-        }
+    public static synchronized void registerReceiver() {
+        if (sNetworkStateReceiver != null)
+            return;
+        final IntentFilter mIFNetwork = NetworkStateHelper.getReceiverIntentFilter();
+        sNetworkStateReceiver = new NetworkStateReceiver(sAppContext);
+        sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
     }
 
     @Override
@@ -67,11 +64,9 @@ public class NetworkStateHelper {
     }
 
     public static synchronized void unregisterReceiver() {
-        synchronized (networkStateReceiverSyncObj) {
-            if (sNetworkStateReceiver != null)
-                sAppContext.unregisterReceiver(sNetworkStateReceiver);
-            sNetworkStateReceiver = null;
-        }
+        if (sNetworkStateReceiver != null)
+            sAppContext.unregisterReceiver(sNetworkStateReceiver);
+        sNetworkStateReceiver = null;
     }
 
     /**
@@ -123,25 +118,27 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isNetworkAvailable() {
-        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable);
-        if (isNetworkConnectionAvailable && !isHostReachable && checkIfHostRespondsLock != null && checkIfHostRespondsLock.isRunning()) {
+        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable+" isAnyNetworkConnectionAvailable(): "+isAnyNetworkConnectionAvailable());
+        //TODO: isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable(); //?
+        if (TextUtils.isEmpty(sHostToCheck) // no host was set to check
+                || !isHostReachable // host to check was set but host is not reachable as for now
+                && checkIfHostRespondsLock != null // and reachability check task is running now
+                && checkIfHostRespondsLock.isRunning()
+                ) {
             // we have network connection but we cant say if host is reachable
             // since the reachability check task (thread) is running
-            return true;
-//        }
-//        else if (checkIfHostRespondsLock==null || !checkIfHostRespondsLock.isRunning()) {
-//            final boolean isNetworkConnectionAvailable = isActiveNetworkConnectionAvailable(sAppContext);
-//            Log.i("isActiveNetworkConnectionAvailable(): " + isNetworkConnectionAvailable);
-//            // if network connection available but it wasn't
-//            if (isNetworkConnectionAvailable)
-//                checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
+            // or no host is given to check
 //            return isNetworkConnectionAvailable;
         } else {
             // if network connection available but it wasn't
-            if (isNetworkConnectionAvailable)
-                checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
-            return isNetworkConnectionAvailable && isHostReachable;
+            if (isNetworkConnectionAvailable) {
+                if (!TextUtils.isEmpty(sHostToCheck)) {
+                    checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
+                    return isNetworkConnectionAvailable && isHostReachable;
+                }
+            }
         }
+        return isNetworkConnectionAvailable;
     }
 
     /**
@@ -197,7 +194,7 @@ public class NetworkStateHelper {
                                     final String lastNetworkID,
                                     final String newNetworkID) {
         if (TextUtils.isEmpty(sHostToCheck)) {
-            Log.e(new Exception("NetworkStateHelper: Can't start checkIfHostResponds() task - sHostToCheck is empty"));
+            Log.w("NetworkStateHelper: Can't start checkIfHostResponds() task - sHostToCheck is empty");
             return;
         }
 
