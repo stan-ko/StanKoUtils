@@ -118,7 +118,7 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isNetworkAvailable() {
-        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable+" isAnyNetworkConnectionAvailable(): "+isAnyNetworkConnectionAvailable());
+        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
         //TODO: isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable(); //?
         if (TextUtils.isEmpty(sHostToCheck) // no host was set to check
                 || !isHostReachable // host to check was set but host is not reachable as for now
@@ -151,12 +151,23 @@ public class NetworkStateHelper {
      * @param newNetworkID
      * @param lastNetworkID
      */
-    static void handleNetworkState(final boolean wasNetworkAvailable,
+    static synchronized void handleNetworkState(final boolean wasNetworkAvailable,
                                    final boolean isNetworkAvailable,
                                    final NetworkState lastNetworkState,
                                    final NetworkState newNetworkState,
                                    final String newNetworkID,
-                                   final String lastNetworkID) {
+                                   final String lastNetworkID)
+    {
+        Log.i("wasNetworkAvailable: " + wasNetworkAvailable
+                        + " isNetworkAvailable: " + isNetworkAvailable
+                        + " lastNetworkState: " + lastNetworkState
+                        + " newNetworkState: " + newNetworkState
+                        + " newNetworkID: " + newNetworkID
+                        + " lastNetworkID: " + lastNetworkID
+        );
+        if (isNetworkConnectionAvailable != isNetworkAvailable) {
+            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+        }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i(NetworkStateHelper.class, "handleNetworkState(): same state -> ignoring");
             return;

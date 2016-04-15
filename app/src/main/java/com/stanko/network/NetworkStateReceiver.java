@@ -53,8 +53,9 @@ class NetworkStateReceiver extends BroadcastReceiver {
 
     @Override
     public synchronized void onReceive(final Context context, final Intent intent) {
+        Log.i();
 
-        Bundle extras = intent.getExtras();
+        final Bundle extras = intent.getExtras();
         if (extras == null) {
             Log.i(this, "Broadcast with NO EXTRAS - ignoring");
             return;
@@ -65,19 +66,18 @@ class NetworkStateReceiver extends BroadcastReceiver {
 
         final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo == null) {
-            Log.i(this, "NO! ActiveNetwork (null) -> NRNoNetwork");
-            if (!wasNetworkAvailable && lastNetworkID == null && lastNetworkState == NetworkState.NRNoNetwork) {
-                Log.i(this, "No ActiveNetwork (null) was registered already -> ignoring");
+            Log.i("ActiveNetwork is null -> NRNoNetwork");
+            if (!wasNetworkAvailable && lastNetworkID == null && NetworkState.NRNoNetwork.equals(lastNetworkState)) {
+                Log.i("No ActiveNetwork was registered already -> ignoring");
                 return;
             }
             newNetworkState = NetworkState.NRNoNetwork;
             newNetworkID = null;
-        }
-        else if (extras.containsKey(ConnectivityManager.EXTRA_NETWORK_INFO)) {
+        } else if (extras.containsKey(ConnectivityManager.EXTRA_NETWORK_INFO)) {
             final NetworkInfo receivedNetworkInfo = intent.getParcelableExtra(ConnectivityManager.EXTRA_NETWORK_INFO);
             // if we got broadcast msg not about the active network - return
             if (activeNetworkInfo.getType() != receivedNetworkInfo.getType()) {
-                Log.i(this, "Broadcast is not about the ActiveNetwork. type: " + activeNetworkInfo.getType() + " vs received: " + receivedNetworkInfo.getType() + " - ignoring");
+                Log.i("Broadcast is not about the ActiveNetwork. type: " + activeNetworkInfo.getType() + " vs received: " + receivedNetworkInfo.getType() + " - ignoring");
                 return;
             } else {
                 //final NetworkState wasCheckNetworkReason = checkNetworkReason;
@@ -117,12 +117,10 @@ class NetworkStateReceiver extends BroadcastReceiver {
                         break;
                 }
             }
-        }
-        else if (extras.containsKey(ConnectivityManager.EXTRA_NO_CONNECTIVITY) && !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
+        } else if (extras.containsKey(ConnectivityManager.EXTRA_NO_CONNECTIVITY) && !intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false)) {
             newNetworkState = NetworkState.NRNoNetwork;
             newNetworkID = null;
-        }
-        else {
+        } else {
 //	    		for(String key:extras.keySet()){
 //	    			Log.i(TAG,"mIRNetwork: Bundle.key = "+key+", value = "+extras.get(key));
 //	    		}
@@ -130,21 +128,29 @@ class NetworkStateReceiver extends BroadcastReceiver {
             newNetworkID = null;
         }
 
+        boolean isLoggedNetwork = false;
         switch (newNetworkState) {
             case NRGotNetwork:
+                Log.i("NetworkStateReceiver.onReceive(): NRGotNetwork");
             case NRGotNetworkMobile:
+                Log.i("NetworkStateReceiver.onReceive(): NRGotNetworkMobile");
+                isLoggedNetwork = true;
             case NRGotNetworkWiFi:
+                if (!isLoggedNetwork) {
+                    Log.i("NetworkStateReceiver.onReceive(): NRGotNetworkWiFi");
+                    isLoggedNetwork = true;
+                }
             case NRGotNetworkOther:
+                if (!isLoggedNetwork) {
+                    Log.i("NetworkStateReceiver.onReceive(): NRGotNetworkOther");
+//                    isLoggedNetwork = true;
+                }
                 if (lastNetworkID != null && lastNetworkID.equals(newNetworkID)) {
-                    Log.i(this, "NetworkStateReceiver.onReceive(): got the same network -> handleNetworkState(true)");
-                    //if (!wasNetworkAvailable)
                     handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                     wasNetworkAvailable = true;
                 } else {
-                    Log.i(this, "NetworkStateReceiver.onReceive(): got other network -> checkIfServerResponds()");
                     handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                     wasNetworkAvailable = true;
-//                    checkIfServerResponds();
                 }
                 break;
 
@@ -156,7 +162,7 @@ class NetworkStateReceiver extends BroadcastReceiver {
 //                break;
 
             default:
-                Log.i(this, "NetworkStateReceiver.onReceive(): default -> handleNetworkState(false)");
+                Log.i("NetworkStateReceiver.onReceive(): case default: -> handleNetworkState(false)");
                 handleNetworkState(wasNetworkAvailable, false, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                 wasNetworkAvailable = false;
         }
