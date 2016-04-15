@@ -166,11 +166,11 @@ public class NetworkStateHelper {
                         + " lastNetworkID: " + lastNetworkID
         );
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
-            Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
-            isNetworkConnectionAvailable = isNetworkAvailable;
+            Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
+            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
-            Log.i("same network state -> ignoring");
+            Log.i("same state -> ignoring");
             return;
         }
         // check if last lastNetworkID is WiFi's one (SSID/BSSID) and is it the same
