@@ -176,11 +176,10 @@ public class NetworkStateHelper {
             // no host to check - post Event about connectivity change
             final EventBus eventBus = EventBus.getDefault();
             if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-                eventBus.post(
-                        new NetworkStateReceiverEvent(
+                eventBus.post(new NetworkStateReceiverEvent(
                         wasNetworkAvailable,
                         isNetworkAvailable,
-                        Boolean.valueOf(isHostReachable),
+                        isHostReachable == null ? false : isHostReachable,
                         lastNetworkState,
                         newNetworkState,
                         lastNetworkID,
