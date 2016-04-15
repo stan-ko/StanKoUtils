@@ -47,25 +47,28 @@ public class NetworkStateHelper {
             sAppContext = context.getApplicationContext();
         isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-        registerNetReceiver(); // will trigger the handleNetworkState() here
+        registerReceiver(); // will trigger the handleNetworkState() here
     }
 
-    private static void registerNetReceiver() {
-        Log.d("registerNetReceiver()");
+    private static void registerReceiver() {
+        Log.d("registerReceiver()");
         synchronized (networkStateReceiverSyncObj) {
             if (sNetworkStateReceiver != null)
                 return;
             final IntentFilter mIFNetwork = NetworkStateHelper.getReceiverIntentFilter();
-            if (TextUtils.isEmpty(sHostToCheck))
-                sNetworkStateReceiver = NetworkStateHelper.getReceiver(sAppContext);
-            else
-                sNetworkStateReceiver = NetworkStateHelper.getReceiver(sAppContext, sHostToCheck);
+            sNetworkStateReceiver = new NetworkStateReceiver(sAppContext);
             sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
         }
     }
 
-    public static synchronized void unregisterNetReceiver() {
-        Log.d("unregisterNetReceiver()");
+    @Override
+    protected void finalize() throws Throwable {
+        unregisterReceiver();
+        super.finalize();
+    }
+
+    public static synchronized void unregisterReceiver() {
+        Log.d("unregisterReceiver()");
         synchronized (networkStateReceiverSyncObj) {
             if (sNetworkStateReceiver != null)
                 sAppContext.unregisterReceiver(sNetworkStateReceiver);
@@ -80,7 +83,8 @@ public class NetworkStateHelper {
      * @return NetworkStateReceiver
      */
     public static NetworkStateReceiver getReceiver(final Context context) {
-        init(context);
+        if (sAppContext == null)
+            init(context);
         return new NetworkStateReceiver(sAppContext);
     }
 
@@ -92,8 +96,10 @@ public class NetworkStateHelper {
      * @return NetworkStateReceiver
      */
     public static NetworkStateReceiver getReceiver(final Context context, final String host) {
-        init(context);
-        sHostToCheck = host;
+        if (sAppContext == null)
+            init(context, host);
+        else
+            sHostToCheck = host;
         return new NetworkStateReceiver(sAppContext);
     }
 
@@ -195,6 +201,14 @@ public class NetworkStateHelper {
                                     final String newNetworkID) {
         if (TextUtils.isEmpty(sHostToCheck)) {
             Log.e(new Exception("NetworkStateHelper: Can't start checkIfHostResponds() task - sHostToCheck is empty"));
+            return;
+        }
+
+        if (lastNetworkState == newNetworkState
+                && lastNetworkID != null && newNetworkID != null
+                && TextUtils.equals(lastNetworkID, newNetworkID)) {
+            Log.w("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
+            return;
         }
 
         synchronized (checkIfHostRespondsLock) {
