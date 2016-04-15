@@ -176,7 +176,15 @@ public class NetworkStateHelper {
             // no host to check - post Event about connectivity change
             final EventBus eventBus = EventBus.getDefault();
             if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-                eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable, isNetworkAvailable, isHostReachable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID));
+                eventBus.post(
+                        new NetworkStateReceiverEvent(
+                        wasNetworkAvailable,
+                        isNetworkAvailable,
+                        Boolean.valueOf(isHostReachable),
+                        lastNetworkState,
+                        newNetworkState,
+                        lastNetworkID,
+                        newNetworkID));
             }
         }
     }
@@ -231,7 +239,7 @@ public class NetworkStateHelper {
                     return;
 
                 synchronized (checkIfHostRespondsLock) {
-                    NetworkStateHelper.isHostReachable = doesHostRespond;
+                    isHostReachable = doesHostRespond;
                     final EventBus eventBus = EventBus.getDefault();
                     if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
                         eventBus.post(new NetworkStateReceiverEvent(false,
@@ -461,7 +469,7 @@ public class NetworkStateHelper {
         return (isInternetWiFi || isInternetWiMax);
     }
 
-    private static boolean setConnectivityManager(){
+    private static boolean setConnectivityManager() {
         if (sAppContext == null) {
             throw new NullPointerException("Context is null - did you call init() with valid context?");
         }
