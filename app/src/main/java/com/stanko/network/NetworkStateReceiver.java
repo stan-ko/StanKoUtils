@@ -31,21 +31,18 @@ class NetworkStateReceiver extends BroadcastReceiver {
     private boolean wasNetworkAvailable;
 
     public NetworkStateReceiver(final Context context) {
-//            lastNetworkID = initialNetworkID;
         sAppContext = context.getApplicationContext();
         mConnectivityManager = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
             lastNetworkID = getNetworkID(sAppContext, activeNetworkInfo);
-            Log.i(this, "NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " -> checkIfServerResponds()");
+            Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " -> checkIfServerResponds()");
             lastNetworkState = NetworkState.NRGotNetwork;
             wasNetworkAvailable = true;
-            //checkIfServerResponds();
             handleNetworkState(false, true, lastNetworkState, lastNetworkState, null, lastNetworkID);
         } else {
             lastNetworkState = NetworkState.NRNoNetwork;
-            //YoTalkService.checkNetworkReason = YoTalkService.NetworkState.NRNoNetwork;
-            Log.i(this, "NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " is NOT connected");
+            Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " is NOT connected");
             handleNetworkState(false, false, lastNetworkState, lastNetworkState, null, null);
         }
     }
@@ -57,7 +54,7 @@ class NetworkStateReceiver extends BroadcastReceiver {
 
         final Bundle extras = intent.getExtras();
         if (extras == null) {
-            Log.i(this, "Broadcast with NO EXTRAS - ignoring");
+            Log.i("Broadcast with NO EXTRAS - ignoring");
             return;
         }
 
