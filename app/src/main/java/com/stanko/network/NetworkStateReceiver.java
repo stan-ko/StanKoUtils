@@ -39,10 +39,12 @@ class NetworkStateReceiver extends BroadcastReceiver {
             Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " -> checkIfServerResponds()");
             lastNetworkState = NetworkState.NRGotNetwork;
             wasNetworkAvailable = true;
+            // initial state handle
             NetworkStateHelper.handleNetworkState(false, true, lastNetworkState, lastNetworkState, null, lastNetworkID);
         } else {
             lastNetworkState = NetworkState.NRNoNetwork;
             Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " is NOT connected");
+            // initial state handle
             NetworkStateHelper.handleNetworkState(false, false, lastNetworkState, lastNetworkState, null, null);
         }
     }
