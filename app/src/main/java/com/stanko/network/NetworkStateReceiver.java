@@ -183,9 +183,9 @@ class NetworkStateReceiver extends BroadcastReceiver {
                 break;
 
             case ConnectivityManager.TYPE_WIFI:
-                final WifiManager mWifiMngr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-                final WifiInfo mWifiInfo = mWifiMngr.getConnectionInfo();
-                newNetworkID = mWifiInfo.getSSID() + ':' + mWifiInfo.getBSSID();
+                final WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+                final WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+                newNetworkID = wifiInfo.getSSID() + ':' + wifiInfo.getBSSID();
                 break;
 
             case ConnectivityManager.TYPE_MOBILE:
@@ -199,7 +199,13 @@ class NetworkStateReceiver extends BroadcastReceiver {
         return newNetworkID;
     }
 
-    private void handleNetworkState(final boolean wasNetworkAvailable, final boolean isNetworkAvailable, final NetworkState lastNetworkState, final NetworkState newNetworkState, final String lastNetworkID, final String newNetworkID) {
+    private void handleNetworkState(final boolean wasNetworkAvailable,
+                                    final boolean isNetworkAvailable,
+                                    final NetworkState lastNetworkState,
+                                    final NetworkState newNetworkState,
+                                    final String lastNetworkID,
+                                    final String newNetworkID)
+    {
         NetworkStateHelper.handleNetworkState(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
     }
 
