@@ -25,33 +25,32 @@ public class NetworkStateHelper {
 
     public static final int TIME_OUT = 1000 * 3; //3s
 
-    final static BooleanLock checkIfHostRespondsLock = new BooleanLock();
-    private static Context sAppContext;
-    private static NetworkState sLastNetworkState;
-    private static String sLastNetworkId;
-    private static String sHostToCheck;
-    //    private static boolean isNetworkAvailable;
-    private static boolean isNetworkConnectionAvailable;
-    private static boolean isHostReachable;
-    private static StoppableThread sCheckIfHostRespondsThread;
-
-    private static NetworkStateReceiver sNetworkStateReceiver;
+    static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
     private static final Object networkStateReceiverSyncObj = new Object();
 
-    public static void init(final Context context) {
-        init(context, null);
+    private static Context sAppContext;
+    private static NetworkState sLastNetworkState;
+    private static String sHostToCheck;
+    private static boolean isNetworkConnectionAvailable;
+    private static boolean isHostReachable;
+
+    private static StoppableThread sCheckIfHostRespondsThread;
+    private static NetworkStateReceiver sNetworkStateReceiver;
+
+    public static synchronized void init(final Context context) {
+        if (sAppContext == null)
+            init(context, null);
     }
 
-    public static void init(final Context context, final String hostToCheck) {
+    public static synchronized void init(final Context context, final String hostToCheck) {
         if (sAppContext == null)
             sAppContext = context.getApplicationContext();
         isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-        registerReceiver(); // will trigger the handleNetworkState() here
+        registerReceiver(); // will trigger the handleNetworkState()
     }
 
-    private static void registerReceiver() {
-        Log.d("registerReceiver()");
+    private static synchronized void registerReceiver() {
         synchronized (networkStateReceiverSyncObj) {
             if (sNetworkStateReceiver != null)
                 return;
@@ -68,7 +67,6 @@ public class NetworkStateHelper {
     }
 
     public static synchronized void unregisterReceiver() {
-        Log.d("unregisterReceiver()");
         synchronized (networkStateReceiverSyncObj) {
             if (sNetworkStateReceiver != null)
                 sAppContext.unregisterReceiver(sNetworkStateReceiver);
@@ -174,7 +172,6 @@ public class NetworkStateHelper {
 
         //boolean isNetworkAvailable = isNetworkConnectionAvailable & isHostReachable;
         sLastNetworkState = newNetworkState;
-        sLastNetworkId = newNetworkID;
         if (isNetworkAvailable && !TextUtils.isEmpty(sHostToCheck)) {
             // first check host then post Event bia EventBus
             checkIfHostResponds(lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
