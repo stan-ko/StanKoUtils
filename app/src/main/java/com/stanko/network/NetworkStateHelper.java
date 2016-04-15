@@ -30,7 +30,6 @@ public class NetworkStateHelper {
 
     private static Context sAppContext;
     private static ConnectivityManager sConnectivityManager;
-//    private static NetworkState sLastNetworkState;
     private static String sHostToCheck;
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
@@ -54,7 +53,7 @@ public class NetworkStateHelper {
     public static synchronized void registerReceiver() {
         if (sNetworkStateReceiver != null)
             return;
-        final IntentFilter mIFNetwork = NetworkStateHelper.getReceiverIntentFilter();
+        final IntentFilter mIFNetwork = getReceiverIntentFilter();
         sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
         sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
     }
