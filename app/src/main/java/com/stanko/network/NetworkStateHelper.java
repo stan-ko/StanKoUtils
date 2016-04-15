@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -26,13 +27,13 @@ public class NetworkStateHelper {
     public static final int TIME_OUT = 1000 * 3; //3s
 
     static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
-    private static final Object networkStateReceiverSyncObj = new Object();
 
     private static Context sAppContext;
-    private static NetworkState sLastNetworkState;
+    private static ConnectivityManager sConnectivityManager;
+//    private static NetworkState sLastNetworkState;
     private static String sHostToCheck;
     private static boolean isNetworkConnectionAvailable;
-    private static boolean isHostReachable;
+    private static Boolean isHostReachable;
     private static StoppableThread sCheckIfHostRespondsThread;
     private static NetworkStateReceiver sNetworkStateReceiver;
 
@@ -46,14 +47,15 @@ public class NetworkStateHelper {
             sAppContext = context.getApplicationContext();
         isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-        registerReceiver(); // will trigger handleNetworkState() method
+        if (setConnectivityManager())
+            registerReceiver(); // will trigger handleNetworkState() method
     }
 
     public static synchronized void registerReceiver() {
         if (sNetworkStateReceiver != null)
             return;
         final IntentFilter mIFNetwork = NetworkStateHelper.getReceiverIntentFilter();
-        sNetworkStateReceiver = new NetworkStateReceiver(sAppContext);
+        sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
         sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
     }
 
@@ -78,7 +80,7 @@ public class NetworkStateHelper {
     public static NetworkStateReceiver getReceiver(final Context context) {
         if (sAppContext == null)
             init(context);
-        return new NetworkStateReceiver(sAppContext);
+        return new NetworkStateReceiver(sAppContext, sConnectivityManager);
     }
 
     /**
@@ -93,7 +95,7 @@ public class NetworkStateHelper {
             init(context, host);
         else
             sHostToCheck = host;
-        return new NetworkStateReceiver(sAppContext);
+        return new NetworkStateReceiver(sAppContext, sConnectivityManager);
     }
 
     public static void setHostToCheck(final String hostToCheck) {
@@ -120,23 +122,9 @@ public class NetworkStateHelper {
     public static boolean isNetworkAvailable() {
         Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
         //TODO: isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable(); //?
-        if (TextUtils.isEmpty(sHostToCheck) // no host was set to check
-                || !isHostReachable // host to check was set but host is not reachable as for now
-                && checkIfHostRespondsLock != null // and reachability check task is running now
-                && checkIfHostRespondsLock.isRunning()
-                ) {
-            // we have network connection but we cant say if host is reachable
-            // since the reachability check task (thread) is running
-            // or no host is given to check
-//            return isNetworkConnectionAvailable;
-        } else {
-            // if network connection available but it wasn't
-            if (isNetworkConnectionAvailable) {
-                if (!TextUtils.isEmpty(sHostToCheck)) {
-                    checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
-                    return isNetworkConnectionAvailable && isHostReachable;
-                }
-            }
+        if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
+//            checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
+            return isHostReachable;
         }
         return isNetworkConnectionAvailable;
     }
@@ -152,12 +140,11 @@ public class NetworkStateHelper {
      * @param lastNetworkID
      */
     static synchronized void handleNetworkState(final boolean wasNetworkAvailable,
-                                   final boolean isNetworkAvailable,
-                                   final NetworkState lastNetworkState,
-                                   final NetworkState newNetworkState,
-                                   final String newNetworkID,
-                                   final String lastNetworkID)
-    {
+                                                final boolean isNetworkAvailable,
+                                                final NetworkState lastNetworkState,
+                                                final NetworkState newNetworkState,
+                                                final String newNetworkID,
+                                                final String lastNetworkID) {
         Log.i("wasNetworkAvailable: " + wasNetworkAvailable
                         + " isNetworkAvailable: " + isNetworkAvailable
                         + " lastNetworkState: " + lastNetworkState
@@ -171,7 +158,10 @@ public class NetworkStateHelper {
         }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i("same state -> ignoring");
-            return;
+            // if host was set and there is connection available but isHostReachable was not checked
+            // yet (null) - we should not return
+            if (TextUtils.isEmpty(sHostToCheck) || isHostReachable != null || !isNetworkConnectionAvailable)
+                return;
         }
         // check if last lastNetworkID is WiFi's one (SSID/BSSID) and is it the same
         // or we switched from one WiFi network to another (networkId is changed)
@@ -179,8 +169,7 @@ public class NetworkStateHelper {
         // and it could be a LAN via WiFi (with no Internet connection available)
         // boolean isWiFiNetworkChanged = !newNetworkID.equals(lastNetworkID);
 
-        //boolean isNetworkAvailable = isNetworkConnectionAvailable & isHostReachable;
-        sLastNetworkState = newNetworkState;
+//        sLastNetworkState = newNetworkState;
         if (isNetworkAvailable && !TextUtils.isEmpty(sHostToCheck)) {
             // first check host then post Event bia EventBus
             checkIfHostResponds(lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
@@ -287,6 +276,9 @@ public class NetworkStateHelper {
         } catch (MalformedURLException e) {
             e.printStackTrace();
 //            isExceptionHappens = true;
+        } catch (SocketTimeoutException e) {
+            e.printStackTrace();
+//            isExceptionHappens = true;
         } catch (IOException e) {
             e.printStackTrace();
 //            isExceptionHappens = true;
@@ -335,26 +327,13 @@ public class NetworkStateHelper {
         return isActiveNetworkConnectionAvailable();
     }
 
-
     public static boolean isActiveNetworkConnectionAvailable() {
-
-        if (sAppContext == null) {
-            throw new NullPointerException("Context is null - did you call init() with valid context?");
-        }
-
-        ConnectivityManager cm = null;
-        try {
-            cm = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (cm == null)
+        if (!setConnectivityManager())
             return false;
 
         NetworkInfo networkInfo = null;
         try {
-            networkInfo = cm.getActiveNetworkInfo();
+            networkInfo = sConnectivityManager.getActiveNetworkInfo();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -378,25 +357,13 @@ public class NetworkStateHelper {
     }
 
     private static boolean isAnyNetworkConnectionAvailable() {
-
-        if (sAppContext == null) {
-            throw new NullPointerException("Context is null - did you call init() with valid context?");
-        }
-
         if (isActiveNetworkConnectionAvailable(sAppContext))
             return true;
 
         boolean isInternetWiFi, isInternetMobile, isInternetWiMax, isInternetOther;
 //        int connectionType = 0;
 
-        ConnectivityManager cm = null;
-        try {
-            cm = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (cm == null)
+        if (!setConnectivityManager())
             return false;
 
         // determine the type of network
@@ -411,10 +378,10 @@ public class NetworkStateHelper {
 //		int TYPE_WIFI			The WIFI data connection.
 //		int TYPE_WIMAX			The WiMAX data connection.
 
-        final NetworkInfo niMobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        final NetworkInfo niWiFi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        final NetworkInfo niWiMax = cm.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
-        final NetworkInfo niOther = ((ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+        final NetworkInfo niMobile = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+        final NetworkInfo niWiFi = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo niWiMax = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
+        final NetworkInfo niOther = sConnectivityManager.getActiveNetworkInfo();
 
 //        if (niOther != null)
 //            connectionType = niOther.getType();
@@ -434,10 +401,29 @@ public class NetworkStateHelper {
      *
      * @return
      */
-    public static boolean isNetworkAvailableViaWiFi(final Context context) {
-        if (sAppContext == null)
-            sAppContext = context.getApplicationContext();
-        return isNetworkAvailableViaWiFi();
+    public static boolean isActiveConnectionViaWiFi() {
+        if (!setConnectivityManager())
+            return false;
+
+        final NetworkInfo niActive = sConnectivityManager.getActiveNetworkInfo();
+        if (niActive == null)
+            return false;
+        final int activeNetworkType = niActive.getType();
+        return activeNetworkType == ConnectivityManager.TYPE_WIFI
+                || activeNetworkType == ConnectivityManager.TYPE_WIMAX;
+    }
+
+    public static boolean isActiveConnectionViaWiFiOrEthernet() {
+        if (!setConnectivityManager())
+            return false;
+
+        final NetworkInfo niActive = sConnectivityManager.getActiveNetworkInfo();
+        if (niActive == null)
+            return false;
+        final int activeNetworkType = niActive.getType();
+        return activeNetworkType == ConnectivityManager.TYPE_WIFI
+                || activeNetworkType == ConnectivityManager.TYPE_WIMAX
+                || activeNetworkType == ConnectivityManager.TYPE_ETHERNET;
     }
 
     public static boolean isNetworkAvailableViaWiFi() {
@@ -446,16 +432,13 @@ public class NetworkStateHelper {
             throw new NullPointerException("Context is null - did you call init() with valid context?");
         }
 
-        boolean isInternetWiFi, isInternetWiMax;
-
-        ConnectivityManager cm = null;
-        try {
-            cm = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (isActiveConnectionViaWiFi()) {
+            return true;
         }
 
-        if (cm == null)
+        boolean isInternetWiFi, isInternetWiMax;
+
+        if (!setConnectivityManager())
             return false;
 
         // determine the type of network
@@ -470,21 +453,30 @@ public class NetworkStateHelper {
 //		int TYPE_WIFI			The WIFI data connection.
 //		int TYPE_WIMAX			The WiMAX data connection.
 
-//        final NetworkInfo niMobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        final NetworkInfo niWiFi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        final NetworkInfo niWiMax = cm.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
-//        final NetworkInfo niOther = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
-
-//        if (niOther != null)
-//            connectionType = niOther.getType();
+        final NetworkInfo niWiFi = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+        final NetworkInfo niWiMax = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
 
         isInternetWiFi = niWiFi != null && niWiFi.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
         isInternetWiMax = niWiMax != null && niWiMax.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-//        isInternetMobile = niMobile != null && niMobile.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-//        isInternetOther = niOther != null && niOther.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
 
         return (isInternetWiFi || isInternetWiMax);
     }
 
+    private static boolean setConnectivityManager(){
+        if (sAppContext == null) {
+            throw new NullPointerException("Context is null - did you call init() with valid context?");
+        }
+
+        if (sConnectivityManager == null) {
+            try {
+                sConnectivityManager = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+            } catch (Exception e) {
+                Log.e("Unable to retrieve ConnectivityManager using getSystemService(Context.CONNECTIVITY_SERVICE)!");
+                e.printStackTrace();
+            }
+        }
+
+        return sConnectivityManager != null;
+    }
 
 }

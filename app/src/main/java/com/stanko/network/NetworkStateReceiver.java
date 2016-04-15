@@ -30,20 +30,20 @@ class NetworkStateReceiver extends BroadcastReceiver {
     private String lastNetworkID;
     private boolean wasNetworkAvailable;
 
-    public NetworkStateReceiver(final Context context) {
+    public NetworkStateReceiver(final Context context, ConnectivityManager connectivityManager) {
         sAppContext = context.getApplicationContext();
-        mConnectivityManager = (ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mConnectivityManager = connectivityManager; //(ConnectivityManager) sAppContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         final NetworkInfo activeNetworkInfo = mConnectivityManager.getActiveNetworkInfo();
         if (activeNetworkInfo != null && activeNetworkInfo.isConnected()) {
             lastNetworkID = getNetworkID(sAppContext, activeNetworkInfo);
             Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " -> checkIfServerResponds()");
             lastNetworkState = NetworkState.NRGotNetwork;
             wasNetworkAvailable = true;
-            handleNetworkState(false, true, lastNetworkState, lastNetworkState, null, lastNetworkID);
+            NetworkStateHelper.handleNetworkState(false, true, lastNetworkState, lastNetworkState, null, lastNetworkID);
         } else {
             lastNetworkState = NetworkState.NRNoNetwork;
             Log.i("NetworkStateReceiver constructor: active/current NetworkID: " + lastNetworkID + " is NOT connected");
-            handleNetworkState(false, false, lastNetworkState, lastNetworkState, null, null);
+            NetworkStateHelper.handleNetworkState(false, false, lastNetworkState, lastNetworkState, null, null);
         }
     }
 
@@ -143,10 +143,10 @@ class NetworkStateReceiver extends BroadcastReceiver {
 //                    isLoggedNetwork = true;
                 }
                 if (lastNetworkID != null && lastNetworkID.equals(newNetworkID)) {
-                    handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+                    NetworkStateHelper.handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                     wasNetworkAvailable = true;
                 } else {
-                    handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+                    NetworkStateHelper.handleNetworkState(wasNetworkAvailable, true, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                     wasNetworkAvailable = true;
                 }
                 break;
@@ -160,7 +160,7 @@ class NetworkStateReceiver extends BroadcastReceiver {
 
             default:
                 Log.i("NetworkStateReceiver.onReceive(): case default: -> handleNetworkState(false)");
-                handleNetworkState(wasNetworkAvailable, false, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+                NetworkStateHelper.handleNetworkState(wasNetworkAvailable, false, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
                 wasNetworkAvailable = false;
         }
 
@@ -196,14 +196,14 @@ class NetworkStateReceiver extends BroadcastReceiver {
         return newNetworkID;
     }
 
-    private void handleNetworkState(final boolean wasNetworkAvailable,
-                                    final boolean isNetworkAvailable,
-                                    final NetworkState lastNetworkState,
-                                    final NetworkState newNetworkState,
-                                    final String lastNetworkID,
-                                    final String newNetworkID)
-    {
-        NetworkStateHelper.handleNetworkState(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
-    }
+//    private void handleNetworkState(final boolean wasNetworkAvailable,
+//                                    final boolean isNetworkAvailable,
+//                                    final NetworkState lastNetworkState,
+//                                    final NetworkState newNetworkState,
+//                                    final String lastNetworkID,
+//                                    final String newNetworkID)
+//    {
+//        NetworkStateHelper.handleNetworkState(wasNetworkAvailable, isNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+//    }
 
 }
