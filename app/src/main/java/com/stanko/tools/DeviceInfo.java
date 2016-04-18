@@ -1,7 +1,6 @@
 package com.stanko.tools;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -64,6 +63,8 @@ public class DeviceInfo {
     public static DisplayMetrics displayMetrics;
 
     public static final int hasAPILevel = Build.VERSION.SDK_INT;
+
+    public static int telephonyType;
 
     /**
      * Obtaining screen width and height.
@@ -286,7 +287,8 @@ public class DeviceInfo {
     }
 
     public static void checkHasTelephony(Context context) {
-        if (!isInitialized) {
+        // isInitialized==true means this method was already executed
+//        if (!isInitialized) {
             TelephonyManager telephonyManager;
             try { // for the firecase
                 telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -294,29 +296,36 @@ public class DeviceInfo {
                 hasTelephony = false;
                 return;
             }
-
-            if (telephonyManager == null || telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_NONE) {
+            telephonyType = telephonyManager == null ? TelephonyManager.PHONE_TYPE_NONE : telephonyManager.getPhoneType();
+            if (telephonyType == TelephonyManager.PHONE_TYPE_NONE) {
                 hasTelephony = false;
                 if (telephonyManager == null)
-                    Log.i("Has NO telephony via telephonyManager == null!");
+                    Log.i("Has NO telephony: TelephonyManager is null");
                 else
-                    Log.i("Has NO telephony via getPhoneType==PHONE_TYPE_NONE");
-                return;
+                    Log.i("Has NO telephony: TelephonyManager.getPhoneType == PHONE_TYPE_NONE");
             } else {
+                hasTelephony = true;
                 //Phone Type
                 // The getPhoneType() returns the device type. This method returns one of the following values:
-//                if (telephonyManager.getPhoneType() != TelephonyManager.PHONE_TYPE_NONE) {
-                hasTelephony = true;
-                Log.i("HAS!!! Telephony!");
-                return;
-//                }
-//				if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM || 
-//						telephonyManager.getPhoneType()TelephonyManager.PHONE_TYPE_CDMA
+                switch (telephonyType){
+                    case TelephonyManager.PHONE_TYPE_GSM:
+                        Log.i("Has GSM Telephony!");
+                        break;
+                    case TelephonyManager.PHONE_TYPE_CDMA:
+                        Log.i("Has CDMA Telephony!");
+                        break;
+                    case TelephonyManager.PHONE_TYPE_SIP:
+                        Log.i("Has SIP Telephony!");
+                        break;
+                    default:
+                        Log.i("Has UNKNOWN TYPE Telephony: "+telephonyType);
+                        break;
+                }
             }
-        }
+//        }
     }
 
-    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    @SuppressLint("NewApi")
     public static Boolean hasCamera() {
         final PackageManager pm = appContext.getPackageManager();
         boolean hasCameraByPM;
