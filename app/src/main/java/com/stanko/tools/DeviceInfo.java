@@ -10,8 +10,6 @@ import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraManager;
 import android.os.Build;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
@@ -315,34 +313,7 @@ public class DeviceInfo {
 //				if (telephonyManager.getPhoneType() == TelephonyManager.PHONE_TYPE_GSM || 
 //						telephonyManager.getPhoneType()TelephonyManager.PHONE_TYPE_CDMA
             }
-
-//            final PackageManager pm = context.getPackageManager();
-//
-//            if (pm != null) {
-//                hasTelephony = pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
-//                Log.i("PackageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY):" + hasTelephony);
-//                //hasCamera = Boolean.valueOf(pm.hasSystemFeature(PackageManager.FEATURE_CAMERA));
-//
-//	            try
-//	            {
-//	                Class[] parameters=new Class[1];
-//	                parameters[0]=String.class;
-//	                method=pm.getClass().getMethod("hasSystemFeature", parameters);
-//	                Object[] parm=new Object[1];
-//	                parm[0]=new String(PackageManager.FEATURE_TELEPHONY);
-//	                Object retValue=method.invoke(pm, parm);
-//	                if(retValue instanceof Boolean)
-//	                    hasTelephony=Boolean.valueOf(((Boolean) retValue).booleanValue());
-//	                else
-//	                    hasTelephony=Boolean.valueOf(false);
-//	            }
-//	            catch(Exception e)
-//	            {
-//	                hasTelephony=Boolean.valueOf(false);
-//	            }
-//            }
         }
-//        return;
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -357,9 +328,9 @@ public class DeviceInfo {
         if (hasCameraByPM) {
             if (hasAPI(21)) {
                 try {
-                    return ((CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE)).getCameraIdList().length > 0;
-                } catch (CameraAccessException e) {
-                    Log.e("", "", e);
+                    return ((android.hardware.camera2.CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE)).getCameraIdList().length > 0;
+                } catch (android.hardware.camera2.CameraAccessException e) {
+                    e.printStackTrace();
                 }
             }
             return Camera.getNumberOfCameras() > 0;
