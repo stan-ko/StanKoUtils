@@ -96,7 +96,7 @@ public class DeviceInfo {
      * @return boolean  true if initialized successfully
      */
     @SuppressLint("NewApi")
-    public static synchronized boolean init(final Context context) {
+    public static boolean init(final Context context) {
 
         if (isInitialized)
             return true;
