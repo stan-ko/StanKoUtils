@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.Camera;
@@ -16,6 +17,8 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.Display;
+import android.view.KeyCharacterMap;
+import android.view.KeyEvent;
 import android.view.WindowManager;
 
 import com.stanko.R;
@@ -66,6 +69,11 @@ public class DeviceInfo {
 
     public static int telephonyType;
 
+    public static boolean hasPermanentMenuKeys;
+    public static boolean hasNavigationBar;
+    public static int navigationBarHeight;
+    public static int statusBarHeight;
+
     /**
      * Obtaining screen width and height.
      * Determining the type of the device e.g. hdpi,mdpi,ldpi
@@ -92,6 +100,7 @@ public class DeviceInfo {
         return Math.max(displayHeight, displayWidth);
     }
 
+
     /**
      * @return boolean  true if initialized successfully
      */
@@ -111,6 +120,8 @@ public class DeviceInfo {
         displayWidth = displayMetrics.widthPixels;
         displayPortraitHeight = getBiggestScreenSideSize();
         displayPortraitWidth = getSmallestScreenSideSize();
+
+        final Resources resources = appContext.getResources();
 
         final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
@@ -134,6 +145,38 @@ public class DeviceInfo {
             } catch (Exception ignored) {
             }
         }
+
+        hasPermanentMenuKeys = displayHeight == realDisplayHeight;
+
+        // http://stackoverflow.com/a/28983720/1811719
+        final boolean hasBackKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_BACK);
+        final boolean hasHomeKey = KeyCharacterMap.deviceHasKey(KeyEvent.KEYCODE_HOME);
+        hasNavigationBar = !(hasBackKey && hasHomeKey);
+        if (hasNavigationBar) {
+            //The device has a navigation bar
+            final int orientation = resources.getConfiguration().orientation;
+            int resourceId;
+            if (isTablet()) {
+                resourceId = resources.getIdentifier(orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_height_landscape", "dimen", "android");
+            } else {
+                resourceId = resources.getIdentifier(orientation == Configuration.ORIENTATION_PORTRAIT ? "navigation_bar_height" : "navigation_bar_width", "dimen", "android");
+            }
+            if (resourceId > 0) {
+                navigationBarHeight = resources.getDimensionPixelSize(resourceId);
+            }
+        }
+        // Status Bar Height
+        int resourceId = resources.getIdentifier("status_bar_height", "dimen", "android");
+        if (resourceId > 0) {
+            statusBarHeight = resources.getDimensionPixelSize(resourceId);
+        } else {
+            statusBarHeight = (int) Math.ceil(24 * displayMetrics.density);
+        }
+//        else {
+//            final Rect rect = new Rect();
+//            appContext.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+//            statusBarHeight = rect.top;
+//        }
 
         deviceModel = android.os.Build.MODEL.toLowerCase(Locale.US);
         deviceManufacturer = android.os.Build.MANUFACTURER.toLowerCase(Locale.US);
@@ -212,14 +255,26 @@ public class DeviceInfo {
     }
 
     public static int getStatusBarHeight(final Activity activity) {
-        Rect rect = new Rect();
+        final Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
         return rect.top;
     }
 
+    public static int getStatusBarHeight(final Context context) {
+        if (!isInitialized)
+            init(context);
+        return statusBarHeight;
+    }
+
+    public static int getNavigationBarHeight(final Context context) {
+        if (!isInitialized)
+            init(context);
+        return navigationBarHeight;
+    }
+
     public static boolean isTablet() {
-        Log.i("this device DeviceInfo.screenSize: " + DeviceInfo.screenSize + " " + DeviceInfo.displayDensity);
-        Log.i("this device screenInchesByMetrics: " + DeviceInfo.screenInchesByMetrics + " screenInchesByConfig: " + DeviceInfo.screenInchesByConfig);
+        Log.i("this device DeviceInfo.screenSize: " + DeviceInfo.screenSize + " " + DeviceInfo.displayDensity+"\n"+
+              "screenInchesByMetrics: " + DeviceInfo.screenInchesByMetrics + " screenInchesByConfig: " + DeviceInfo.screenInchesByConfig);
         final boolean isTabletByResources = appContext.getResources().getBoolean(R.bool.isTablet);
         //final boolean isTabletByTelephony = !DeviceInfo.hasTelephony();
         final boolean isTabletByScreen = DeviceInfo.screenSize > 2 && DeviceInfo.screenInchesByMetrics > 7f;
@@ -289,39 +344,39 @@ public class DeviceInfo {
     public static void checkHasTelephony(Context context) {
         // isInitialized==true means this method was already executed
 //        if (!isInitialized) {
-            TelephonyManager telephonyManager;
-            try { // for the firecase
-                telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
-            } catch (Throwable e) {
-                hasTelephony = false;
-                return;
+        TelephonyManager telephonyManager;
+        try { // for the firecase
+            telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+        } catch (Throwable e) {
+            hasTelephony = false;
+            return;
+        }
+        telephonyType = telephonyManager == null ? TelephonyManager.PHONE_TYPE_NONE : telephonyManager.getPhoneType();
+        if (telephonyType == TelephonyManager.PHONE_TYPE_NONE) {
+            hasTelephony = false;
+            if (telephonyManager == null)
+                Log.i("Has NO telephony: TelephonyManager is null");
+            else
+                Log.i("Has NO telephony: TelephonyManager.getPhoneType == PHONE_TYPE_NONE");
+        } else {
+            hasTelephony = true;
+            //Phone Type
+            // The getPhoneType() returns the device type. This method returns one of the following values:
+            switch (telephonyType) {
+                case TelephonyManager.PHONE_TYPE_GSM:
+                    Log.i("Has GSM Telephony!");
+                    break;
+                case TelephonyManager.PHONE_TYPE_CDMA:
+                    Log.i("Has CDMA Telephony!");
+                    break;
+                case TelephonyManager.PHONE_TYPE_SIP:
+                    Log.i("Has SIP Telephony!");
+                    break;
+                default:
+                    Log.i("Has UNKNOWN TYPE Telephony: " + telephonyType);
+                    break;
             }
-            telephonyType = telephonyManager == null ? TelephonyManager.PHONE_TYPE_NONE : telephonyManager.getPhoneType();
-            if (telephonyType == TelephonyManager.PHONE_TYPE_NONE) {
-                hasTelephony = false;
-                if (telephonyManager == null)
-                    Log.i("Has NO telephony: TelephonyManager is null");
-                else
-                    Log.i("Has NO telephony: TelephonyManager.getPhoneType == PHONE_TYPE_NONE");
-            } else {
-                hasTelephony = true;
-                //Phone Type
-                // The getPhoneType() returns the device type. This method returns one of the following values:
-                switch (telephonyType){
-                    case TelephonyManager.PHONE_TYPE_GSM:
-                        Log.i("Has GSM Telephony!");
-                        break;
-                    case TelephonyManager.PHONE_TYPE_CDMA:
-                        Log.i("Has CDMA Telephony!");
-                        break;
-                    case TelephonyManager.PHONE_TYPE_SIP:
-                        Log.i("Has SIP Telephony!");
-                        break;
-                    default:
-                        Log.i("Has UNKNOWN TYPE Telephony: "+telephonyType);
-                        break;
-                }
-            }
+        }
 //        }
     }
 

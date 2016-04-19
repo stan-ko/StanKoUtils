@@ -10,6 +10,7 @@ import android.os.StatFs;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.text.TextUtils;
+import android.util.Base64;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -670,6 +671,7 @@ public class FileUtils {
     /**
      * Method deletes all files and subdirectories recursively from given directory.
      * Returns true if all files deleted false if at least one doesn't
+     *
      * @param file - File which represents a directory where to delete all files and dirs
      */
     public static boolean deleteFilesAndDirsRecursive(final String file) {
@@ -683,6 +685,7 @@ public class FileUtils {
     /**
      * Method deletes all files and subdirectories recursively from given directory.
      * Returns true if all files deleted false if at least one doesn't
+     *
      * @param directory - File which represents a directory where to delete all files and dirs
      */
     public static boolean deleteFilesAndDirsRecursive(final File directory) {
@@ -710,6 +713,7 @@ public class FileUtils {
     /**
      * Method deletes all files only (but NOT subdirectories) from given directory.
      * Returns true if all files deleted false if at least one doesn't
+     *
      * @param targetDir - File with represents a Directory where to delete all files
      */
     public static boolean deleteFiles(final File targetDir) {
@@ -1061,6 +1065,36 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * Returns a Base64.DEFAULT encoded String representation of given file
+     * Aware of OOM: large files will probably cause it.
+     *
+     * @param fileToEncode
+     * @return
+     */
+    public static String getBase64EncodedFile(final File fileToEncode) {
+        if (!isReadable(fileToEncode)) {
+            new Exception("File: " + fileToEncode + " is not readable!").printStackTrace();
+            return null;
+        }
+        String dataString = null;
+        try {
+            // Reading a Image file from file system
+            final FileInputStream imageInFile = new FileInputStream(fileToEncode);
+            byte imageData[] = new byte[(int) fileToEncode.length()];
+            imageInFile.read(imageData);
+            // Converting Image byte array into Base64 String
+            dataString = Base64.encodeToString(imageData, Base64.DEFAULT);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError e) {
+            e.printStackTrace();
+        }
+        return dataString;
     }
 
     /**

@@ -26,6 +26,7 @@ import android.os.Build;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
+import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -42,13 +43,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * class used to store/restore of images 
+ * class used to store/restore of images
+ *
  * @author Stan Koshutsky
- * depends on class DeviceInfo   
+ *         depends on class DeviceInfo
  */
 public class ImageUtils {
 
-    private static final String TAG="ImageUtils";
+    private static final String TAG = "ImageUtils";
 
     public static BitmapInfo getBitmapInfoFromFile(final File bitmapFile) {
         if (!FileUtils.isReadable(bitmapFile))
@@ -65,27 +67,29 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(bitmapFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             if (fileDescriptor != null)
                 BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
             else
                 BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
 
-            bitmapInfo = new BitmapInfo (bmfOtions.outWidth,bmfOtions.outHeight);
+            bitmapInfo = new BitmapInfo(bmfOtions.outWidth, bmfOtions.outHeight);
         } catch (FileNotFoundException e) {
             Log.e("ImageUtils", e);
         } finally {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
         return bitmapInfo;
     }
 
     public static BitmapInfo getBitmapInfoFromStream(final InputStream inputStream) {
-        if (inputStream==null)
+        if (inputStream == null)
             return null;
 
         BitmapInfo bitmapInfo = null;
@@ -97,7 +101,7 @@ public class ImageUtils {
         try {
             // decode image size
             BitmapFactory.decodeStream(inputStream, null, bmfOtions);
-            bitmapInfo = new BitmapInfo (bmfOtions.outWidth,bmfOtions.outHeight);
+            bitmapInfo = new BitmapInfo(bmfOtions.outWidth, bmfOtions.outHeight);
         } catch (Exception e) {
             Log.e(TAG, e.toString());
         }
@@ -105,14 +109,14 @@ public class ImageUtils {
     }
 
     public static BitmapInfo getBitmapInfoFromUri(final Uri uri, final Context context) {
-        if (context==null || uri==null)
+        if (context == null || uri == null)
             return null;
         ContentResolver contentResolver = context.getContentResolver();
         return getBitmapInfoFromUri(uri, contentResolver);
     }
 
     public static BitmapInfo getBitmapInfoFromUri(final Uri uri, final ContentResolver contentResolver) {
-        if (uri==null)
+        if (uri == null)
             return null;
         InputStream inputStream = null;
         BitmapInfo bitmapInfo = null;
@@ -125,27 +129,28 @@ public class ImageUtils {
             if (inputStream != null)
                 try {
                     inputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
         return bitmapInfo;
     }
 
     public static BitmapInfo getBitmapInfoFromResources(final Context context, final int mBitmapResId) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
         return getBitmapInfoFromUri(uri, context);
     }
 
     public static BitmapInfo getBitmapInfoFromResources(final Resources resources, final ContentResolver contentResolver, final int mBitmapResId) {
-        if (resources==null)
+        if (resources == null)
             return null;
         Uri uri = getUriOfBitmapFromResources(resources, mBitmapResId);
         return getBitmapInfoFromUri(uri, contentResolver);
     }
 
     public static BitmapInfo getBitmapInfoFromResId(final int mBitmapResId, final Context context) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
         return getBitmapInfoFromUri(uri, context);
@@ -159,7 +164,7 @@ public class ImageUtils {
         public final boolean hasLandscapeOrientation;
         public final boolean hasSquareForm;
 
-        public BitmapInfo(final float width, final float height){
+        public BitmapInfo(final float width, final float height) {
             this.height = height;
             this.width = width;
             hasPortraitOrientation = height > width;
@@ -167,7 +172,7 @@ public class ImageUtils {
             hasSquareForm = width == height;
         }
 
-        public BitmapInfo(final Bitmap bitmap){
+        public BitmapInfo(final Bitmap bitmap) {
             this.height = bitmap.getHeight();
             this.width = bitmap.getWidth();
             hasPortraitOrientation = height > width;
@@ -175,44 +180,46 @@ public class ImageUtils {
             hasSquareForm = width == height;
         }
 
-        public float getHeightByWidth(final float newWidth){
+        public float getHeightByWidth(final float newWidth) {
             return (newWidth * height / width);
         }
 
-        public float getWidthByHeight(final float newHeight){
+        public float getWidthByHeight(final float newHeight) {
             return (newHeight * width / height);
         }
 
         @Override
         public String toString() {
-            return "height: "+height+" width: "+width+" hasLandscapeOrientation: "+hasLandscapeOrientation+" hasPortraitOrientation: "+hasPortraitOrientation+" "+" hasSquareForm: "+hasSquareForm;
+            return "height: " + height + " width: " + width + " hasLandscapeOrientation: " + hasLandscapeOrientation + " hasPortraitOrientation: " + hasPortraitOrientation + " " + " hasSquareForm: " + hasSquareForm;
         }
     }
 
 
     //decodes image and scales it to reduce memory consumption
-    public static Bitmap getBitmapFromFile(final String bitmapFile){
-        if (bitmapFile==null || bitmapFile.length()==0)
+    public static Bitmap getBitmapFromFile(final String bitmapFile) {
+        if (bitmapFile == null || bitmapFile.length() == 0)
             return null;
         return getBitmapFromFile(new File(bitmapFile), 0);
     }
 
-    public static Bitmap getBitmapFromFile(final File bitmapFile){
+    public static Bitmap getBitmapFromFile(final File bitmapFile) {
         return getBitmapFromFile(bitmapFile, 0);
     }
 
-    public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit){
+    public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit) {
         return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
     }
-    public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit, final boolean isOptimistic){
-        if (bitmapFile==null || bitmapFile.length()==0)
+
+    public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit, final boolean isOptimistic) {
+        if (bitmapFile == null || bitmapFile.length() == 0)
             return null;
-        return getBitmapFromFile(new File(bitmapFile),sideSizeLimit, isOptimistic);
+        return getBitmapFromFile(new File(bitmapFile), sideSizeLimit, isOptimistic);
     }
 
     public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit) {
         return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
     }
+
     public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit, final boolean isOptimistic) {
         if (!FileUtils.isReadable(bitmapFile))
             return null;
@@ -239,7 +246,8 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(bitmapFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             if (fileDescriptor != null)
                 BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
@@ -251,7 +259,8 @@ public class ImageUtils {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
 
             // Find the correct scale value. It should be the power of 2.
             // final int REQUIRED_SIZE=70;
@@ -262,7 +271,7 @@ public class ImageUtils {
                 height_tmp /= 2;
                 scale++;
             }
-            if (isOptimistic && scale>1)
+            if (isOptimistic && scale > 1)
                 scale--;
             bmfOtions.inSampleSize = scale;
             bmfOtions.inJustDecodeBounds = false;
@@ -272,7 +281,8 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(bitmapFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             if (fileDescriptor != null)
                 return BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
@@ -284,19 +294,20 @@ public class ImageUtils {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
         return null;
     }
 
 
-    public static boolean rotateBitmapByExifAndSave(final String targetFilePath){
-        if (targetFilePath==null || targetFilePath.length()==0)
+    public static boolean rotateBitmapByExifAndSave(final String targetFilePath) {
+        if (targetFilePath == null || targetFilePath.length() == 0)
             return false;
         return rotateBitmapByExifAndSave(new File(targetFilePath));
     }
 
-    public static boolean rotateBitmapByExifAndSave(final File targetFile){
+    public static boolean rotateBitmapByExifAndSave(final File targetFile) {
 
         if (!FileUtils.isWritable(targetFile))
             return false;
@@ -331,7 +342,7 @@ public class ImageUtils {
                     break;
             }
 
-            if (isRotationNeeded){
+            if (isRotationNeeded) {
                 BitmapFactory.Options bmfOtions = new BitmapFactory.Options();
                 bmfOtions.inPurgeable = true;
                 Bitmap bitmap = null;
@@ -341,23 +352,24 @@ public class ImageUtils {
                     fileInputStream = new FileInputStream(targetFile);
                     try {
                         fileDescriptor = fileInputStream.getFD();
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
 
                     if (fileDescriptor != null)
                         bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
                     else
                         bitmap = BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
 
-                } catch (FileNotFoundException e){
+                } catch (FileNotFoundException e) {
                     isSucceed = false;
-                }
-                finally {
+                } finally {
                     if (fileInputStream != null)
                         try {
                             fileInputStream.close();
-                        } catch (IOException e) {}
+                        } catch (IOException e) {
+                        }
                 }
-                if (bitmap!=null){
+                if (bitmap != null) {
                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
                     isSucceed = ImageUtils.saveBitmapToJPEGFile(bitmap, targetFile, 99);
                     bitmap.recycle();
@@ -381,13 +393,13 @@ public class ImageUtils {
         return isSucceed;
     }
 
-    public static Bitmap getRotatedBitmapByExif(final String targetFilePath){
-        if (targetFilePath==null || targetFilePath.length()==0)
+    public static Bitmap getRotatedBitmapByExif(final String targetFilePath) {
+        if (targetFilePath == null || targetFilePath.length() == 0)
             return null;
         return getRotatedBitmapByExif(new File(targetFilePath));
     }
 
-    public static Bitmap getRotatedBitmapByExif(final File targetFile){
+    public static Bitmap getRotatedBitmapByExif(final File targetFile) {
 
         if (!FileUtils.isWritable(targetFile))
             return null;
@@ -426,48 +438,51 @@ public class ImageUtils {
             BitmapFactory.Options bmfOtions = new BitmapFactory.Options();
             bmfOtions.inPurgeable = true;
 
-            if (isRotationNeeded){
+            if (isRotationNeeded) {
                 FileInputStream fileInputStream = null;
                 FileDescriptor fileDescriptor = null;
                 try {
                     fileInputStream = new FileInputStream(targetFile);
                     try {
                         fileDescriptor = fileInputStream.getFD();
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
 
                     if (fileDescriptor != null)
                         bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
                     else
                         bitmap = BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
-                } catch (FileNotFoundException e){}
-                finally {
+                } catch (FileNotFoundException e) {
+                } finally {
                     if (fileInputStream != null)
                         try {
                             fileInputStream.close();
-                        } catch (IOException e) {}
+                        } catch (IOException e) {
+                        }
                 }
-                if (bitmap!=null)
+                if (bitmap != null)
                     bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
-            }
-            else {
+            } else {
                 FileInputStream fileInputStream = null;
                 FileDescriptor fileDescriptor = null;
                 try {
                     fileInputStream = new FileInputStream(targetFile);
                     try {
                         fileDescriptor = fileInputStream.getFD();
-                    } catch (IOException ignored) {}
+                    } catch (IOException ignored) {
+                    }
 
                     if (fileDescriptor != null)
-                        bitmap =  BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
+                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
                     else
                         bitmap = BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
-                } catch (FileNotFoundException e){}
-                finally {
+                } catch (FileNotFoundException e) {
+                } finally {
                     if (fileInputStream != null)
                         try {
                             fileInputStream.close();
-                        } catch (IOException e) {}
+                        } catch (IOException e) {
+                        }
                 }
             }
 
@@ -507,25 +522,25 @@ public class ImageUtils {
     public static Bitmap getScaledBitmap(final Bitmap bitmap, final int maxSideSize, final boolean doKeepAspectRatioWhileStrech) {
 
         // default image
-        if (bitmap == null || maxSideSize==0)
+        if (bitmap == null || maxSideSize == 0)
             return null;
 
         final int maxSideSize4Icon = maxSideSize;
         final int width = bitmap.getWidth();
         final int height = bitmap.getHeight();
-        if (width<=maxSideSize4Icon && height<=maxSideSize4Icon)
+        if (width <= maxSideSize4Icon && height <= maxSideSize4Icon)
             return bitmap;
 
-        if (doKeepAspectRatioWhileStrech){
-            final float aspectRatio = (float)maxSideSize4Icon / (float)((height>width) ? height : width);
-            final int scaleHeight = (int)(height*aspectRatio);
-            final int scaleWidth = (int)(width*aspectRatio);
+        if (doKeepAspectRatioWhileStrech) {
+            final float aspectRatio = (float) maxSideSize4Icon / (float) ((height > width) ? height : width);
+            final int scaleHeight = (int) (height * aspectRatio);
+            final int scaleWidth = (int) (width * aspectRatio);
             final Bitmap resizedIcon = Bitmap.createBitmap(maxSideSize4Icon, maxSideSize4Icon, Config.ARGB_8888);
             resizedIcon.eraseColor(Color.TRANSPARENT);
-            final int deltaW = (maxSideSize4Icon-scaleWidth)/2;
-            final int deltaH = (maxSideSize4Icon-scaleHeight)/2;
+            final int deltaW = (maxSideSize4Icon - scaleWidth) / 2;
+            final int deltaH = (maxSideSize4Icon - scaleHeight) / 2;
 
-            final RectF outRect = new RectF(deltaW, deltaH, scaleWidth+deltaW, scaleHeight+deltaH);
+            final RectF outRect = new RectF(deltaW, deltaH, scaleWidth + deltaW, scaleHeight + deltaH);
             final Canvas canvas = new Canvas(resizedIcon);
             canvas.drawBitmap(bitmap, null, outRect, null);
             return resizedIcon;
@@ -540,11 +555,11 @@ public class ImageUtils {
 
             Matrix matrix = new Matrix();
             float scale = isLandscapeImage ? ((float) maxSideSize) / height : ((float) maxSideSize) / width;
-            matrix.postScale(scale,scale);
+            matrix.postScale(scale, scale);
             if (isLandscapeImage)
-                return Bitmap.createBitmap(bitmap, width/2 - height/2, 0, height, height, matrix, true);
+                return Bitmap.createBitmap(bitmap, width / 2 - height / 2, 0, height, height, matrix, true);
             else
-                return Bitmap.createBitmap(bitmap, 0, height/2 - width/2, width, width, matrix, true);
+                return Bitmap.createBitmap(bitmap, 0, height / 2 - width / 2, width, width, matrix, true);
         }
     }
 
@@ -556,10 +571,10 @@ public class ImageUtils {
      * @param targetJpegQuality
      * @return
      */
-    public static Bitmap getReducedQualityJpegFromBitmap(Bitmap bitmap, int targetJpegQuality){
-        if (bitmap==null || targetJpegQuality==0)
+    public static Bitmap getReducedQualityJpegFromBitmap(Bitmap bitmap, int targetJpegQuality) {
+        if (bitmap == null || targetJpegQuality == 0)
             return bitmap;
-        if (targetJpegQuality>100 || targetJpegQuality<0)
+        if (targetJpegQuality > 100 || targetJpegQuality < 0)
             targetJpegQuality = 100;
 
         // Convert bitmap to byte array
@@ -629,29 +644,29 @@ public class ImageUtils {
     /**
      * Returns given @Bitmap resized the to given size.
      *
-     * @param bitmap : Bitmap to resize.
+     * @param bitmap    : Bitmap to resize.
      * @param newHeight : Height to resize.
-     * @param newWidth : Width to resize.
+     * @param newWidth  : Width to resize.
      * @return Resized Bitmap.
      */
     public static Bitmap getResizedBitmap(final Bitmap bitmap, int newHeight, int newWidth) {
 
-        if (bitmap == null || newHeight<0 ||  newWidth<0 || newHeight+newWidth==0)
+        if (bitmap == null || newHeight < 0 || newWidth < 0 || newHeight + newWidth == 0)
             return null;
 
         Bitmap resizedBitmap = null;
         final int height = bitmap.getHeight();
         final int width = bitmap.getWidth();
 
-        if (newHeight==0)
-            newHeight = (int)((float)newWidth * (float)height / (float)width);
+        if (newHeight == 0)
+            newHeight = (int) ((float) newWidth * (float) height / (float) width);
 
-        if (newWidth==0)
-            newWidth = (int)((float)newHeight * (float)width / (float)height);
+        if (newWidth == 0)
+            newWidth = (int) ((float) newHeight * (float) width / (float) height);
 
         float scaleHeight = ((float) newHeight) / height;
         float scaleWidth = ((float) newWidth) / width;
-        Log.d("ImageUtils", "width: "+width+" height: "+height+" newWidth: "+newWidth+" newHeight: "+newHeight+" scaleWidth: "+scaleWidth+" scaleHeight: "+scaleHeight);
+        Log.d("ImageUtils", "width: " + width + " height: " + height + " newWidth: " + newWidth + " newHeight: " + newHeight + " scaleWidth: " + scaleWidth + " scaleHeight: " + scaleHeight);
 
         // create a matrix for the manipulation
         final Matrix matrix = new Matrix();
@@ -686,12 +701,13 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getResizedBitmapFromResources(final Context context, final int bitmapResId, final int newHeight, final int newWidth) {
-        if (context==null || bitmapResId==0)
+        if (context == null || bitmapResId == 0)
             return null;
         return getResizedBitmapFromResources(context, bitmapResId, newHeight, newWidth, false);
     }
+
     public static Bitmap getResizedBitmapFromResources(final Context context, final int bitmapResId, final int newHeight, final int newWidth, final boolean isOptimistic) {
-        if (context==null || bitmapResId==0)
+        if (context == null || bitmapResId == 0)
             return null;
         Resources resources = context.getResources();
         ContentResolver contentResolver = context.getContentResolver();
@@ -709,19 +725,20 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getResizedBitmapFromResources(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, final int newHeight, final int newWidth) {
-        if (resources==null)
+        if (resources == null)
             return null;
         return getResizedBitmapFromResources(resources, contentResolver, bitmapResId, newHeight, newWidth, false);
     }
+
     public static Bitmap getResizedBitmapFromResources(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, final int newHeight, final int newWidth, final boolean isOptimistic) {
-        if (resources==null || contentResolver==null)
+        if (resources == null || contentResolver == null)
             return null;
 
         Bitmap bitmap = null;
 
-        if (newHeight>0 && newWidth>0)
+        if (newHeight > 0 && newWidth > 0)
             bitmap = getBitmapFromResources(resources, contentResolver, bitmapResId, Math.max(newHeight, newWidth), isOptimistic);
-        else if (newWidth>0)
+        else if (newWidth > 0)
             bitmap = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, newWidth, isOptimistic);
         else
             bitmap = getBitmapFromResources(resources, contentResolver, bitmapResId, newHeight, isOptimistic);
@@ -737,28 +754,28 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapFromRawResources(final Context context, final int mBitmapResId) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         Bitmap bitmap = null;
         InputStream inputStream = null;
         try {
             inputStream = context.getResources().openRawResource(mBitmapResId);
             bitmap = BitmapFactory.decodeStream(inputStream);
-        }
-        catch(Resources.NotFoundException  e){
+        } catch (Resources.NotFoundException e) {
             e.printStackTrace();
         } finally {
-            if (inputStream!=null)
+            if (inputStream != null)
                 try {
                     inputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return bitmap;
     }
 
     public static Uri getUriOfBitmapFromResources(final Context context, final int mBitmapResId) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         Resources resources = context.getResources();
         return getUriOfBitmapFromResources(resources, mBitmapResId);
@@ -766,72 +783,74 @@ public class ImageUtils {
     }
 
     public static Uri getUriOfBitmapFromResources(final Resources resources, final int mBitmapResId) {
-        if (resources==null || mBitmapResId==0)
+        if (resources == null || mBitmapResId == 0)
             return null;
         Uri uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" +
                 resources.getResourcePackageName(mBitmapResId) + '/' +
                 resources.getResourceTypeName(mBitmapResId) + '/' +
-                resources.getResourceEntryName(mBitmapResId) );
+                resources.getResourceEntryName(mBitmapResId));
         return uri;
 
     }
 
     public static Bitmap getBitmapFromResources(final Context context, final int mBitmapResId, final int sideSizeLimit) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         return getBitmapFromResources(context, mBitmapResId, sideSizeLimit, false);
     }
-    public static Bitmap getBitmapFromResources (final Context context, final int mBitmapResId, final int sideSizeLimit, final boolean isOptimistic) {
-        if (context==null || mBitmapResId==0)
+
+    public static Bitmap getBitmapFromResources(final Context context, final int mBitmapResId, final int sideSizeLimit, final boolean isOptimistic) {
+        if (context == null || mBitmapResId == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(context, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
         return getBitmapByUriFromResources(context, uri, sideSizeLimit, isOptimistic);
     }
 
     public static Bitmap getBitmapFromResources(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int sideSizeLimit) {
-        if (resources==null)
+        if (resources == null)
             return null;
         return getBitmapFromResources(resources, resolver, mBitmapResId, sideSizeLimit, false);
     }
+
     public static Bitmap getBitmapFromResources(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int sideSizeLimit, final boolean isOptimistic) {
-        if (resources==null || resolver==null || mBitmapResId==0)
+        if (resources == null || resolver == null || mBitmapResId == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(resources, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(resources, mBitmapResId);
         return getBitmapByUriFromResources(resolver, uri, sideSizeLimit, isOptimistic);
     }
 
     public static Bitmap getBitmapByUriFromResources(final Context context, final Uri uri, final int sideSizeLimit) {
-        if (context==null || uri==null)
+        if (context == null || uri == null)
             return null;
         return getBitmapByUriFromResources(context, uri, sideSizeLimit, false);
     }
+
     public static Bitmap getBitmapByUriFromResources(final Context context, final Uri uri, final int sideSizeLimit, final boolean isOptimistic) {
-        if (context==null || uri==null)
+        if (context == null || uri == null)
             return null;
         ContentResolver resolver = context.getContentResolver();
         return getBitmapByUriFromResources(resolver, uri, sideSizeLimit, isOptimistic);
     }
 
     public static Bitmap getBitmapByUriFromResources(final ContentResolver resolver, final Uri uri, final int sideSizeLimit) {
-        return getBitmapByUriFromResources( resolver, uri, sideSizeLimit, false);
+        return getBitmapByUriFromResources(resolver, uri, sideSizeLimit, false);
     }
+
     public static Bitmap getBitmapByUriFromResources(final ContentResolver resolver, final Uri uri, final int sideSizeLimit, final boolean isOptimistic) {
-        if (resolver==null || uri == null)
+        if (resolver == null || uri == null)
             return null;
 
         Bitmap bitmap = null;
         InputStream inputStream = null;
 
         int maxWidth = 0, maxHeight = 0;
-        if (sideSizeLimit>0){
+        if (sideSizeLimit > 0) {
             maxWidth = sideSizeLimit;
             maxHeight = sideSizeLimit;
-        }
-        else if (DeviceInfo.displayWidth>0 && DeviceInfo.displayHeight>0){
+        } else if (DeviceInfo.displayWidth > 0 && DeviceInfo.displayHeight > 0) {
             maxWidth = DeviceInfo.displayWidth;
             maxHeight = DeviceInfo.displayHeight;
-        }
-        else{
+        } else {
             maxWidth = DeviceInfo.getDeviceMaxSideSizeByDensity();
             maxHeight = maxWidth;
         }
@@ -854,7 +873,7 @@ public class ImageUtils {
                 scale++;
             }
 
-            if (isOptimistic && scale>1)
+            if (isOptimistic && scale > 1)
                 scale--;
 
             bmfOtions.inSampleSize = scale;
@@ -871,7 +890,8 @@ public class ImageUtils {
             if (inputStream != null)
                 try {
                     inputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return bitmap;
@@ -879,10 +899,11 @@ public class ImageUtils {
 
 
     public static Bitmap getBitmapFromFileWithMaxHeight(final String bitmapFile, final int maxHeight) {
-        return  getBitmapFromFileWithMaxHeight(bitmapFile, maxHeight, false);
+        return getBitmapFromFileWithMaxHeight(bitmapFile, maxHeight, false);
     }
-    public static Bitmap getBitmapFromFileWithMaxHeight(final String bitmapFile, final int maxHeight,final  boolean isOptimistic) {
-        if (bitmapFile==null || bitmapFile.length()==0)
+
+    public static Bitmap getBitmapFromFileWithMaxHeight(final String bitmapFile, final int maxHeight, final boolean isOptimistic) {
+        if (bitmapFile == null || bitmapFile.length() == 0)
             return null;
         return getBitmapFromFileWithMaxSideSize(new File(bitmapFile), maxHeight, true, isOptimistic);
     }
@@ -890,8 +911,9 @@ public class ImageUtils {
     public static Bitmap getBitmapFromFileWithMaxWidth(final String bitmapFile, final int maxWidth) {
         return getBitmapFromFileWithMaxWidth(bitmapFile, maxWidth, false);
     }
+
     public static Bitmap getBitmapFromFileWithMaxWidth(final String bitmapFile, final int maxWidth, final boolean isOptimistic) {
-        if (bitmapFile==null || bitmapFile.length()==0)
+        if (bitmapFile == null || bitmapFile.length() == 0)
             return null;
         return getBitmapFromFileWithMaxSideSize(new File(bitmapFile), maxWidth, false, isOptimistic);
     }
@@ -899,8 +921,9 @@ public class ImageUtils {
     public static Bitmap getBitmapFromFileWithMaxHeight(final File bitmapFile, final int maxHeight) {
         return getBitmapFromFileWithMaxHeight(bitmapFile, maxHeight, false);
     }
+
     public static Bitmap getBitmapFromFileWithMaxHeight(final File bitmapFile, final int maxHeight, final boolean isOptimistic) {
-        if (bitmapFile==null || maxHeight==0)
+        if (bitmapFile == null || maxHeight == 0)
             return null;
         return getBitmapFromFileWithMaxSideSize(bitmapFile, maxHeight, true, isOptimistic);
     }
@@ -908,12 +931,13 @@ public class ImageUtils {
     public static Bitmap getBitmapFromFileWithMaxWidth(final File bitmapFile, final int maxWidth) {
         return getBitmapFromFileWithMaxWidth(bitmapFile, maxWidth, false, false);
     }
+
     public static Bitmap getBitmapFromFileWithMaxWidth(final File bitmapFile, final int maxWidth, final boolean isOptimistic) {
         return getBitmapFromFileWithMaxWidth(bitmapFile, maxWidth, false, isOptimistic);
     }
 
     public static Bitmap getBitmapFromFileWithMaxWidth(final File bitmapFile, final int maxWidth, final boolean isByHeight, final boolean isOptimistic) {
-        if (bitmapFile==null || maxWidth==0)
+        if (bitmapFile == null || maxWidth == 0)
             return null;
         return getBitmapFromFileWithMaxSideSize(bitmapFile, maxWidth, false, isOptimistic);
     }
@@ -922,6 +946,7 @@ public class ImageUtils {
     public static Bitmap getBitmapFromFileWithMaxSideSize(final File bitmapFile, final int maxSideSize, final boolean isByHeight) {
         return getBitmapFromFileWithMaxSideSize(bitmapFile, maxSideSize, isByHeight, false);
     }
+
     public static Bitmap getBitmapFromFileWithMaxSideSize(final File bitmapFile, final int maxSideSize, final boolean isByHeight, final boolean isOptimistic) {
         if (!FileUtils.isReadable(bitmapFile))
             return null;
@@ -932,7 +957,8 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(bitmapFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
             if (fileDescriptor != null)
                 bitmap = getBitmapFromStreamWithMaxSideSize(fileDescriptor, maxSideSize, isByHeight, isOptimistic);
             else
@@ -943,7 +969,8 @@ public class ImageUtils {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return bitmap;
@@ -952,19 +979,22 @@ public class ImageUtils {
     public static Bitmap getResizedBitmapFromFile(final String bitmapFile, final int newHeight, final int newWidth) {
         return getResizedBitmapFromFile(new File(bitmapFile), newHeight, newWidth, true);
     }
+
     public static Bitmap getResizedBitmapFromFile(final File bitmapFile, final int newHeight, final int newWidth) {
         return getResizedBitmapFromFile(bitmapFile, newHeight, newWidth, true);
     }
+
     public static Bitmap getResizedBitmapFromFile(final String bitmapFile, final int newHeight, final int newWidth, final boolean isOptimistic) {
         return getResizedBitmapFromFile(new File(bitmapFile), newHeight, newWidth, isOptimistic);
     }
+
     public static Bitmap getResizedBitmapFromFile(final File bitmapFile, final int newHeight, int newWidth, final boolean isOptimistic) {
         if (!FileUtils.isReadable(bitmapFile))
             return null;
 
         int maxSideSize;
         boolean isByHeight;
-        if (newHeight>newHeight){
+        if (newHeight > newHeight) {
             maxSideSize = newHeight;
             isByHeight = true;
         } else {
@@ -979,7 +1009,8 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(bitmapFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
             if (fileDescriptor != null)
                 bitmap = getBitmapFromStreamWithMaxSideSize(fileDescriptor, maxSideSize, isByHeight, isOptimistic);
             else
@@ -990,11 +1021,12 @@ public class ImageUtils {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
-        if (newHeight==0 || newWidth==0){
+        if (newHeight == 0 || newWidth == 0) {
             final BitmapInfo bitmapInfo = new BitmapInfo(bitmap);
-            if (newHeight==0)
+            if (newHeight == 0)
                 newWidth = (int) bitmapInfo.getWidthByHeight(newHeight);
             else
                 newWidth = (int) bitmapInfo.getHeightByWidth(newWidth);
@@ -1004,60 +1036,65 @@ public class ImageUtils {
     }
 
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Context context, final int mBitmapResId, final int maxHeight) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         return getBitmapFromResourcesWithMaxHeight(context, mBitmapResId, maxHeight, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Context context, final int mBitmapResId, final int maxHeight, final boolean isOptimistic) {
-        if (context==null || mBitmapResId==0 || maxHeight==0)
+        if (context == null || mBitmapResId == 0 || maxHeight == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(context, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
         return getBitmapFromResourcesWithMaxSideSize(context, uri, maxHeight, true, isOptimistic);
     }
 
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int maxHeight) {
-        if (resources==null)
+        if (resources == null)
             return null;
         return getBitmapFromResourcesWithMaxHeight(resources, resolver, mBitmapResId, maxHeight, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int maxHeight, final boolean isOptimistic) {
-        if (resolver==null || resources==null || mBitmapResId==0 || maxHeight==0)
+        if (resolver == null || resources == null || mBitmapResId == 0 || maxHeight == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(resources, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(resources, mBitmapResId);
         return getBitmapFromResourcesWithMaxSideSize(resolver, uri, maxHeight, true, isOptimistic);
     }
 
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Context context, final int mBitmapResId, final int maxWidth) {
-        if (context==null || mBitmapResId==0)
+        if (context == null || mBitmapResId == 0)
             return null;
         return getBitmapFromResourcesWithMaxWidth(context, mBitmapResId, maxWidth, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Context context, final int mBitmapResId, final int maxWidth, final boolean isOptimistic) {
-        if (context==null || mBitmapResId==0 || maxWidth==0)
+        if (context == null || mBitmapResId == 0 || maxWidth == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(context, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
         return getBitmapFromResourcesWithMaxSideSize(context, uri, maxWidth, false, isOptimistic);
     }
 
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int maxWidth) {
-        if (resources==null)
+        if (resources == null)
             return null;
         return getBitmapFromResourcesWithMaxWidth(resources, resolver, mBitmapResId, maxWidth, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Resources resources, final ContentResolver resolver, final int mBitmapResId, final int maxWidth, final boolean isOptimistic) {
-        if (resolver==null || resolver==null || mBitmapResId==0 || maxWidth==0)
+        if (resolver == null || resolver == null || mBitmapResId == 0 || maxWidth == 0)
             return null;
-        Uri uri =  getUriOfBitmapFromResources(resources, mBitmapResId);
+        Uri uri = getUriOfBitmapFromResources(resources, mBitmapResId);
         return getBitmapFromResourcesWithMaxSideSize(resolver, uri, maxWidth, false, isOptimistic);
     }
 
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(final Context context, final Uri uri, final int maxSideSize, final boolean isByHeight) {
-        if (context==null || uri==null)
+        if (context == null || uri == null)
             return null;
         return getBitmapFromResourcesWithMaxSideSize(context, uri, maxSideSize, isByHeight, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(final Context context, final Uri uri, final int maxSideSize, final boolean isByHeight, final boolean isOptimistic) {
-        if (context==null || uri==null)
+        if (context == null || uri == null)
             return null;
         ContentResolver resolver = context.getContentResolver();
         return getBitmapFromResourcesWithMaxSideSize(resolver, uri, maxSideSize, isByHeight, isOptimistic);
@@ -1066,6 +1103,7 @@ public class ImageUtils {
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(final ContentResolver resolver, final Uri uri, final int maxSideSize, final boolean isByHeight) {
         return getBitmapFromResourcesWithMaxSideSize(resolver, uri, maxSideSize, isByHeight, false);
     }
+
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(ContentResolver resolver, Uri uri, int maxSideSize, boolean isByHeight, boolean isOptimistic) {
 
         Bitmap bitmap = null;
@@ -1082,14 +1120,15 @@ public class ImageUtils {
             if (inputStream != null)
                 try {
                     inputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return bitmap;
     }
 
     public static Bitmap getBitmapFromStreamWithMaxSideSize(final InputStream inputStream, final float maxSideSize, final boolean isByHeight, final boolean isOptimistic) {
-        if (maxSideSize==0)
+        if (maxSideSize == 0)
             return null;
 
         // decode image size
@@ -1103,12 +1142,12 @@ public class ImageUtils {
         int height_tmp = bmfOtions.outHeight;
         int scale = 1;
         if (isByHeight)
-            while (height_tmp > maxSideSize && (!isOptimistic || height_tmp/maxSideSize>1.5f) ) {
+            while (height_tmp > maxSideSize && (!isOptimistic || height_tmp / maxSideSize > 1.5f)) {
                 height_tmp >>= 1;
                 scale++;
             }
         else
-            while (width_tmp > maxSideSize && (!isOptimistic || width_tmp/maxSideSize>1.5f) ) {
+            while (width_tmp > maxSideSize && (!isOptimistic || width_tmp / maxSideSize > 1.5f)) {
                 width_tmp >>= 1;
                 scale++;
             }
@@ -1118,13 +1157,13 @@ public class ImageUtils {
 
         // decode with inSampleSize
         // BitmapFactory.Options o2 = new BitmapFactory.Options();
-        Log.i(TAG, "getBitmapFromStreamWithMaxSideSize() bmfOtions.inSampleSize: "+scale);
+        Log.i(TAG, "getBitmapFromStreamWithMaxSideSize() bmfOtions.inSampleSize: " + scale);
         final Bitmap bitmap = BitmapFactory.decodeStream(inputStream, null, bmfOtions);
         return bitmap;
     }
 
     public static Bitmap getBitmapFromStreamWithMaxSideSize(final FileDescriptor fileDescriptor, final float maxSideSize, final boolean isByHeight, final boolean isOptimistic) {
-        if (maxSideSize==0)
+        if (maxSideSize == 0)
             return null;
 
         // decode image size
@@ -1138,12 +1177,12 @@ public class ImageUtils {
         int height_tmp = bmfOtions.outHeight;
         int scale = 1;
         if (isByHeight)
-            while (height_tmp > maxSideSize && (!isOptimistic || height_tmp/maxSideSize>1.5f) ) {
+            while (height_tmp > maxSideSize && (!isOptimistic || height_tmp / maxSideSize > 1.5f)) {
                 height_tmp >>= 1;
                 scale++;
             }
         else
-            while (width_tmp > maxSideSize && (!isOptimistic || width_tmp/maxSideSize>1.5f) ) {
+            while (width_tmp > maxSideSize && (!isOptimistic || width_tmp / maxSideSize > 1.5f)) {
                 width_tmp >>= 1;
                 scale++;
             }
@@ -1153,30 +1192,30 @@ public class ImageUtils {
 
         // decode with inSampleSize
         // BitmapFactory.Options o2 = new BitmapFactory.Options();
-        Log.i(TAG, "getBitmapFromStreamWithMaxSideSize() bmfOtions.inSampleSize: "+scale);
+        Log.i(TAG, "getBitmapFromStreamWithMaxSideSize() bmfOtions.inSampleSize: " + scale);
         final Bitmap bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
         return bitmap;
     }
 
     public static Bitmap getBitmapFromResources(final Context context, final int resId) {
-        if (context==null || resId==0)
+        if (context == null || resId == 0)
             return null;
 
         return getBitmapFromResources(context.getResources(), resId);
     }
 
     public static Bitmap getBitmapFromResources(final Resources resources, final int imageResId) {
-        if (resources==null || imageResId==0)
+        if (resources == null || imageResId == 0)
             return null;
 
         return BitmapFactory.decodeResource(resources, imageResId);
     }
 
     public static Drawable getDrawableFromBitmap(final Bitmap bitmap, final Context context) {
-        if (bitmap==null || context==null)
+        if (bitmap == null || context == null)
             return null;
 
-        Drawable drawable = new BitmapDrawable(context.getResources(),bitmap);
+        Drawable drawable = new BitmapDrawable(context.getResources(), bitmap);
 
         return drawable;
     }
@@ -1188,8 +1227,8 @@ public class ImageUtils {
      * @param imageView
      * @return
      */
-    public static Bitmap getBitmapFromImageView(final ImageView imageView){
-        if (imageView==null)
+    public static Bitmap getBitmapFromImageView(final ImageView imageView) {
+        if (imageView == null)
             return null;
         return getBitmapFromDrawable(imageView.getDrawable());
     }
@@ -1200,12 +1239,12 @@ public class ImageUtils {
      * @param drawable @Drawable resource of image
      * @return @Bitmap whose resource id was passed to method.
      */
-    public static Bitmap getBitmapFromDrawable(final Drawable drawable){
-        if (drawable==null)
+    public static Bitmap getBitmapFromDrawable(final Drawable drawable) {
+        if (drawable == null)
             return null;
 
         if (drawable instanceof BitmapDrawable) {
-            return ((BitmapDrawable)drawable).getBitmap();
+            return ((BitmapDrawable) drawable).getBitmap();
         }
 
         final Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Config.ARGB_8888);
@@ -1217,30 +1256,30 @@ public class ImageUtils {
     }
 
     public static Bitmap getBitmapByAddImages(final Context context, final Bitmap mBitmap1, final int mBitmap2ResId) {
-        if (context==null || mBitmap1==null)
+        if (context == null || mBitmap1 == null)
             return null;
         final Bitmap mBitmap2 = getBitmapFromResources(context, mBitmap2ResId);
-        final Bitmap result = getBitmapByAddImages(context,mBitmap1,mBitmap2);
+        final Bitmap result = getBitmapByAddImages(context, mBitmap1, mBitmap2);
         //mBitmap2.recycle();
         return result;
     }
 
     public static Bitmap getBitmapByAddImages(final Context context, final int mBitmap1ResId, final Bitmap mBitmap2) {
-        if (context==null || mBitmap2==null)
+        if (context == null || mBitmap2 == null)
             return null;
         final Bitmap mBitmap1 = getBitmapFromResources(context, mBitmap1ResId);
-        final Bitmap result = getBitmapByAddImages(context,mBitmap1,mBitmap2);
+        final Bitmap result = getBitmapByAddImages(context, mBitmap1, mBitmap2);
         //mBitmap1.recycle();
         return result;
     }
 
     public static Bitmap getBitmapByMergeImagesToTheRight(final Context context, final Bitmap mLeftBitmap, final Bitmap mRightBitmap) {
-        if (context==null || mLeftBitmap ==  null && mRightBitmap == null)
+        if (context == null || mLeftBitmap == null && mRightBitmap == null)
             return null;
         if (mRightBitmap == null)
             return mLeftBitmap;
-        if (mLeftBitmap ==  null)
-            return  mRightBitmap;
+        if (mLeftBitmap == null)
+            return mRightBitmap;
 
         int m_width = 0, m_height = 0;
         if (mLeftBitmap.getWidth() > mRightBitmap.getWidth()) {
@@ -1259,12 +1298,12 @@ public class ImageUtils {
     }
 
     public static Bitmap getBitmapByAddImages(final Context context, Bitmap mBitmap1, final Bitmap mBitmap2) {
-        if (context==null || mBitmap1 == null && mBitmap2 == null)
+        if (context == null || mBitmap1 == null && mBitmap2 == null)
             return null;
         if (mBitmap2 == null)
             return mBitmap1;
-        if (mBitmap1 ==  null)
-            return  mBitmap2;
+        if (mBitmap1 == null)
+            return mBitmap2;
 
 
 //		if (srcBmp.getWidth() > srcBmp.getHeight()){
@@ -1303,15 +1342,15 @@ public class ImageUtils {
         return m_combinedImages;
     }
 
-    public static Bitmap makePreviewAndSave(File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize){
+    public static Bitmap makePreviewAndSave(File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize) {
         return makePreviewAndSave(fullsizedImageFile, previewImageFile, maxAllowedSideSize, 90);
     }
 
-    public static Bitmap makePreviewAndSave(File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize, int maxAllowedQuality){
+    public static Bitmap makePreviewAndSave(File fullsizedImageFile, File previewImageFile, int maxAllowedSideSize, int maxAllowedQuality) {
         if (!FileUtils.isReadable(fullsizedImageFile)
                 || fullsizedImageFile.length() == 0 || previewImageFile == null
                 || previewImageFile.exists() && !previewImageFile.canWrite()
-                || maxAllowedSideSize==0)
+                || maxAllowedSideSize == 0)
             return null;
 
 //		if (previewImageFile.exists() && !previewImageFile.delete())
@@ -1328,15 +1367,15 @@ public class ImageUtils {
         return bitmap;
     }
 
-    public static Bitmap getPreviewBitmapFromFile(File fullsizedImageFile, int maxAllowedSideSize){
+    public static Bitmap getPreviewBitmapFromFile(File fullsizedImageFile, int maxAllowedSideSize) {
         return getPreviewBitmapFromFile(fullsizedImageFile, maxAllowedSideSize, false, false, false);
     }
 
-    public static Bitmap getPreviewBitmapFromFile(File fullsizedImageFile, int maxAllowedSideSize, boolean doLessScale, boolean doStretch, boolean doKeepAspectRatioWhileStrech){
+    public static Bitmap getPreviewBitmapFromFile(File fullsizedImageFile, int maxAllowedSideSize, boolean doLessScale, boolean doStretch, boolean doKeepAspectRatioWhileStrech) {
 
         if (!FileUtils.isReadable(fullsizedImageFile)
                 || fullsizedImageFile.length() == 0
-                || maxAllowedSideSize==0 && (DeviceInfo.displayWidth==0 || DeviceInfo.displayHeight==0))
+                || maxAllowedSideSize == 0 && (DeviceInfo.displayWidth == 0 || DeviceInfo.displayHeight == 0))
             return null;
 
         // надо ли даунсайзнуть имагу?
@@ -1350,7 +1389,8 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(fullsizedImageFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             if (fileDescriptor != null)
                 BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
@@ -1363,17 +1403,18 @@ public class ImageUtils {
             if (fileInputStream != null)
                 try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
-        if (maxAllowedSideSize==0){
-            int maxDeviceWidth = DeviceInfo.displayWidth/4;
-            int maxDeviceHeight = DeviceInfo.displayHeight/4;
+        if (maxAllowedSideSize == 0) {
+            int maxDeviceWidth = DeviceInfo.displayWidth / 4;
+            int maxDeviceHeight = DeviceInfo.displayHeight / 4;
             maxAllowedSideSize = maxDeviceWidth < maxDeviceHeight ? maxDeviceWidth : maxDeviceHeight;
         }
 
         //Find the correct scale value. It should be the power of 2.
-        int width_tmp=bmfOtions.outWidth, height_tmp=bmfOtions.outHeight, scale=1;
+        int width_tmp = bmfOtions.outWidth, height_tmp = bmfOtions.outHeight, scale = 1;
         while (width_tmp > maxAllowedSideSize || height_tmp > maxAllowedSideSize) {
             width_tmp /= 2;
             height_tmp /= 2;
@@ -1386,12 +1427,13 @@ public class ImageUtils {
         Bitmap bitmap = null;
 
         // nothing to do if scale==1 and no quality reduce needed
-        if (scale == 1){
+        if (scale == 1) {
             try {
                 fileInputStream = new FileInputStream(fullsizedImageFile);
                 try {
                     fileDescriptor = fileInputStream.getFD();
-                } catch (IOException ignored) {}
+                } catch (IOException ignored) {
+                }
 
                 if (fileDescriptor != null)
                     bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
@@ -1404,13 +1446,14 @@ public class ImageUtils {
                 if (fileInputStream != null)
                     try {
                         fileInputStream.close();
-                    } catch (IOException e) {}
+                    } catch (IOException e) {
+                    }
             }
             return bitmap; // возвращаем пезультат - конец метода!!!
         }
 
         //увеличиваем scale-фактор, если по одной из сторон более чем в 2 раза меньше размер 
-        if (doLessScale && (width_tmp*2< maxAllowedSideSize || height_tmp*2 < maxAllowedSideSize) )
+        if (doLessScale && (width_tmp * 2 < maxAllowedSideSize || height_tmp * 2 < maxAllowedSideSize))
             scale--;
 
         // down scaling the image
@@ -1422,15 +1465,15 @@ public class ImageUtils {
             fileInputStream = new FileInputStream(fullsizedImageFile);
             try {
                 fileDescriptor = fileInputStream.getFD();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
 
             if (doStretch) {
                 if (fileDescriptor != null)
                     bitmap = getScaledBitmap(BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions), maxAllowedSideSize, doKeepAspectRatioWhileStrech);
                 else
                     bitmap = getScaledBitmap(BitmapFactory.decodeStream(fileInputStream, null, bmfOtions), maxAllowedSideSize, doKeepAspectRatioWhileStrech);
-            }
-            else {
+            } else {
                 if (fileDescriptor != null)
                     bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
                 else
@@ -1439,26 +1482,27 @@ public class ImageUtils {
 
         } catch (FileNotFoundException e) {
             Log.e("ImageUtils", e);
-        } finally{
-            if (fileInputStream!=null)
-                try{
+        } finally {
+            if (fileInputStream != null)
+                try {
                     fileInputStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
         }
 
         return bitmap;
     }
 
 
-    public static boolean saveBitmapToJPEGFile(final Bitmap bitmap, final File imageFile, int maxAllowedQuality){
+    public static boolean saveBitmapToJPEGFile(final Bitmap bitmap, final File imageFile, int maxAllowedQuality) {
 
-        if (bitmap==null || imageFile == null || imageFile.exists() && !imageFile.canWrite())
+        if (bitmap == null || imageFile == null || imageFile.exists() && !imageFile.canWrite())
             return false;
 
         if (imageFile.exists() && !imageFile.delete())
             return false;
 
-        if (maxAllowedQuality>100 || maxAllowedQuality<0)
+        if (maxAllowedQuality > 100 || maxAllowedQuality < 0)
             maxAllowedQuality = 100;
 
         boolean isSucceed = false;
@@ -1467,7 +1511,7 @@ public class ImageUtils {
         // Convert bitmap to byte array
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
-        if (maxAllowedQuality==0)
+        if (maxAllowedQuality == 0)
             bitmap.compress(CompressFormat.JPEG, 100, bos);
         else
             bitmap.compress(CompressFormat.JPEG, maxAllowedQuality, bos);
@@ -1478,14 +1522,15 @@ public class ImageUtils {
         if (bos != null)
             try {
                 bos.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
 
         return isSucceed;
     }
 
 
-    public static boolean saveBitmapToPNGFile(final Bitmap bitmap, final File imageFile){
-        if (bitmap==null || imageFile == null || imageFile.exists() && !imageFile.canWrite())
+    public static boolean saveBitmapToPNGFile(final Bitmap bitmap, final File imageFile) {
+        if (bitmap == null || imageFile == null || imageFile.exists() && !imageFile.canWrite())
             return false;
 
         if (imageFile.exists() && !imageFile.delete())
@@ -1505,7 +1550,8 @@ public class ImageUtils {
         if (bos != null)
             try {
                 bos.close();
-            } catch (IOException e) {}
+            } catch (IOException e) {
+            }
 
         return isSucceed;
     }
@@ -1518,14 +1564,14 @@ public class ImageUtils {
      * @param context
      */
     public static void deleteLastTakenPhotoDupe(final Context context) {
-        if (context==null)
+        if (context == null)
             return;
-        String[] projection = new String[] {
+        String[] projection = new String[]{
                 BaseColumns._ID,
                 MediaColumns.DATA,
                 MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME,
                 MediaStore.Images.ImageColumns.DATE_TAKEN,
-                MediaColumns.MIME_TYPE };
+                MediaColumns.MIME_TYPE};
 
         Cursor cursor = null;
         try {
@@ -1541,20 +1587,20 @@ public class ImageUtils {
                 cr.delete(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, BaseColumns._ID + "=" + cursor.getString(0), null);
 
             }
-        } catch (Exception e) {}
-        finally{
+        } catch (Exception e) {
+        } finally {
             if (cursor != null)
                 cursor.close();
         }
     }
 
 
-    public static Bitmap getBluredBitmap(final Resources res, final int imageId, final int radius){
+    public static Bitmap getBluredBitmap(final Resources res, final int imageId, final int radius) {
         Bitmap sentBitmap = BitmapFactory.decodeResource(res, imageId);
         return getBluredBitmap(res, sentBitmap, radius);
     }
 
-    public static Bitmap getBluredBitmap(final Resources res, final Bitmap sentBitmap, final int radius){
+    public static Bitmap getBluredBitmap(final Resources res, final Bitmap sentBitmap, final int radius) {
 
         final Bitmap bitmap = sentBitmap.copy(sentBitmap.getConfig(), true);
 
@@ -1707,7 +1753,7 @@ public class ImageUtils {
             stackpointer = radius;
             for (y = 0; y < h; y++) {
                 // Preserve alpha channel: ( 0xff000000 & pix[yi] )
-                pix[yi] = ( 0xff000000 & pix[yi] ) | ( dv[rsum] << 16 ) | ( dv[gsum] << 8 ) | dv[bsum];
+                pix[yi] = (0xff000000 & pix[yi]) | (dv[rsum] << 16) | (dv[gsum] << 8) | dv[bsum];
 
                 rsum -= routsum;
                 gsum -= goutsum;
@@ -1758,7 +1804,8 @@ public class ImageUtils {
     }
 
 
-    /** Creates snapshot handler that captures the root of the whole activity.
+    /**
+     * Creates snapshot handler that captures the root of the whole activity.
      *
      * @param activity
      * @return @Bitmap
@@ -1768,7 +1815,8 @@ public class ImageUtils {
         return getScreenShotOfView(view);
     }
 
-    /** Creates snapshot handler that captures the view with target id of the activity
+    /**
+     * Creates snapshot handler that captures the view with target id of the activity
      *
      * @param activity
      * @param id
@@ -1778,13 +1826,14 @@ public class ImageUtils {
         return getScreenShotOfView(activity.findViewById(id));
     }
 
-    /** Takes a snapshot of the view.
+    /**
+     * Takes a snapshot of the view.
      *
      * @param view
      * @return @Bitmap
      */
     public static Bitmap getScreenShotOfView(final View view) {
-        if (view==null)
+        if (view == null)
             return null;
         Bitmap bitmap = Bitmap.createBitmap(view.getWidth(), view.getHeight(), Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -1793,7 +1842,7 @@ public class ImageUtils {
     }
 
     public static Bitmap getScreenShotOfView(final View view, final int width, final int height) {
-        if (view==null)
+        if (view == null)
             return null;
         Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -1802,8 +1851,8 @@ public class ImageUtils {
     }
 
 
-    public static Bitmap getBitmapByCropFromCenterWithScaling(final File bitmapFile, int cropToHeight, int cropToWidth){
-        if (bitmapFile==null || !FileUtils.isReadable(bitmapFile) || cropToHeight==0 || cropToWidth == 0)
+    public static Bitmap getBitmapByCropFromCenterWithScaling(final File bitmapFile, int cropToHeight, int cropToWidth) {
+        if (bitmapFile == null || !FileUtils.isReadable(bitmapFile) || cropToHeight == 0 || cropToWidth == 0)
             return null;
 
         final BitmapInfo bitmapInfo = ImageUtils.getBitmapInfoFromFile(bitmapFile);
@@ -1813,430 +1862,413 @@ public class ImageUtils {
 //		while (bitmapInfo.width<cropToWidth || bitmapInfo.height<cropToHeight)
 //			bitmapInfo = new BitmapInfo(bitmapInfo.width*2, bitmapInfo.height*2);
 
-        float bitmapWHProportions = (float)bitmapInfo.width / (float)bitmapInfo.height;
-        float bitmapHWProportions = (float)bitmapInfo.height/ (float)bitmapInfo.width;
-        float cropWHProportions = (float)cropToWidth / (float)cropToHeight;
+        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
+        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
         Bitmap bitmapToCrop = null;
         // crop Portrait from Portrait
-        if ( (bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight>cropToWidth){
+        if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth>cropToHeight ){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth > cropToHeight) {
             // 800x480 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Portrait
-        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight<cropToWidth){
+        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight < cropToWidth) {
             // 480x800 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
             // scale by width
-            if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            } else if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
             Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-            if (bitmapToScale==null)
+            if (bitmapToScale == null)
                 return null;
-            bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
+            bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
         }
         // crop Portrait from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth<cropToHeight /*&& bitmapInfo.height>cropToHeight*/){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth < cropToHeight /*&& bitmapInfo.height>cropToHeight*/) {
             // scale by height
-            if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            } else if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
             Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-            if (bitmapToScale==null)
+            if (bitmapToScale == null)
                 return null;
-            bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
-        }
-        else{
+            bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
+        } else {
             if (bitmapInfo.hasLandscapeOrientation)
-                bitmapToCrop = getBitmapFromFileWithMaxWidth(bitmapFile, (int)bitmapInfo.width);
+                bitmapToCrop = getBitmapFromFileWithMaxWidth(bitmapFile, (int) bitmapInfo.width);
             else
-                bitmapToCrop = getBitmapFromFileWithMaxHeight(bitmapFile, (int)bitmapInfo.height);
+                bitmapToCrop = getBitmapFromFileWithMaxHeight(bitmapFile, (int) bitmapInfo.height);
         }
 
-        Log.d("ImageUtils", "original bitmap H: "+bitmapInfo.height+" W: "+bitmapInfo.width);
-        Log.d("ImageUtils", "cropToHeight: "+cropToHeight+" cropToWidth: "+cropToWidth);
-        Log.d("ImageUtils", "bitmapToCrop h: "+bitmapToCrop.getHeight()+" w: "+bitmapToCrop.getWidth());
+        Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
+        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
-        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getWidth() >= cropToWidth){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
+        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, 0,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getHeight() >= cropToHeight){
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     0, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else
+        } else
             return bitmapToCrop;
     }
 
-    public static Bitmap getBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth){
-        if (context==null || bitmapResId==0)
+    public static Bitmap getBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth) {
+        if (context == null || bitmapResId == 0)
             return null;
         ContentResolver contentResolver = context.getContentResolver();
         Resources resources = context.getResources();
         return getBitmapByCropFromCenterWithScaling(resources, contentResolver, bitmapResId, cropToHeight, cropToWidth);
     }
 
-    public static Bitmap getBitmapByCropFromCenterWithScaling(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, int cropToHeight, int cropToWidth){
-        if (resources==null || contentResolver==null || bitmapResId==0 || cropToHeight==0 && cropToWidth == 0){
-            Log.d("ImageUtils","getBitmapByCropFromCenterWithScaling() fucked off by params");
+    public static Bitmap getBitmapByCropFromCenterWithScaling(final Resources resources, final ContentResolver contentResolver, final int bitmapResId, int cropToHeight, int cropToWidth) {
+        if (resources == null || contentResolver == null || bitmapResId == 0 || cropToHeight == 0 && cropToWidth == 0) {
+            Log.d("ImageUtils", "getBitmapByCropFromCenterWithScaling() fucked off by params");
             return null;
         }
 
         final BitmapInfo bitmapInfo = ImageUtils.getBitmapInfoFromResources(resources, contentResolver, bitmapResId);
-        if (bitmapInfo == null){
-            Log.d("ImageUtils","getBitmapByCropFromCenterWithScaling() fucked off by bitmapInfo == null");
+        if (bitmapInfo == null) {
+            Log.d("ImageUtils", "getBitmapByCropFromCenterWithScaling() fucked off by bitmapInfo == null");
             return null;
         }
 
-        float bitmapWHProportions = (float)bitmapInfo.width / (float)bitmapInfo.height;
-        float bitmapHWProportions = (float)bitmapInfo.height/ (float)bitmapInfo.width;
-        float cropWHProportions = (float)cropToWidth / (float)cropToHeight;
+        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
+        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
         Bitmap bitmapToCrop = null;
         // crop Portrait from Portrait
-        if ( (bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight>cropToWidth){
+        if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, cropToWidth);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxHeight(resources, contentResolver, bitmapResId, cropToHeight);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth>cropToHeight ){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth > cropToHeight) {
             // 800x480 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, cropToWidth);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
                 final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxHeight(resources, contentResolver, bitmapResId, cropToHeight);
-                if (bitmapToScale==null)
+                if (bitmapToScale == null)
                     return null;
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Portrait
-        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight<cropToWidth && bitmapInfo.width>cropToWidth){
+        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight < cropToWidth && bitmapInfo.width > cropToWidth) {
             // 480x800 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
             // scale by width
-            if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            } else if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
             final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, cropToWidth);
-            if (bitmapToScale==null)
+            if (bitmapToScale == null)
                 return null;
-            bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
+            bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
         }
         // crop Portrait from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth<cropToHeight /*&& bitmapInfo.height>cropToHeight*/){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth < cropToHeight /*&& bitmapInfo.height>cropToHeight*/) {
             // scale by height
-            if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            } else if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
             final Bitmap bitmapToScale = getBitmapFromResourcesWithMaxHeight(resources, contentResolver, bitmapResId, cropToHeight);
-            if (bitmapToScale==null)
+            if (bitmapToScale == null)
                 return null;
-            bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
-        }
-        else{
+            bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
+        } else {
             if (bitmapInfo.hasLandscapeOrientation)
-                bitmapToCrop = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, (int)bitmapInfo.width);
+                bitmapToCrop = getBitmapFromResourcesWithMaxWidth(resources, contentResolver, bitmapResId, (int) bitmapInfo.width);
             else
-                bitmapToCrop = getBitmapFromResourcesWithMaxHeight(resources, contentResolver, bitmapResId, (int)bitmapInfo.height);
+                bitmapToCrop = getBitmapFromResourcesWithMaxHeight(resources, contentResolver, bitmapResId, (int) bitmapInfo.height);
         }
 
 
-        Log.d("ImageUtils", "original bitmap H: "+bitmapInfo.height+" W: "+bitmapInfo.width);
-        Log.d("ImageUtils", "cropToHeight: "+cropToHeight+" cropToWidth: "+cropToWidth);
-        Log.d("ImageUtils", "bitmapToCrop h: "+bitmapToCrop.getHeight()+" w: "+bitmapToCrop.getWidth());
+        Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
+        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
 
-        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getWidth() >= cropToWidth){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
+        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, 0,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getHeight() >= cropToHeight){
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     0, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else
+        } else
             return bitmapToCrop;
     }
 
 
-    public static Bitmap getBitmapByCropFromCenterWithScaling(final Bitmap bitmapToScale, int cropToHeight, int cropToWidth){
-        if (bitmapToScale==null || cropToHeight==0 || cropToWidth == 0)
+    public static Bitmap getBitmapByCropFromCenterWithScaling(final Bitmap bitmapToScale, int cropToHeight, int cropToWidth) {
+        if (bitmapToScale == null || cropToHeight == 0 || cropToWidth == 0)
             return null;
 
-        Log.d("ImageUtils", "using Bitmap. original cropToHeight: "+cropToHeight+" cropToWidth: "+cropToWidth);
+        Log.d("ImageUtils", "using Bitmap. original cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
 
         BitmapInfo bitmapInfo = new BitmapInfo(bitmapToScale.getWidth(), bitmapToScale.getHeight());
 
-        float bitmapWHProportions = (float)bitmapInfo.width / (float)bitmapInfo.height;
-        float bitmapHWProportions = (float)bitmapInfo.height/ (float)bitmapInfo.width;
-        float cropWHProportions = (float)cropToWidth / (float)cropToHeight;
+        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
+        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
         Bitmap bitmapToCrop = null;
         // crop Portrait from Portrait
-        if ( (bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight>cropToWidth){
+        if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
 
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth>cropToHeight ){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth > cropToHeight) {
             // 800x480 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
-            if (bitmapWHProportions<=cropWHProportions){
+            if (bitmapWHProportions <= cropWHProportions) {
                 // scale by width
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-                if (cropToWidth>bitmapInfo.width){
-                    float downSample = bitmapInfo.width/cropToWidth;
+                if (cropToWidth > bitmapInfo.width) {
+                    float downSample = bitmapInfo.width / cropToWidth;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
-                bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
-            }
-            else {
+                bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
+            } else {
                 // scale by height
                 //Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-                if (cropToHeight>bitmapInfo.height){
-                    float downSample = bitmapInfo.height/cropToHeight;
+                if (cropToHeight > bitmapInfo.height) {
+                    float downSample = bitmapInfo.height / cropToHeight;
                     cropToWidth *= downSample;
                     cropToHeight *= downSample;
                 }
-                bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
+                bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
             }
         }
         // crop Landscape from Portrait
-        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight<cropToWidth /*&& bitmapInfo.width>cropToWidth*/){
+        else if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight < cropToWidth /*&& bitmapInfo.width>cropToWidth*/) {
             // 480x800 -> 400x300, 1.66 -> 1.33, result is higher than original bitmap
             // scale by width
             //Bitmap bitmapToScale = getBitmapFromFileWithMaxWidth(bitmapFile, cropToWidth);
-            if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            } else if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
-            bitmapToCrop = getResizedBitmap(bitmapToScale, (int)(cropToWidth*bitmapHWProportions),  cropToWidth);
+            bitmapToCrop = getResizedBitmap(bitmapToScale, (int) (cropToWidth * bitmapHWProportions), cropToWidth);
         }
         // crop Portrait from Landscape
-        else if ( (bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth<cropToHeight /*&& bitmapInfo.height>cropToHeight*/){
+        else if ((bitmapInfo.hasLandscapeOrientation || bitmapInfo.hasSquareForm) && cropToWidth < cropToHeight /*&& bitmapInfo.height>cropToHeight*/) {
             // scale by height
             //Bitmap bitmapToScale = getBitmapFromFileWithMaxHeight(bitmapFile, cropToHeight);
-            if (cropToHeight>bitmapInfo.height){
-                float downSample = bitmapInfo.height/cropToHeight;
+            if (cropToHeight > bitmapInfo.height) {
+                float downSample = bitmapInfo.height / cropToHeight;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
-            } else if (cropToWidth>bitmapInfo.width){
-                float downSample = bitmapInfo.width/cropToWidth;
+            } else if (cropToWidth > bitmapInfo.width) {
+                float downSample = bitmapInfo.width / cropToWidth;
                 cropToWidth *= downSample;
                 cropToHeight *= downSample;
             }
-            bitmapToCrop = getResizedBitmap(bitmapToScale,  cropToHeight, (int)(cropToHeight*bitmapWHProportions));
-        }
-        else {
+            bitmapToCrop = getResizedBitmap(bitmapToScale, cropToHeight, (int) (cropToHeight * bitmapWHProportions));
+        } else {
             bitmapToCrop = bitmapToScale;
         }
 
-        Log.d("ImageUtils", "original bitmap H: "+bitmapInfo.height+" W: "+bitmapInfo.width);
-        Log.d("ImageUtils", "cropToHeight: "+cropToHeight+" cropToWidth: "+cropToWidth);
-        Log.d("ImageUtils", "bitmapToCrop h: "+bitmapToCrop.getHeight()+" w: "+bitmapToCrop.getWidth());
+        Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
+        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
-        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getWidth() >= cropToWidth){
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth)/2;
+        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, 0,
                     cropToWidth, cropToHeight);
-        }
-        else if (bitmapToCrop.getHeight() >= cropToHeight){
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight)/2;
+        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     0, deltaY,
                     cropToWidth, cropToHeight);
-        }
-        else
+        } else
             return bitmapToCrop;
 
     }
 
     @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
-    public static void setBackground(final View view, final Bitmap bitmap){
-        if (view==null || bitmap==null)
+    public static void setBackground(final View view, final Bitmap bitmap) {
+        if (view == null || bitmap == null)
             return;
         if (DeviceInfo.hasAPI16())
-            view.setBackground(ImageUtils.getDrawableFromBitmap(bitmap,view.getContext()));
+            view.setBackground(ImageUtils.getDrawableFromBitmap(bitmap, view.getContext()));
         else
             view.setBackgroundDrawable(ImageUtils.getDrawableFromBitmap(bitmap, view.getContext()));
     }
-    public static void setBackground(View view, int resId){
-        if (view==null || resId==0)
+
+    public static void setBackground(View view, int resId) {
+        if (view == null || resId == 0)
             return;
         view.setBackgroundResource(resId);
     }
@@ -2244,7 +2276,7 @@ public class ImageUtils {
     @SuppressLint("NewApi")
     @SuppressWarnings("deprecation")
     public static void setBackground(final View view, final BitmapDrawable bitmap) {
-        if (view==null || bitmap==null)
+        if (view == null || bitmap == null)
             return;
         if (DeviceInfo.hasAPI16())
             view.setBackground(bitmap);
@@ -2254,73 +2286,85 @@ public class ImageUtils {
     }
 
 
-    public static byte[] getJPEGByteArrayFromBitmap(final Bitmap bitmap, final int jpegQuality){
+    public static byte[] getJPEGByteArrayFromBitmap(final Bitmap bitmap, final int jpegQuality) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(CompressFormat.JPEG, jpegQuality, baos);
         return baos.toByteArray();
     }
-    public static byte[] getJPEGByteArrayFromFile(final String imageFile, final int jpegQuality){
+
+    public static byte[] getJPEGByteArrayFromFile(final String imageFile, final int jpegQuality) {
         return getJPEGByteArrayFromFile(new File(imageFile), jpegQuality);
     }
-    public static byte[] getJPEGByteArrayFromFile(final File image, final int jpegQuality){
+
+    public static byte[] getJPEGByteArrayFromFile(final File image, final int jpegQuality) {
         final Bitmap bm = ImageUtils.getBitmapFromFile(image);
-        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
-        bm.recycle();
-        return result;
-    }
-    public static byte[] getJPEGByteArrayFromFile(final String imageFile, final int maxSideSize, final int jpegQuality){
-        return getJPEGByteArrayFromFile(new File(imageFile),maxSideSize,jpegQuality);
-    }
-    public static byte[] getJPEGByteArrayFromFile(final File image, final int maxSideSize, final int jpegQuality){
-        final Bitmap bm = ImageUtils.getPreviewBitmapFromFile(image, maxSideSize);
-        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
-        bm.recycle();
-        return result;
-    }
-    public static byte[] getJPEGByteArrayFromResources(final Context context, final int imageResId, final int jpegQuality){
-        final Bitmap bm = ImageUtils.getBitmapFromResources(context, imageResId, 0);
-        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
-        bm.recycle();
-        return result;
-    }
-    public static byte[] getJPEGByteArrayFromResources(final Context context, final int imageResId, final int maxSideSize, final int jpegQuality){
-        final Bitmap bm = ImageUtils.getResizedBitmapFromResources  (context, imageResId, maxSideSize, maxSideSize);
         final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
         bm.recycle();
         return result;
     }
 
-    public static byte[] getPNGByteArrayFromBitmap(final Bitmap bitmap){
+    public static byte[] getJPEGByteArrayFromFile(final String imageFile, final int maxSideSize, final int jpegQuality) {
+        return getJPEGByteArrayFromFile(new File(imageFile), maxSideSize, jpegQuality);
+    }
+
+    public static byte[] getJPEGByteArrayFromFile(final File image, final int maxSideSize, final int jpegQuality) {
+        final Bitmap bm = ImageUtils.getPreviewBitmapFromFile(image, maxSideSize);
+        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
+        bm.recycle();
+        return result;
+    }
+
+    public static byte[] getJPEGByteArrayFromResources(final Context context, final int imageResId, final int jpegQuality) {
+        final Bitmap bm = ImageUtils.getBitmapFromResources(context, imageResId, 0);
+        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
+        bm.recycle();
+        return result;
+    }
+
+    public static byte[] getJPEGByteArrayFromResources(final Context context, final int imageResId, final int maxSideSize, final int jpegQuality) {
+        final Bitmap bm = ImageUtils.getResizedBitmapFromResources(context, imageResId, maxSideSize, maxSideSize);
+        final byte[] result = getJPEGByteArrayFromBitmap(bm, jpegQuality);
+        bm.recycle();
+        return result;
+    }
+
+    public static byte[] getPNGByteArrayFromBitmap(final Bitmap bitmap) {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(CompressFormat.PNG, 0, baos);
         return baos.toByteArray();
     }
-    public static byte[] getPNGByteArrayFromFile(final String imageFile){
+
+    public static byte[] getPNGByteArrayFromFile(final String imageFile) {
         return getPNGByteArrayFromFile(new File(imageFile));
     }
-    public static byte[] getPNGByteArrayFromFile(final File image){
+
+    public static byte[] getPNGByteArrayFromFile(final File image) {
         final Bitmap bm = ImageUtils.getBitmapFromFile(image);
         final byte[] result = getPNGByteArrayFromBitmap(bm);
         bm.recycle();
         return result;
     }
-    public static byte[] getPNGByteArrayFromFile(final String imageFile, final int maxSideSize){
+
+    public static byte[] getPNGByteArrayFromFile(final String imageFile, final int maxSideSize) {
         return getPNGByteArrayFromFile(new File(imageFile), maxSideSize);
     }
-    public static byte[] getPNGByteArrayFromFile(final File image, final int maxSideSize){
+
+    public static byte[] getPNGByteArrayFromFile(final File image, final int maxSideSize) {
         final Bitmap bm = ImageUtils.getPreviewBitmapFromFile(image, maxSideSize);
         final byte[] result = getPNGByteArrayFromBitmap(bm);
         bm.recycle();
         return result;
     }
-    public static byte[] getPNGByteArrayFromResources(final Context context, final int imageResId){
+
+    public static byte[] getPNGByteArrayFromResources(final Context context, final int imageResId) {
         final Bitmap bm = ImageUtils.getBitmapFromResources(context, imageResId, 0);
         final byte[] result = getPNGByteArrayFromBitmap(bm);
         bm.recycle();
         return result;
     }
-    public static byte[] getPNGByteArrayFromResources(final Context context, final int imageResId, final int maxSideSize){
-        final Bitmap bm = ImageUtils.getResizedBitmapFromResources  (context, imageResId, maxSideSize, maxSideSize);
+
+    public static byte[] getPNGByteArrayFromResources(final Context context, final int imageResId, final int maxSideSize) {
+        final Bitmap bm = ImageUtils.getResizedBitmapFromResources(context, imageResId, maxSideSize, maxSideSize);
         final byte[] result = getPNGByteArrayFromBitmap(bm);
         bm.recycle();
         return result;
@@ -2330,36 +2374,41 @@ public class ImageUtils {
     public static Bitmap getRoundBitmap(final Bitmap bitmap) {
         return getCircleWrappedBitmap(bitmap);
     }
+
     public static Bitmap getRoundBitmap(final Bitmap bitmap, final int diameter) {
         return getCircleWrappedBitmap(bitmap, diameter);
     }
+
     public static Bitmap getCircleBitmap(final Bitmap bitmap) {
         return getCircleWrappedBitmap(bitmap);
     }
+
     public static Bitmap getCircleBitmap(final Bitmap bitmap, final int diameter) {
         return getCircleWrappedBitmap(bitmap, diameter);
     }
+
     public static Bitmap getCircleWrappedBitmap(final Bitmap bitmap) {
         if (bitmap == null)
             return null;
         return getCircleWrappedBitmap(bitmap, Math.min(bitmap.getWidth(), bitmap.getHeight()));
     }
+
     public static Bitmap getCircleWrappedBitmap(final Bitmap bitmap, int diameter) {
 
         if (bitmap == null)
             return null;
 
         int cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight());
-        if (diameter==0)
+        if (diameter == 0)
             diameter = cropSize;
         final int radius = diameter / 2;
 
         final Bitmap croppedToSquareBitmap = getBitmapByCropFromCenterWithScaling(bitmap, cropSize, cropSize);
-        if (croppedToSquareBitmap!=bitmap)
+        if (croppedToSquareBitmap != bitmap)
             bitmap.recycle();
 
         final Bitmap downsizedToDiameterBitmap;
-        if (diameter==cropSize)
+        if (diameter == cropSize)
             downsizedToDiameterBitmap = croppedToSquareBitmap;
         else {
             downsizedToDiameterBitmap = getResizedBitmap(croppedToSquareBitmap, diameter, diameter);
@@ -2376,24 +2425,23 @@ public class ImageUtils {
         canvas.clipPath(path);
         canvas.drawBitmap(downsizedToDiameterBitmap, 0, 0, null);
 
-        if (outputBitmap!=downsizedToDiameterBitmap)
+        if (outputBitmap != downsizedToDiameterBitmap)
             downsizedToDiameterBitmap.recycle();
 
         return outputBitmap;
     }
 
 
-
     public static Bitmap getBlackAndWhiteBitmap(final Bitmap orginalBitmap) {
-        return getBlackAndWhiteBitmap( orginalBitmap,Bitmap.Config.ARGB_8888 );
+        return getBlackAndWhiteBitmap(orginalBitmap, Bitmap.Config.ARGB_8888);
     }
 
     public static Bitmap getBlackAndWhiteBitmapARGB8888(final Bitmap orginalBitmap) {
-        return getBlackAndWhiteBitmap( orginalBitmap,Bitmap.Config.ARGB_8888 );
+        return getBlackAndWhiteBitmap(orginalBitmap, Bitmap.Config.ARGB_8888);
     }
 
     public static Bitmap getBlackAndWhiteBitmapRGB565(final Bitmap orginalBitmap) {
-        return getBlackAndWhiteBitmap( orginalBitmap,Bitmap.Config.RGB_565 );
+        return getBlackAndWhiteBitmap(orginalBitmap, Bitmap.Config.RGB_565);
     }
 
     public static Bitmap getBlackAndWhiteBitmap(final Bitmap orginalBitmap, Bitmap.Config bitmapConfig) {
@@ -2414,13 +2462,40 @@ public class ImageUtils {
     }
 
 
-    public static Bitmap getRotatedBitmapByAngle(final Bitmap bitmap, final float angle){
+    public static Bitmap getRotatedBitmapByAngle(final Bitmap bitmap, final float angle) {
         final Matrix matrix = new Matrix();
         matrix.postRotate(angle, bitmap.getWidth() / 2, bitmap.getHeight() / 2);
 
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
     }
 
+    public String getBase64EncodedImage(final File imageFile) {
+        return FileUtils.getBase64EncodedFile(imageFile);
+    }
+
+    public String getBase64EncodedPNG(final Bitmap image) {
+        String imageDataString = "";
+        try {
+            byte imageData[] = getPNGByteArrayFromBitmap(image);
+            // Converting Image byte array into Base64 String
+            imageDataString = Base64.encodeToString(imageData, Base64.DEFAULT);
+        } catch (OutOfMemoryError e) { //most probably RTE
+            e.printStackTrace();
+        }
+        return imageDataString;
+    }
+
+    public String getBase64EncodedJPEG(final Bitmap image, final int jpegQuality) {
+        String imageDataString = null;
+        try {
+            byte imageData[] = getJPEGByteArrayFromBitmap(image, jpegQuality);
+            // Converting Image byte array into Base64 String
+            imageDataString = Base64.encodeToString(imageData, Base64.DEFAULT);
+        } catch (OutOfMemoryError e) { //most probably RTE
+            e.printStackTrace();
+        }
+        return imageDataString;
+    }
 
 //    public static Drawable getRotatedDrawable(final Bitmap b, final float angle) {
 //	    final BitmapDrawable drawable = new BitmapDrawable(getResources(), b) {

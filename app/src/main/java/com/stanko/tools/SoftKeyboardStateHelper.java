@@ -11,13 +11,14 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
 
     public interface SoftKeyboardStateListener {
         void onSoftKeyboardOpened(int keyboardHeightInPx);
+
         void onSoftKeyboardClosed();
     }
 
     private final List<SoftKeyboardStateListener> listeners = new LinkedList<SoftKeyboardStateListener>();
-    private final View activityRootView;
-    private int        lastSoftKeyboardHeightInPx;
-    private boolean    isSoftKeyboardOpened;
+    private final View mActivityRootView;
+    private int lastSoftKeyboardHeightInPx;
+    private boolean mIsSoftKeyboardOpened;
     private final Rect mRect = new Rect();
 
     /**
@@ -47,36 +48,37 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
      * @param isSoftKeyboardOpened
      */
     public SoftKeyboardStateHelper(final View activityRootView, boolean isSoftKeyboardOpened) {
-        this.activityRootView     = activityRootView;
-        this.isSoftKeyboardOpened = isSoftKeyboardOpened;
+        this.mActivityRootView = activityRootView;
+        this.mIsSoftKeyboardOpened = isSoftKeyboardOpened;
+        DeviceInfo.init(activityRootView.getContext()); //if not initialized eventually
         activityRootView.getViewTreeObserver().addOnGlobalLayoutListener(this);
     }
 
     @Override
     public void onGlobalLayout() {
         //r will be populated with the coordinates of your view that area still visible.
-        activityRootView.getWindowVisibleDisplayFrame(mRect);
-
-        final int heightDiff = activityRootView.getRootView().getHeight() - (mRect.bottom - mRect.top);
-        if (!isSoftKeyboardOpened && heightDiff > 100) { // if more than 100 pixels, its probably a keyboard...
-            isSoftKeyboardOpened = true;
+        mActivityRootView.getWindowVisibleDisplayFrame(mRect);
+        final int heightDiff = mActivityRootView.getRootView().getHeight() - (mRect.bottom - mRect.top) - DeviceInfo.navigationBarHeight - DeviceInfo.statusBarHeight;
+        if (!mIsSoftKeyboardOpened && heightDiff > 100) { // if more than 100 pixels, its probably a keyboard...
+            mIsSoftKeyboardOpened = true;
             notifyOnSoftKeyboardOpened(heightDiff);
-        } else if (isSoftKeyboardOpened && heightDiff < 100) {
-            isSoftKeyboardOpened = false;
+        } else if (mIsSoftKeyboardOpened && heightDiff < 100) {
+            mIsSoftKeyboardOpened = false;
             notifyOnSoftKeyboardClosed();
         }
     }
 
     public void setIsSoftKeyboardOpened(boolean isSoftKeyboardOpened) {
-        this.isSoftKeyboardOpened = isSoftKeyboardOpened;
+        this.mIsSoftKeyboardOpened = isSoftKeyboardOpened;
     }
 
     public boolean isSoftKeyboardOpened() {
-        return isSoftKeyboardOpened;
+        return mIsSoftKeyboardOpened;
     }
 
     /**
      * Default value is zero (0)
+     *
      * @return last saved keyboard height in px
      */
     public int getLastSoftKeyboardHeightInPx() {
