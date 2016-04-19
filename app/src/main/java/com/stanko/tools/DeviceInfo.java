@@ -126,17 +126,17 @@ public class DeviceInfo {
 
         final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
-        if (Build.VERSION.SDK_INT < 14) {
+        if (hasAPILevel < 14) {
 //            realDisplayHeight = displayMetrics.heightPixels;
 //            realDisplayWidth =  displayMetrics.widthPixels;
-        } else if (Build.VERSION.SDK_INT > 13 && Build.VERSION.SDK_INT < 17) {
+        } else if (hasAPILevel > 13 && hasAPILevel < 17) {
             // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
             try {
                 realDisplayWidth = (int) Display.class.getMethod("getRawWidth").invoke(display);
                 realDisplayHeight = (int) Display.class.getMethod("getRawHeight").invoke(display);
             } catch (Exception ignored) {
             }
-        } else /*if (Build.VERSION.SDK_INT >= 17)*/ {
+        } else /*if (hasAPILevel >= 17)*/ {
             // includes window decorations (statusbar bar/menu bar)
             try {
                 final Point realSize = new Point();
