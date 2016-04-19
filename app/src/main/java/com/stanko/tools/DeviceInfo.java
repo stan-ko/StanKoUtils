@@ -1,6 +1,7 @@
 package com.stanko.tools;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -387,20 +388,29 @@ public class DeviceInfo {
         if (pm == null)
             return null;
         else
-            hasCameraByPM = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA);
+            hasCameraByPM = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA)
+                    || pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
 
         if (hasCameraByPM) {
-            if (hasAPI(21)) {
-                try {
-                    return ((android.hardware.camera2.CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE)).getCameraIdList().length > 0;
-                } catch (android.hardware.camera2.CameraAccessException e) {
-                    e.printStackTrace();
-                }
-            }
-            return Camera.getNumberOfCameras() > 0;
+            if (hasAPI(21))
+                return hasCameraApi2();
+            else
+                return Camera.getNumberOfCameras() > 0;
         } else
             return false;
 
+    }
+
+    @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+    public static boolean hasCameraApi2(){
+        try {
+            final android.hardware.camera2.CameraManager cameraManager = (android.hardware.camera2.CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE);
+            final String[] cameraIdList = cameraManager.getCameraIdList();
+            return cameraIdList!=null && cameraIdList.length > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public static Boolean hasBackCamera() {
