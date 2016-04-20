@@ -312,39 +312,20 @@ public class ImageUtils {
         if (!FileUtils.isWritable(targetFile))
             return false;
 
-        boolean isSucceed = false;
+        boolean isSucceed;
         // определяем необходимость поворота фотки
         try {
             final Matrix matrix = new Matrix();
-
-            ExifInterface exifReader = new ExifInterface(targetFile.getAbsolutePath());
-
-            int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-            boolean isRotationNeeded = true;
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    matrix.postRotate(90);
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    matrix.postRotate(180);
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    matrix.postRotate(270);
-                    break;
-
-                default: // ExifInterface.ORIENTATION_NORMAL
-                    // Do nothing. The original image is fine.
-                    isRotationNeeded = false;
-                    isSucceed = true;
-                    break;
+            final int rotateAngle = getExifRotateAngle(targetFile);
+            boolean isRotationNeeded = rotateAngle > 0;
+            if (isRotationNeeded) {
+                matrix.postRotate(rotateAngle);
             }
+            isSucceed = !isRotationNeeded;
 
             if (isRotationNeeded) {
-                BitmapFactory.Options bmfOtions = new BitmapFactory.Options();
-                bmfOtions.inPurgeable = true;
+                BitmapFactory.Options bmfOptions = new BitmapFactory.Options();
+                bmfOptions.inPurgeable = true;
                 Bitmap bitmap = null;
                 FileInputStream fileInputStream = null;
                 FileDescriptor fileDescriptor = null;
@@ -356,9 +337,9 @@ public class ImageUtils {
                     }
 
                     if (fileDescriptor != null)
-                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
+                        bitmap = BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOptions);
                     else
-                        bitmap = BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
+                        bitmap = BitmapFactory.decodeStream(fileInputStream, null, bmfOptions);
 
                 } catch (FileNotFoundException e) {
                     isSucceed = false;
@@ -376,12 +357,7 @@ public class ImageUtils {
                 }
             }
 
-
-        } catch (IOException e) {
-            isSucceed = false;
-            Log.e(TAG, e);
         } catch (Exception e) {
-            // like there is no EXIF support?
             isSucceed = false;
             Log.e(TAG, e);
         } catch (Throwable e) {
@@ -393,46 +369,63 @@ public class ImageUtils {
         return isSucceed;
     }
 
+    public static int getExifRotateAngle(final File targetFile) {
+        if (!FileUtils.isReadable(targetFile)) {
+            Log.e("File is not readable! " + targetFile);
+            return 0;
+        }
+
+        try {
+            final ExifInterface exifReader = new ExifInterface(targetFile.getAbsolutePath());
+            final int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+            return getExifRotateAngle(orientation);
+        } catch (Exception e) {
+            // like there is no EXIF support?
+            Log.e(TAG, e);
+        }
+
+        return 0;
+    }
+
+    private static int getExifRotateAngle(final int orientation) {
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                return 90;
+
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                return 180;
+
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                return 270;
+
+            default: // ExifInterface.ORIENTATION_NORMAL
+                return 0;
+        }
+    }
+
     public static Bitmap getRotatedBitmapByExif(final String targetFilePath) {
-        if (targetFilePath == null || targetFilePath.length() == 0)
+        if (targetFilePath == null || targetFilePath.length() == 0) {
+            Log.e("File is not readable! " + targetFilePath);
             return null;
+        }
         return getRotatedBitmapByExif(new File(targetFilePath));
     }
 
     public static Bitmap getRotatedBitmapByExif(final File targetFile) {
 
-        if (!FileUtils.isWritable(targetFile))
+        if (!FileUtils.isReadable(targetFile)) {
+            Log.e("File is not readable! " + targetFile);
             return null;
+        }
 
         Bitmap bitmap = null;
         // определяем необходимость поворота фотки
         try {
             final Matrix matrix = new Matrix();
-
-            ExifInterface exifReader = new ExifInterface(targetFile.getAbsolutePath());
-
-            int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-            boolean isRotationNeeded = false;
-
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    matrix.postRotate(90);
-                    isRotationNeeded = true;
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    matrix.postRotate(180);
-                    isRotationNeeded = true;
-                    break;
-
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    matrix.postRotate(270);
-                    isRotationNeeded = true;
-                    break;
-
-                default: // ExifInterface.ORIENTATION_NORMAL
-                    // Do nothing. The original image is fine.
-                    break;
+            final int rotateAngle = getExifRotateAngle(targetFile);
+            boolean isRotationNeeded = rotateAngle > 0;
+            if (isRotationNeeded) {
+                matrix.postRotate(rotateAngle);
             }
 
             BitmapFactory.Options bmfOtions = new BitmapFactory.Options();
@@ -486,8 +479,6 @@ public class ImageUtils {
                 }
             }
 
-        } catch (IOException e) {
-            Log.e("ImageUtils", e);
         } catch (Exception e) {
             // like there is no EXIF support?
             Log.e("ImageUtils", e);
@@ -497,6 +488,94 @@ public class ImageUtils {
         }
 
         return bitmap;
+    }
+
+    public static Bitmap getRotatedBitmapByExif(final String targetFilePath, final int maxSideSize) {
+        if (targetFilePath == null || targetFilePath.length() == 0) {
+            Log.e("File is not readable! " + targetFilePath);
+            return null;
+        }
+        return getRotatedBitmapByExif(new File(targetFilePath), maxSideSize);
+    }
+
+    public static Bitmap getRotatedBitmapByExif(final File targetFile, final int maxSideSize) {
+
+        if (!FileUtils.isReadable(targetFile)) {
+            Log.e("File is not readable! " + targetFile);
+            return null;
+        }
+
+        Bitmap bitmap = null;
+        // определяем необходимость поворота фотки
+        try {
+            final int rotateAngle = getExifRotateAngle(targetFile);
+            boolean isRotationNeeded = rotateAngle > 0;
+            if (isRotationNeeded) {
+                bitmap = getRotatedBitmapByAngle(getBitmapFromFile(targetFile, maxSideSize), rotateAngle);
+            } else {
+                bitmap = getBitmapFromFile(targetFile, maxSideSize);
+            }
+        } catch (Exception e) {
+            // like there is no EXIF support?
+            Log.e("ImageUtils", e);
+        } catch (Throwable e) {
+            // Out of stupid vedroid's memory
+            Log.e("ImageUtils", e.toString());
+        }
+
+        return bitmap;
+    }
+
+    public static Bitmap getRotatedBitmapByExif(final Context context, final Uri targetUri, final int maxSideSize) {
+
+        Bitmap bitmap = null;
+        // определяем необходимость поворота фотки
+        try {
+            final int rotateAngle = (int) getExifRotateAngle(context, targetUri);
+            boolean isRotationNeeded = rotateAngle > 0;
+            final File targetFile = FileUtils.getFileFromUri(context, targetUri);
+            if (!FileUtils.isReadable(targetFile)) {
+                Log.e("File is not readable! " + targetFile);
+                return null;
+            }
+            if (isRotationNeeded) {
+                bitmap = getRotatedBitmapByAngle(getBitmapFromFile(targetFile, maxSideSize), rotateAngle);
+            } else {
+                bitmap = getBitmapFromFile(targetFile, maxSideSize);
+            }
+        } catch (Exception e) {
+            // like there is no EXIF support?
+            Log.e("ImageUtils", e);
+        } catch (Throwable e) {
+            // Out of stupid vedroid's memory
+            Log.e("ImageUtils", e.toString());
+        }
+
+        return bitmap;
+    }
+
+    public static float getExifRotateAngle(Context context, Uri uri) {
+        try {
+            if (uri.getScheme().equals("content")) {
+                //From the media gallery
+                String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
+                Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
+                if (c.moveToFirst()) {
+                    return c.getInt(0);
+                }
+            } else if (uri.getScheme().equals("file")) {
+                //From a file saved by the camera
+                final ExifInterface exifReader = new ExifInterface(uri.getPath());
+                final int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+                final int rotateAngle = getExifRotateAngle(orientation);
+                return rotateAngle;
+            }
+            return 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     /**
