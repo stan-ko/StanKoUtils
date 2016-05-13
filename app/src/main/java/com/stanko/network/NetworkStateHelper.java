@@ -123,6 +123,10 @@ public class NetworkStateHelper {
         //TODO: isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable(); //?
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
 //            checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
+            if (!isHostReachable) {
+                // emulate was no network and now we got it
+                checkIfHostResponds(NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
+            }
             return isHostReachable;
         }
         return isNetworkConnectionAvailable;
@@ -205,8 +209,7 @@ public class NetworkStateHelper {
             return;
         }
 
-        if (lastNetworkState == newNetworkState
-                && lastNetworkID != null && newNetworkID != null
+        if (isNetworkConnectionAvailable  && lastNetworkState == newNetworkState
                 && TextUtils.equals(lastNetworkID, newNetworkID)) {
             Log.w("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
             return;

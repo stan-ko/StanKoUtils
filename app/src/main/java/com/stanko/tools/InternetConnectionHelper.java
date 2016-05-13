@@ -236,20 +236,16 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             pureHostName = hostName.trim();
 
         final int serverIP = getHostIntIP(pureHostName);
-        //Log.i("ServerChecker", "getHostIntIP("+host+"): "+serverIP);
         if (serverIP != 0) {
             // check serverIP is reachable
             final ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
 
             if (isInternetWiFi)
                 isInternetWiFi = cm.requestRouteToHost(ConnectivityManager.TYPE_WIFI, serverIP);
-
             else if (isInternetMobile)
                 isInternetMobile = cm.requestRouteToHost(ConnectivityManager.TYPE_MOBILE, serverIP);
-
             else if (isInternetWiMax)
                 isInternetWiMax = cm.requestRouteToHost(ConnectivityManager.TYPE_WIMAX, serverIP);
-
             else if (isInternetOther) {
                 connectionType = ((ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE)).getActiveNetworkInfo().getType();
                 isInternetOther = cm.requestRouteToHost(connectionType, serverIP);
@@ -294,11 +290,10 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             return 0;
 
         final byte[] addressBytes = inetAddress.getAddress();
-        final int address = (addressBytes[3] & 0xff) << 24
+        return (addressBytes[3] & 0xff) << 24
                 | (addressBytes[2] & 0xff) << 16
                 | (addressBytes[1] & 0xff) << 8
                 | addressBytes[0] & 0xff;
-        return address;
     }
 
     /**
@@ -309,13 +304,11 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
      * @return true if host reachable (connection were established)
      */
     public static boolean isHostReachable(String hostUrl) {
-
         // adding http:// if its just a pure host name like google.com instead of http://google.com
         if (!hostUrl.contains("://"))
             hostUrl = "http://" + hostUrl;
 
         boolean isReachable = false;
-//        boolean isExceptionHappens = false;
         try {
             final URL url = new URL(hostUrl);
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -324,42 +317,14 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
             final int responseCode = httpURLConnection.getResponseCode();
-            isReachable = responseCode >0;
+            isReachable = responseCode > 0;
 // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 // there are too many codes, guess checking if its gt 0 is enough
-//            == HttpURLConnection.HTTP_OK //200
-//                            || responseCode == HttpURLConnection.HTTP_BAD_METHOD
-//                            || responseCode == HttpURLConnection.HTTP_BAD_REQUEST
-//                            || responseCode == HttpURLConnection.HTTP_ACCEPTED
-//                            || responseCode == HttpURLConnection.HTTP_FORBIDDEN
-//                            || responseCode == HttpURLConnection.HTTP_UNAUTHORIZED;
-
         } catch (MalformedURLException e) {
-//            isExceptionHappens = true;
-//            Log.e("ServerChecker", e);
+            Log.e(e);
         } catch (IOException e) {
-//            isExceptionHappens = true;
-//            Log.e("ServerChecker", e);
+            Log.e(e);
         }
-
-//        // maybe host is not reachable using GET method? Lets try with POST
-//        if (!isReachable && !isExceptionHappens){
-//            try {
-//                final URL url = new URL(hostUrl);
-//                final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-//                httpURLConnection.setRequestProperty("User-Agent", "Android Application");
-//                httpURLConnection.setRequestProperty("Connection", "close");
-//                httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
-//                httpURLConnection.setRequestMethod("POST");
-//                httpURLConnection.connect();
-//                isReachable = httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK; //200
-//            } catch (MalformedURLException e) {
-//                Log.e("ServerChecker", e);
-//            } catch (IOException e) {
-//                Log.e("ServerChecker",e);
-//            }
-//        }
-
         return isReachable;
     }
 
@@ -422,4 +387,5 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
     public interface ServerChecking {
         public void handleServerCheckingResult(final int result);
     }
+
 }
