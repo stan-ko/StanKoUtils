@@ -18,6 +18,17 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 /**
  * Created by Stan Koshutsky <stan.koshutsky@gmail.com> on 03.09.2015.
@@ -209,7 +220,7 @@ public class NetworkStateHelper {
             return;
         }
 
-        if (isNetworkConnectionAvailable  && lastNetworkState == newNetworkState
+        if (isNetworkConnectionAvailable && lastNetworkState == newNetworkState
                 && TextUtils.equals(lastNetworkID, newNetworkID)) {
             Log.w("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
             return;
@@ -273,15 +284,18 @@ public class NetworkStateHelper {
         try {
             // adding http:// if its just a pure host name like google.com instead of http://google.com
             final URL url = new URL(hostUrl.contains("://") ? hostUrl : "http://" + hostUrl);
+//            if (hostUrl.startsWith("https")){
+            setTrustAnySSLCertificateMode();
+//            }
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
+//            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
             httpURLConnection.setRequestProperty("Connection", "close");
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
             final int responseCode = httpURLConnection.getResponseCode();
             // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             // there are too many codes, guess checking if its gt 0 is enough
-            doesHostRespond = responseCode > 0;
+            doesHostRespond = responseCode < 400;
         } catch (MalformedURLException e) {
             e.printStackTrace();
 //            isExceptionHappens = true;
@@ -294,8 +308,38 @@ public class NetworkStateHelper {
         } catch (SecurityException e) {
             e.printStackTrace();
             // user could limit Internet access so app could crash here
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        } catch (KeyManagementException e) {
+            e.printStackTrace();
         }
         return doesHostRespond;
+    }
+
+    public static void setTrustAnySSLCertificateMode() throws NoSuchAlgorithmException, KeyManagementException {
+        HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            public boolean verify(String hostname, SSLSession session) {
+                return true;
+            }
+        });
+        final SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(null, new TrustManager[]{
+                new X509TrustManager() {
+                    @Override
+                    public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    }
+
+                    @Override
+                    public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    }
+
+                    @Override
+                    public X509Certificate[] getAcceptedIssuers() {
+                        return new X509Certificate[]{};
+                    }
+                }
+        }, null);
+        HttpsURLConnection.setDefaultSSLSocketFactory(sslContext.getSocketFactory());
     }
 
     /**

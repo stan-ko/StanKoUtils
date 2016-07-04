@@ -255,6 +255,17 @@ public class DeviceInfo {
         return true;
     }
 
+//    private static boolean deviceNotHasSoftNavigationBar() {
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//            final Point realSize = new Point();
+//            final Point visibleSize = new Point();
+//            mMainActivity.getWindowManager().getDefaultDisplay().getRealSize(realSize);
+//            mMainActivity.getWindowManager().getDefaultDisplay().getSize(visibleSize);
+//            return (realSize.y == visibleSize.y);
+//        }
+//        return false;
+//    }
+
     public static int getStatusBarHeight(final Activity activity) {
         final Rect rect = new Rect();
         activity.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
