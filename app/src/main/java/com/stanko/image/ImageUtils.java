@@ -2044,27 +2044,29 @@ public class ImageUtils {
         }
 
         Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
-        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
-        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
+//        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+//        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
-        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    deltaX, deltaY,
-                    cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    deltaX, 0,
-                    cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    0, deltaY,
-                    cropToWidth, cropToHeight);
-        } else
-            return bitmapToCrop;
+        return getCroppedFromCenterBitmap(bitmapToCrop, cropToHeight, cropToWidth);
+
+//        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, 0,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    0, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else
+//            return bitmapToCrop;
     }
 
     public static Bitmap getBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth) {
@@ -2191,28 +2193,29 @@ public class ImageUtils {
 
 
         Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
-        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
-        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
+//        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+//        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
+        return getCroppedFromCenterBitmap(bitmapToCrop, cropToHeight, cropToWidth);
 
-        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    deltaX, deltaY,
-                    cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
-            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    deltaX, 0,
-                    cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
-            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
-            return Bitmap.createBitmap(bitmapToCrop,
-                    0, deltaY,
-                    cropToWidth, cropToHeight);
-        } else
-            return bitmapToCrop;
+//        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, 0,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    0, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else
+//            return bitmapToCrop;
     }
 
 
@@ -2311,6 +2314,34 @@ public class ImageUtils {
         }
 
         Log.d("ImageUtils", "original bitmap H: " + bitmapInfo.height + " W: " + bitmapInfo.width);
+//        Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
+//        Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
+        return getCroppedFromCenterBitmap(bitmapToCrop, cropToHeight, cropToWidth);
+
+//        if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+//            int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    deltaX, 0,
+//                    cropToWidth, cropToHeight);
+//        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+//            int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
+//            return Bitmap.createBitmap(bitmapToCrop,
+//                    0, deltaY,
+//                    cropToWidth, cropToHeight);
+//        } else
+//            return bitmapToCrop;
+    }
+
+    public static Bitmap getCroppedFromCenterBitmap(final Bitmap bitmapToCrop, int cropToHeight, int cropToWidth){
+        if (bitmapToCrop == null || cropToHeight == 0 || cropToWidth == 0)
+            return null;
+
         Log.d("ImageUtils", "cropToHeight: " + cropToHeight + " cropToWidth: " + cropToWidth);
         Log.d("ImageUtils", "bitmapToCrop h: " + bitmapToCrop.getHeight() + " w: " + bitmapToCrop.getWidth());
 
@@ -2320,19 +2351,18 @@ public class ImageUtils {
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, deltaY,
                     cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getWidth() >= cropToWidth) {
+        } else if (bitmapToCrop.getWidth() > cropToWidth && bitmapToCrop.getHeight() == cropToHeight) {
             int deltaX = (bitmapToCrop.getWidth() - cropToWidth) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     deltaX, 0,
                     cropToWidth, cropToHeight);
-        } else if (bitmapToCrop.getHeight() >= cropToHeight) {
+        } else if (bitmapToCrop.getWidth() == cropToWidth && bitmapToCrop.getHeight() > cropToHeight) {
             int deltaY = (bitmapToCrop.getHeight() - cropToHeight) / 2;
             return Bitmap.createBitmap(bitmapToCrop,
                     0, deltaY,
                     cropToWidth, cropToHeight);
         } else
             return bitmapToCrop;
-
     }
 
     @SuppressLint("NewApi")
