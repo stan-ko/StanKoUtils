@@ -160,11 +160,11 @@ public class NetworkStateHelper {
                                                 final String newNetworkID,
                                                 final String lastNetworkID) {
         Log.i("wasNetworkAvailable: " + wasNetworkAvailable
-                        + " isNetworkAvailable: " + isNetworkAvailable
-                        + " lastNetworkState: " + lastNetworkState
-                        + " newNetworkState: " + newNetworkState
-                        + " newNetworkID: " + newNetworkID
-                        + " lastNetworkID: " + lastNetworkID
+                + " isNetworkAvailable: " + isNetworkAvailable
+                + " lastNetworkState: " + lastNetworkState
+                + " newNetworkState: " + newNetworkState
+                + " newNetworkID: " + newNetworkID
+                + " lastNetworkID: " + lastNetworkID
         );
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
             Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
@@ -240,6 +240,8 @@ public class NetworkStateHelper {
         }
 
         // Creating and starting a thread for sending a request to Host
+        if (sCheckIfHostRespondsThread != null)
+            sCheckIfHostRespondsThread.isStopped = true;
         sCheckIfHostRespondsThread = new StoppableThread(new Runnable() {
             @Override
             public void run() {
@@ -311,6 +313,8 @@ public class NetworkStateHelper {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         } catch (KeyManagementException e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError e){
             e.printStackTrace();
         }
         return doesHostRespond;
