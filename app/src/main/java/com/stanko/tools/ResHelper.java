@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable;
 import android.util.DisplayMetrics;
 
 import java.io.InputStream;
+import java.lang.reflect.Field;
 
 /**
  * (c)Nova Poshta by theMakeApp
@@ -100,4 +101,13 @@ public class ResHelper {
             return sResources.getQuantityString(resId, quantity, formatArgs);
     }
 
+    public static int getResId(final String resName, final Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 }
