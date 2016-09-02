@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -56,7 +57,27 @@ public class SharedPrefsHelper {
 
     // context NPE not safe
     public static synchronized void initSecured(final Context context) {
-        initSecured(context, context.getApplicationContext().getPackageName());
+        Exception caughtException = null;
+        try {
+            initSecured(context, context.getApplicationContext().getPackageName());
+        } catch (Exception e) {
+            caughtException = e;
+            // most probably NoSuchAlgorithmException
+        }
+        if (caughtException != null) {
+            Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+            try {
+                initSecured(context, context.getApplicationContext().getPackageName());
+            } catch (Exception e) {
+                // most probably NoSuchAlgorithmException
+                caughtException = e;
+            }
+        }
+        if (caughtException != null) {
+            Log.e(caughtException);
+            Log.e("Initializing regular (not secured) version");
+            init(context);
+        }
     }
 
     // context NPE not safe
