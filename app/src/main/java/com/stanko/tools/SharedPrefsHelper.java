@@ -51,6 +51,7 @@ public class SharedPrefsHelper {
 
     // context NPE not safe
     public static synchronized void init(final Context context, final String sharedPrefsName) {
+        isSecuredMode = false;
         SharedPrefsHelper.appContext = context.getApplicationContext();
         getSharedPreferences(appContext, sharedPrefsName);
     }
@@ -120,7 +121,7 @@ public class SharedPrefsHelper {
                 if (isSecuredMode)
                     sharedPreferencesInstances.put(mLastUsedSharedPrefsName, new SecurePreferences(
                             appContext,
-                            Hash.getMD5(appContext.getPackageName()),
+                            Hash.getMD5(sharedPrefsName),
                             sharedPrefsName));
                 else
                     sharedPreferencesInstances.put(mLastUsedSharedPrefsName, appContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
