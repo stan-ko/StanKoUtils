@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.stanko.tools.BackgroundThreadFactory;
 import com.stanko.tools.BooleanLock;
 import com.stanko.tools.Log;
 import com.stanko.tools.StoppableThread;
@@ -22,6 +23,10 @@ import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Stack;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -35,7 +40,7 @@ import javax.net.ssl.X509TrustManager;
  */
 public class NetworkStateHelper {
 
-    public static final int TIME_OUT = 1000 * 3; //3s
+    public static final int TIME_OUT = 1000 * 2; //2s
 
     static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
 
@@ -44,7 +49,12 @@ public class NetworkStateHelper {
     private static String sHostToCheck;
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
+
+    private static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
     private static StoppableThread sCheckIfHostRespondsThread;
+    private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
+    private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
+
     private static NetworkStateReceiver sNetworkStateReceiver;
 
     public static synchronized void init(final Context context) {
@@ -240,19 +250,14 @@ public class NetworkStateHelper {
         }
 
         // Creating and starting a thread for sending a request to Host
-        if (sCheckIfHostRespondsThread != null)
-            sCheckIfHostRespondsThread.isStopped = true;
-        sCheckIfHostRespondsThread = new StoppableThread(new Runnable() {
+        final NSHRunnable checkIfHostRespondsTask = new NSHRunnable() {
             @Override
             public void run() {
+                isRunning = true;
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 Looper.prepare();
-                final StoppableThread thisThread = ((StoppableThread) Thread.currentThread());
+                // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
-                // if thread stop requested task result will be ignored
-                if (thisThread.isStopped)
-                    return;
-
                 synchronized (checkIfHostRespondsLock) {
                     isHostReachable = doesHostRespond;
                     final EventBus eventBus = EventBus.getDefault();
@@ -267,12 +272,41 @@ public class NetworkStateHelper {
                     }
                     checkIfHostRespondsLock.setFinished();
                 }
-
+                aiCheckIfHostRespondsThreadsCount.decrementAndGet();
+                synchronized (sCheckIfHostRespondsTasks) {
+                    sCheckIfHostRespondsTasks.remove(this); // could be already removed
+                    if (sCheckIfHostRespondsTasks.size() > 0) {
+                        sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
+                    }
+                }
+                isRunning = false;
                 Looper.loop();
             }
-        });
-        sCheckIfHostRespondsThread.start();
+        };
+//        StoppableThread checkIfHostRespondsThread = new StoppableThread(checkIfHostRespondsTask);
+//        checkIfHostRespondsThread.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+//        if (sCheckIfHostRespondsThread != null) {
+//            sCheckIfHostRespondsThread.isStopped = true;
+//        }
+//        sCheckIfHostRespondsThread = checkIfHostRespondsThread;
+//        sCheckIfHostRespondsThread.start();
+        synchronized (sCheckIfHostRespondsTasks) {
+            // if there is a queue of tasks - kill all the previous
+            // there must be no more than 1-2 tasks at a time
+            final boolean hasTasks = sCheckIfHostRespondsTasks.size() > 0;
+            if (hasTasks) { // at least 1 task is executing now
+                // remove all tasks from stack
+                while (sCheckIfHostRespondsTasks.size() > 0)
+                    sCheckIfHostRespondsTasks.pop();
+            }
+            // no queue - add current task and execute it
+            sCheckIfHostRespondsTasks.add(checkIfHostRespondsTask);
+            // if there was no tasks
+            if (!hasTasks)
+                sExecutorService.execute(checkIfHostRespondsTask);
+        }
     }
+
 
     /**
      * Checks host by connection to using HttpURLConnection. Method should not be run
@@ -314,7 +348,7 @@ public class NetworkStateHelper {
             e.printStackTrace();
         } catch (KeyManagementException e) {
             e.printStackTrace();
-        } catch (OutOfMemoryError e){
+        } catch (OutOfMemoryError e) {
             e.printStackTrace();
         }
         return doesHostRespond;
@@ -365,12 +399,13 @@ public class NetworkStateHelper {
         }).start();
     }
 
-    /**
-     * Interface to deliver result of {@link #checkIfHostResponds(String, ICheckIfHostResponds)}
-     */
-    public interface ICheckIfHostResponds {
-        void doesHostRespond(boolean doestIt);
-    }
+/**
+ * Interface to deliver result of {@link #checkIfHostResponds(String, ICheckIfHostResponds)}
+ */
+public interface ICheckIfHostResponds {
+    void doesHostRespond(boolean doestIt);
+
+}
 
 
     /**
