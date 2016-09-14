@@ -5,8 +5,8 @@ android {
     buildToolsVersion "23.0.1"
 
     defaultConfig {
-        versionCode 15
-        versionName "1.4"
+        versionCode 16
+        versionName "1.41"
         minSdkVersion 10
         targetSdkVersion 21
     }
@@ -24,6 +24,9 @@ dependencies {
     // EventBus
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'com.scottyab:secure-preferences-lib:0.1.4'
+    //SpongeCastle (adds Security algorithms)
+    compile('com.madgag.spongycastle:core:1.54.0.0')
+    compile('com.madgag.spongycastle:prov:1.54.0.0')
 }
 
 //// This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054
