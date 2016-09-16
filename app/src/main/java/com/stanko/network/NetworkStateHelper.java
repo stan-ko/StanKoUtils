@@ -42,7 +42,7 @@ public class NetworkStateHelper {
 
     public static final int TIME_OUT = 1000 * 2; //2s
 
-    static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
+//    static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
 
     private static Context sAppContext;
     private static ConnectivityManager sConnectivityManager;
@@ -50,8 +50,8 @@ public class NetworkStateHelper {
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
 
-    private static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
-    private static StoppableThread sCheckIfHostRespondsThread;
+    static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
+//    private static StoppableThread sCheckIfHostRespondsThread;
     private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
 
@@ -226,29 +226,15 @@ public class NetworkStateHelper {
                                     final String lastNetworkID,
                                     final String newNetworkID) {
         if (TextUtils.isEmpty(sHostToCheck)) {
-            Log.w("NetworkStateHelper: Can't start checkIfHostResponds() task - sHostToCheck is empty");
+            Log.i("NetworkStateHelper: Can't start checkIfHostResponds() task - HostToCheck not set");
             return;
         }
 
         if (isNetworkConnectionAvailable && lastNetworkState == newNetworkState
                 && TextUtils.equals(lastNetworkID, newNetworkID)) {
-            Log.w("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
+            Log.i("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
             return;
         }
-
-        synchronized (checkIfHostRespondsLock) {
-            // cancel current Host responding check thread if any
-            if (checkIfHostRespondsLock.isRunning() && sCheckIfHostRespondsThread != null) {
-                sCheckIfHostRespondsThread.isStopped = true;
-                checkIfHostRespondsLock.setFinished();
-            }
-
-            if (!checkIfHostRespondsLock.setRunning()) {
-                Log.e(new Exception("NetworkStateHelper: Can't start checkIfHostResponds() task - checkIfHostRespondsLock is locked"));
-                return;
-            }
-        }
-
         // Creating and starting a thread for sending a request to Host
         final NSHRunnable checkIfHostRespondsTask = new NSHRunnable() {
             @Override
@@ -258,7 +244,6 @@ public class NetworkStateHelper {
                 Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
-                synchronized (checkIfHostRespondsLock) {
                     isHostReachable = doesHostRespond;
                     final EventBus eventBus = EventBus.getDefault();
                     if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
@@ -270,8 +255,6 @@ public class NetworkStateHelper {
                                 lastNetworkID,
                                 newNetworkID));
                     }
-                    checkIfHostRespondsLock.setFinished();
-                }
                 aiCheckIfHostRespondsThreadsCount.decrementAndGet();
                 synchronized (sCheckIfHostRespondsTasks) {
                     sCheckIfHostRespondsTasks.remove(this); // could be already removed
@@ -283,13 +266,6 @@ public class NetworkStateHelper {
                 Looper.loop();
             }
         };
-//        StoppableThread checkIfHostRespondsThread = new StoppableThread(checkIfHostRespondsTask);
-//        checkIfHostRespondsThread.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-//        if (sCheckIfHostRespondsThread != null) {
-//            sCheckIfHostRespondsThread.isStopped = true;
-//        }
-//        sCheckIfHostRespondsThread = checkIfHostRespondsThread;
-//        sCheckIfHostRespondsThread.start();
         synchronized (sCheckIfHostRespondsTasks) {
             // if there is a queue of tasks - kill all the previous
             // there must be no more than 1-2 tasks at a time
