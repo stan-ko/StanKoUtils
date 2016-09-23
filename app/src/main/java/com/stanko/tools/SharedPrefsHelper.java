@@ -57,10 +57,12 @@ public class SharedPrefsHelper {
     }
 
     // context NPE not safe
-    public static synchronized void initSecured(final Context context) {
+    public static synchronized boolean initSecured(final Context context) {
         Exception caughtException = null;
+        final Context appContext = context.getApplicationContext();
+        final String packageName =  appContext.getPackageName();
         try {
-            initSecured(context, context.getApplicationContext().getPackageName());
+            initSecured(appContext, packageName);
         } catch (Exception e) {
             caughtException = e;
             // most probably NoSuchAlgorithmException
@@ -68,7 +70,7 @@ public class SharedPrefsHelper {
         if (caughtException != null) {
             Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
             try {
-                initSecured(context, context.getApplicationContext().getPackageName());
+                initSecured(appContext, packageName);
             } catch (Exception e) {
                 // most probably NoSuchAlgorithmException
                 caughtException = e;
@@ -79,6 +81,7 @@ public class SharedPrefsHelper {
             Log.e("Initializing regular (not secured) version");
             init(context);
         }
+        return isSecuredMode;
     }
 
     // context NPE not safe
