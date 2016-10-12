@@ -143,8 +143,7 @@ public class NetworkStateHelper {
         final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
         // when isNetworkConnectionAvailable is wrong due to isAnyNetworkConnectionAvailable
-        if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable)
-            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
+        isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
             if (!isHostReachable) {
                 // emulate was no network and now we got it
