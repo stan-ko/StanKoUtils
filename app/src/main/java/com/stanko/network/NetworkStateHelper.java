@@ -140,17 +140,19 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isNetworkAvailable() {
-        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
-        //TODO: isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable(); //?
+        final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
+        // when isNetworkConnectionAvailable is wrong due to isAnyNetworkConnectionAvailable
+        if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable)
+            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
-//            checkIfHostResponds(sLastNetworkState, NetworkState.NRGotNetwork, null, null);
             if (!isHostReachable) {
                 // emulate was no network and now we got it
                 checkIfHostResponds(NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
             }
             return isHostReachable;
         }
-        return isNetworkConnectionAvailable;
+        return isNetworkConnectionAvailable || isAnyNetworkConnectionAvailable;
     }
 
     /**
@@ -167,20 +169,21 @@ public class NetworkStateHelper {
                                                 final boolean isNetworkAvailable,
                                                 final NetworkState lastNetworkState,
                                                 final NetworkState newNetworkState,
-                                                final String newNetworkID,
-                                                final String lastNetworkID) {
+                                                final String lastNetworkID,
+                                                final String newNetworkID) {
         Log.i("wasNetworkAvailable: " + wasNetworkAvailable
                 + " isNetworkAvailable: " + isNetworkAvailable
                 + " lastNetworkState: " + lastNetworkState
                 + " newNetworkState: " + newNetworkState
-                + " newNetworkID: " + newNetworkID
                 + " lastNetworkID: " + lastNetworkID
+                + " newNetworkID: " + newNetworkID
         );
         // current network state is other than incoming
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
             final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
             Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
-            isNetworkConnectionAvailable = /*isNetworkAvailable ||*/ isAnyNetworkConnectionAvailable;
+            // should only be the current state which holds in isAnyNetworkConnectionAvailable
+            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
         }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i("same state -> ignoring");
@@ -467,52 +470,53 @@ public class NetworkStateHelper {
         isInternetWiMax = niWiMax != null && niWiMax.isConnected();
         isInternetMobile = niMobile != null && niMobile.isConnected();
         isInternetOther = niOther != null && niOther.isConnected();
-        Log.i("isInternetWiFi: " + isInternetWiFi
-                + " isInternetWiMax: " + isInternetWiMax
-                + " isInternetMobile: " + isInternetMobile
-                + " isInternetOther: " + isInternetOther);
 
         final boolean hasFreeConnection = (isInternetWiFi || isInternetWiMax || isInternetMobile || isInternetOther);
         if (hasFreeConnection) {
             Log.i("hasFreeConnection: true");
             return true;
-        }
-        if (niWiFi != null) {
-            Log.i("niWiFi:"
-                    + " isAvailable(): " + niWiFi.isAvailable()
-                    + " isConnected(): " + niWiFi.isConnected()
-                    + " isConnectedOrConnecting(): " + niWiFi.isConnectedOrConnecting()
-                    + " isFailover(): " + niWiFi.isFailover()
-                    + " isRoaming(): " + niWiFi.isRoaming()
-            );
-        }
-        if (niWiMax != null) {
-            Log.i("niWiMax:"
-                    + " isAvailable(): " + niWiMax.isAvailable()
-                    + " isConnected(): " + niWiMax.isConnected()
-                    + " isConnectedOrConnecting(): " + niWiMax.isConnectedOrConnecting()
-                    + " isFailover(): " + niWiMax.isFailover()
-                    + " isRoaming(): " + niWiMax.isRoaming()
-            );
-        }
-        if (niMobile != null) {
-            Log.i("niMobile:"
-                    + " isAvailable(): " + niMobile.isAvailable()
-                    + " isConnected(): " + niMobile.isConnected()
-                    + " isConnectedOrConnecting(): " + niMobile.isConnectedOrConnecting()
-                    + " isFailover(): " + niMobile.isFailover()
-                    + " isRoaming(): " + niMobile.isRoaming()
-            );
-        }
-        if (niOther != null) {
-            Log.i("niOther:"
-                    + " isAvailable(): " + niOther.isAvailable()
-                    + " isConnected(): " + niOther.isConnected()
-                    + " isConnectedOrConnecting(): " + niOther.isConnectedOrConnecting()
-                    + " isFailover(): " + niOther.isFailover()
-                    + " isRoaming(): " + niOther.isRoaming()
-            );
-        }
+        } else
+            Log.i("isInternetWiFi: " + isInternetWiFi + " networkInfo: " + niWiFi
+                    + "\nisInternetWiMax: " + isInternetWiMax + " networkInfo: " + niWiMax
+                    + "\nisInternetMobile: " + isInternetMobile + " networkInfo: " + niMobile
+                    + "\nisInternetOther: " + isInternetOther + " networkInfo: " + niOther);
+
+//        if (niWiFi != null) {
+//            Log.i("niWiFi: " + niWiFi + "\n"
+//                    + " isAvailable(): " + niWiFi.isAvailable()
+//                    + " isConnected(): " + niWiFi.isConnected()
+//                    + " isConnectedOrConnecting(): " + niWiFi.isConnectedOrConnecting()
+//                    + " isFailover(): " + niWiFi.isFailover()
+//                    + " isRoaming(): " + niWiFi.isRoaming()
+//            );
+//        }
+//        if (niWiMax != null) {
+//            Log.i("niWiMax: " + niWiMax + "\n"
+//                    + " isAvailable(): " + niWiMax.isAvailable()
+//                    + " isConnected(): " + niWiMax.isConnected()
+//                    + " isConnectedOrConnecting(): " + niWiMax.isConnectedOrConnecting()
+//                    + " isFailover(): " + niWiMax.isFailover()
+//                    + " isRoaming(): " + niWiMax.isRoaming()
+//            );
+//        }
+//        if (niMobile != null) {
+//            Log.i("niMobile: " + niMobile + "\n"
+//                    + " isAvailable(): " + niMobile.isAvailable()
+//                    + " isConnected(): " + niMobile.isConnected()
+//                    + " isConnectedOrConnecting(): " + niMobile.isConnectedOrConnecting()
+//                    + " isFailover(): " + niMobile.isFailover()
+//                    + " isRoaming(): " + niMobile.isRoaming()
+//            );
+//        }
+//        if (niOther != null) {
+//            Log.i("niOther: " + niOther + "\n"
+//                    + " isAvailable(): " + niOther.isAvailable()
+//                    + " isConnected(): " + niOther.isConnected()
+//                    + " isConnectedOrConnecting(): " + niOther.isConnectedOrConnecting()
+//                    + " isFailover(): " + niOther.isFailover()
+//                    + " isRoaming(): " + niOther.isRoaming()
+//            );
+//        }
         isInternetWiFi = niWiFi != null && niWiFi.isRoaming();
         isInternetMobile = niMobile != null && niMobile.isRoaming();
         isInternetWiMax = niWiMax != null && niWiMax.isRoaming();
