@@ -144,7 +144,7 @@ public class NetworkStateHelper {
         Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
         if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable) {
             // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long
-            // or due to doze mode we will assume that host is reachable
+            // or due to doze mode. Assume host is reachable
             handleNetworkState(false, true, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, null, null);
             return true;
         }
