@@ -180,7 +180,7 @@ public class NetworkStateHelper {
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
             final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
             Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
-            isNetworkConnectionAvailable = isNetworkAvailable || isAnyNetworkConnectionAvailable;
+            isNetworkConnectionAvailable = /*isNetworkAvailable ||*/ isAnyNetworkConnectionAvailable;
         }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i("same state -> ignoring");
