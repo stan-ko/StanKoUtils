@@ -51,7 +51,7 @@ public class NetworkStateHelper {
     private static Boolean isHostReachable;
 
     static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
-//    private static StoppableThread sCheckIfHostRespondsThread;
+    //    private static StoppableThread sCheckIfHostRespondsThread;
     private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
 
@@ -176,9 +176,11 @@ public class NetworkStateHelper {
                 + " newNetworkID: " + newNetworkID
                 + " lastNetworkID: " + lastNetworkID
         );
+        // current network state is other than incoming
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
-            Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable());
-            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+            final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+            Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
+            isNetworkConnectionAvailable = isNetworkAvailable || isAnyNetworkConnectionAvailable;
         }
         if (TextUtils.equals(lastNetworkID, newNetworkID) && lastNetworkState == newNetworkState && wasNetworkAvailable == isNetworkAvailable) {
             Log.i("same state -> ignoring");
@@ -187,7 +189,7 @@ public class NetworkStateHelper {
             if (TextUtils.isEmpty(sHostToCheck) || isHostReachable != null || !isNetworkConnectionAvailable)
                 return;
         }
-        // check if last lastNetworkID is WiFi's one (SSID/BSSID) and is it the same
+        // check if last lastNetworkID is WiFi's one (SSID/BSSID) and it is the same
         // or we switched from one WiFi network to another (networkId is changed)
         // cuz if its WiFi but networkId is changed - it is another WiFi network
         // and it could be a LAN via WiFi (with no Internet connection available)
@@ -244,21 +246,22 @@ public class NetworkStateHelper {
                 Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
-                    isHostReachable = doesHostRespond;
-                    final EventBus eventBus = EventBus.getDefault();
-                    if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-                        eventBus.post(new NetworkStateReceiverEvent(false,
-                                isNetworkConnectionAvailable,
-                                doesHostRespond,
-                                lastNetworkState,
-                                newNetworkState,
-                                lastNetworkID,
-                                newNetworkID));
-                    }
+                isHostReachable = doesHostRespond;
+                final EventBus eventBus = EventBus.getDefault();
+                if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
+                    eventBus.post(new NetworkStateReceiverEvent(false,
+                            isNetworkConnectionAvailable,
+                            doesHostRespond,
+                            lastNetworkState,
+                            newNetworkState,
+                            lastNetworkID,
+                            newNetworkID));
+                }
                 aiCheckIfHostRespondsThreadsCount.decrementAndGet();
                 synchronized (sCheckIfHostRespondsTasks) {
                     sCheckIfHostRespondsTasks.remove(this); // could be already removed
                     if (sCheckIfHostRespondsTasks.size() > 0) {
+                        Log.i("ExecutorService.execute(sCheckIfHostRespondsTasks.pop()) from task inside");
                         sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
                     }
                 }
@@ -278,8 +281,10 @@ public class NetworkStateHelper {
             // no queue - add current task and execute it
             sCheckIfHostRespondsTasks.add(checkIfHostRespondsTask);
             // if there was no tasks
-            if (!hasTasks)
+            if (!hasTasks) {
                 sExecutorService.execute(checkIfHostRespondsTask);
+                Log.i("ExecutorService.execute(sCheckIfHostRespondsTask) from task inside");
+            }
         }
     }
 
@@ -375,13 +380,13 @@ public class NetworkStateHelper {
         }).start();
     }
 
-/**
- * Interface to deliver result of {@link #checkIfHostResponds(String, ICheckIfHostResponds)}
- */
-public interface ICheckIfHostResponds {
-    void doesHostRespond(boolean doestIt);
+    /**
+     * Interface to deliver result of {@link #checkIfHostResponds(String, ICheckIfHostResponds)}
+     */
+    public interface ICheckIfHostResponds {
+        void doesHostRespond(boolean doestIt);
 
-}
+    }
 
 
     /**
@@ -405,7 +410,10 @@ public interface ICheckIfHostResponds {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
+        if (networkInfo != null)
+            Log.i("networkInfo: " + networkInfo + " isConnected(): " + networkInfo.isConnected());
+        else
+            Log.i("networkInfo: is null");
         return networkInfo != null && networkInfo.isConnected();
     }
 
@@ -425,14 +433,18 @@ public interface ICheckIfHostResponds {
     }
 
     private static boolean isAnyNetworkConnectionAvailable() {
-        if (isActiveNetworkConnectionAvailable(sAppContext))
-            return true;
 
-        boolean isInternetWiFi, isInternetMobile, isInternetWiMax, isInternetOther;
-//        int connectionType = 0;
+        if (isActiveNetworkConnectionAvailable(sAppContext)) {
+            Log.i("isActiveNetworkConnectionAvailable: true");
+            return true;
+        } else {
+            Log.i("isActiveNetworkConnectionAvailable: false");
+        }
 
         if (!setConnectivityManager())
             return false;
+
+        boolean isInternetWiFi, isInternetMobile, isInternetWiMax, isInternetOther;
 
         // determine the type of network
 //		int TYPE_BLUETOOTH		The Bluetooth data connection.
@@ -451,15 +463,63 @@ public interface ICheckIfHostResponds {
         final NetworkInfo niWiMax = sConnectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIMAX);
         final NetworkInfo niOther = sConnectivityManager.getActiveNetworkInfo();
 
-//        if (niOther != null)
-//            connectionType = niOther.getType();
+        isInternetWiFi = niWiFi != null && niWiFi.isConnected();
+        isInternetWiMax = niWiMax != null && niWiMax.isConnected();
+        isInternetMobile = niMobile != null && niMobile.isConnected();
+        isInternetOther = niOther != null && niOther.isConnected();
+        Log.i("isInternetWiFi: " + isInternetWiFi
+                + " isInternetWiMax: " + isInternetWiMax
+                + " isInternetMobile: " + isInternetMobile
+                + " isInternetOther: " + isInternetOther);
 
-        isInternetWiFi = niWiFi != null && niWiFi.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-        isInternetMobile = niMobile != null && niMobile.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-        isInternetWiMax = niWiMax != null && niWiMax.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-        isInternetOther = niOther != null && niOther.isConnected(); //.getState() == NetworkInfo.State.CONNECTED;
-
-        return (isInternetWiFi || isInternetWiMax || isInternetMobile || isInternetOther);
+        final boolean hasFreeConnection = (isInternetWiFi || isInternetWiMax || isInternetMobile || isInternetOther);
+        if (hasFreeConnection) {
+            Log.i("hasFreeConnection: true");
+            return true;
+        }
+        if (niWiFi != null) {
+            Log.i("niWiFi:"
+                    + " isAvailable(): " + niWiFi.isAvailable()
+                    + " isConnected(): " + niWiFi.isConnected()
+                    + " isConnectedOrConnecting(): " + niWiFi.isConnectedOrConnecting()
+                    + " isFailover(): " + niWiFi.isFailover()
+                    + " isRoaming(): " + niWiFi.isRoaming()
+            );
+        }
+        if (niWiMax != null) {
+            Log.i("niWiMax:"
+                    + " isAvailable(): " + niWiMax.isAvailable()
+                    + " isConnected(): " + niWiMax.isConnected()
+                    + " isConnectedOrConnecting(): " + niWiMax.isConnectedOrConnecting()
+                    + " isFailover(): " + niWiMax.isFailover()
+                    + " isRoaming(): " + niWiMax.isRoaming()
+            );
+        }
+        if (niMobile != null) {
+            Log.i("niMobile:"
+                    + " isAvailable(): " + niMobile.isAvailable()
+                    + " isConnected(): " + niMobile.isConnected()
+                    + " isConnectedOrConnecting(): " + niMobile.isConnectedOrConnecting()
+                    + " isFailover(): " + niMobile.isFailover()
+                    + " isRoaming(): " + niMobile.isRoaming()
+            );
+        }
+        if (niOther != null) {
+            Log.i("niOther:"
+                    + " isAvailable(): " + niOther.isAvailable()
+                    + " isConnected(): " + niOther.isConnected()
+                    + " isConnectedOrConnecting(): " + niOther.isConnectedOrConnecting()
+                    + " isFailover(): " + niOther.isFailover()
+                    + " isRoaming(): " + niOther.isRoaming()
+            );
+        }
+        isInternetWiFi = niWiFi != null && niWiFi.isRoaming();
+        isInternetMobile = niMobile != null && niMobile.isRoaming();
+        isInternetWiMax = niWiMax != null && niWiMax.isRoaming();
+        isInternetOther = niOther != null && niOther.isRoaming();
+        final boolean hasRoamingConnection = (isInternetWiFi || isInternetWiMax || isInternetMobile || isInternetOther);
+        Log.i("hasRoamingConnection: " + hasRoamingConnection);
+        return hasRoamingConnection;
     }
 
     /**
