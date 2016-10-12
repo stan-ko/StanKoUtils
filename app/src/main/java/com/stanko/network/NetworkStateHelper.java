@@ -142,7 +142,7 @@ public class NetworkStateHelper {
     public static boolean isNetworkAvailable() {
         final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
-        // when isNetworkConnectionAvailable is wrong due to isAnyNetworkConnectionAvailable
+        // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long or doze
         isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
             if (!isHostReachable) {
@@ -151,7 +151,7 @@ public class NetworkStateHelper {
             }
             return isHostReachable;
         }
-        return isNetworkConnectionAvailable || isAnyNetworkConnectionAvailable;
+        return isNetworkConnectionAvailable;
     }
 
     /**
