@@ -142,8 +142,12 @@ public class NetworkStateHelper {
     public static boolean isNetworkAvailable() {
         final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
-        // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long or doze
-        isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable;
+        if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable) {
+            // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long
+            // or due to doze mode we will assume that host is reachable
+            handleNetworkState(false, true, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, null, null);
+            return true;
+        }
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
             if (!isHostReachable) {
                 // emulate was no network and now we got it
