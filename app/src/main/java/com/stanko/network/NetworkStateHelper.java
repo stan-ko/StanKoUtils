@@ -139,7 +139,7 @@ public class NetworkStateHelper {
      */
     public static boolean isNetworkAvailable() {
         final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
-        Log.i("isNetworkAvailable(): isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable);
+        Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable+" isHostReachable: "+isHostReachable);
         if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable) {
             // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long
             // or due to doze mode. Assume host is reachable
@@ -251,6 +251,7 @@ public class NetworkStateHelper {
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
                 isHostReachable = doesHostRespond;
+                Log.i("checkIfHostRespondsTask isHostReachable: "+isHostReachable);
                 final EventBus eventBus = EventBus.getDefault();
                 if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
                     eventBus.post(new NetworkStateReceiverEvent(false,
@@ -274,21 +275,24 @@ public class NetworkStateHelper {
             }
         };
         synchronized (sCheckIfHostRespondsTasks) {
+            Log.i("sCheckIfHostRespondsTasks.size(): "+sCheckIfHostRespondsTasks.size());
             // if there is a queue of tasks - kill all the previous
             // there must be no more than 1-2 tasks at a time
             final boolean hasTasks = sCheckIfHostRespondsTasks.size() > 0;
             if (hasTasks) { // at least 1 task is executing now
                 // remove all tasks from stack
-                while (sCheckIfHostRespondsTasks.size() > 0)
+                while (sCheckIfHostRespondsTasks.size() > 0) {
                     sCheckIfHostRespondsTasks.pop();
+                    Log.i("sCheckIfHostRespondsTasks.pop(): "+sCheckIfHostRespondsTasks.size());
+                }
             }
             // no queue - add current task and execute it
             sCheckIfHostRespondsTasks.add(checkIfHostRespondsTask);
-            // if there was no tasks
-            if (!hasTasks) {
+//            // if there was no tasks
+//            if (!hasTasks) {
                 sExecutorService.execute(checkIfHostRespondsTask);
                 Log.i("ExecutorService.execute(sCheckIfHostRespondsTask) from task inside");
-            }
+//            }
         }
     }
 
