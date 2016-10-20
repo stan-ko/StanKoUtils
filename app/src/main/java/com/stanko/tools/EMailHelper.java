@@ -48,11 +48,27 @@ public class EMailHelper {
     public static boolean isValidEmail(final String email) {
         if (TextUtils.isEmpty(email))
             return false;
-
-        final String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}";
+        // https://en.wikipedia.org/wiki/Domain_Name_System
+        // a label may contain zero to 63 characters
+        // subdivisions may have up to 127 levels
+        // but total domain name 253 chars max
+        final String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,63}";
         final Pattern p = Pattern.compile(expression);
         final Matcher m = p.matcher(email);
-        return m.matches();
+        if (m.matches()) {
+            final String domainPart = expression.substring(expression.indexOf("@") + 1);
+            final String[] domainParts = domainPart.split(".");
+            if (domainParts.length < 127) {
+                // check labels
+                for (String domainLabel : domainParts) {
+                    if (domainLabel.length() < 1 || domainLabel.length() > 63)
+                        return false;
+                }
+                return domainPart.length() < 254;
+            } else
+                return false;
+        } else
+            return false;
     }
 
     private final static String[] knownPackages = new String[]{
@@ -108,8 +124,8 @@ public class EMailHelper {
             emailIntent.setPackage(resInfo.get(0).activityInfo.packageName);
             return true;
         }
-        int count=0;
-        String targetPackage=null;
+        int count = 0;
+        String targetPackage = null;
         for (ResolveInfo info : resInfo) {
             for (String sharePackage : knownPackages) {
                 if (info.activityInfo.packageName.toLowerCase(Locale.US).contains(sharePackage)
@@ -119,9 +135,9 @@ public class EMailHelper {
                 }
             }
         }
-        if (count==1)
+        if (count == 1)
             emailIntent.setPackage(targetPackage);
-        return count==1;
+        return count == 1;
     }
 
 
@@ -380,8 +396,7 @@ public class EMailHelper {
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
-        }
-        else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
+        } else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(emailIntent);
             } catch (SecurityException e) {
@@ -669,8 +684,7 @@ public class EMailHelper {
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
-        }
-        else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
+        } else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(emailIntent);
             } catch (SecurityException e) {

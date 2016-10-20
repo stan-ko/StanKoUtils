@@ -8,9 +8,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.stanko.tools.BackgroundThreadFactory;
-import com.stanko.tools.BooleanLock;
 import com.stanko.tools.Log;
-import com.stanko.tools.StoppableThread;
 
 import org.greenrobot.eventbus.EventBus;
 
@@ -484,42 +482,6 @@ public class NetworkStateHelper {
                     + "\nisInternetMobile: " + isInternetMobile + " networkInfo: " + niMobile
                     + "\nisInternetOther: " + isInternetOther + " networkInfo: " + niOther);
 
-//        if (niWiFi != null) {
-//            Log.i("niWiFi: " + niWiFi + "\n"
-//                    + " isAvailable(): " + niWiFi.isAvailable()
-//                    + " isConnected(): " + niWiFi.isConnected()
-//                    + " isConnectedOrConnecting(): " + niWiFi.isConnectedOrConnecting()
-//                    + " isFailover(): " + niWiFi.isFailover()
-//                    + " isRoaming(): " + niWiFi.isRoaming()
-//            );
-//        }
-//        if (niWiMax != null) {
-//            Log.i("niWiMax: " + niWiMax + "\n"
-//                    + " isAvailable(): " + niWiMax.isAvailable()
-//                    + " isConnected(): " + niWiMax.isConnected()
-//                    + " isConnectedOrConnecting(): " + niWiMax.isConnectedOrConnecting()
-//                    + " isFailover(): " + niWiMax.isFailover()
-//                    + " isRoaming(): " + niWiMax.isRoaming()
-//            );
-//        }
-//        if (niMobile != null) {
-//            Log.i("niMobile: " + niMobile + "\n"
-//                    + " isAvailable(): " + niMobile.isAvailable()
-//                    + " isConnected(): " + niMobile.isConnected()
-//                    + " isConnectedOrConnecting(): " + niMobile.isConnectedOrConnecting()
-//                    + " isFailover(): " + niMobile.isFailover()
-//                    + " isRoaming(): " + niMobile.isRoaming()
-//            );
-//        }
-//        if (niOther != null) {
-//            Log.i("niOther: " + niOther + "\n"
-//                    + " isAvailable(): " + niOther.isAvailable()
-//                    + " isConnected(): " + niOther.isConnected()
-//                    + " isConnectedOrConnecting(): " + niOther.isConnectedOrConnecting()
-//                    + " isFailover(): " + niOther.isFailover()
-//                    + " isRoaming(): " + niOther.isRoaming()
-//            );
-//        }
         isInternetWiFi = niWiFi != null && niWiFi.isRoaming();
         isInternetMobile = niMobile != null && niMobile.isRoaming();
         isInternetWiMax = niWiMax != null && niWiMax.isRoaming();

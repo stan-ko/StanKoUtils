@@ -60,7 +60,7 @@ public class SharedPrefsHelper {
     public static synchronized boolean initSecured(final Context context) {
         Exception caughtException = null;
         final Context appContext = context.getApplicationContext();
-        final String packageName =  appContext.getPackageName();
+        final String packageName = appContext.getPackageName();
         try {
             initSecured(appContext, packageName);
         } catch (Exception e) {
@@ -220,7 +220,7 @@ public class SharedPrefsHelper {
         else if (value instanceof Float)
             prefsEditor.putFloat(theKey, (float) value);
         else if (value instanceof Double)
-            prefsEditor.putFloat(theKey, (float) ((double) value)); //unwrap Double and cast to float
+            prefsEditor.putLong(theKey, Double.doubleToRawLongBits((double) value));
         else if (value instanceof Long)
             prefsEditor.putLong(theKey, (long) value);
         else if (value instanceof Boolean)
@@ -287,7 +287,7 @@ public class SharedPrefsHelper {
                 else if (value instanceof Float)
                     prefsEditor.putFloat(theKey, (float) value);
                 else if (value instanceof Double)
-                    prefsEditor.putFloat(theKey, (float) ((double) value)); //unwrap Double and cast to float
+                    prefsEditor.putLong(theKey, Double.doubleToRawLongBits((double) value));
                 else if (value instanceof Long)
                     prefsEditor.putLong(theKey, (Long) value);
                 else if (value instanceof Boolean)
@@ -346,7 +346,7 @@ public class SharedPrefsHelper {
                 else if (value instanceof Float)
                     prefsEditor.putFloat(theKey, (float) value);
                 else if (value instanceof Double)
-                    prefsEditor.putFloat(theKey, (float) ((double) value)); //unwrap Double and cast to float
+                    prefsEditor.putLong(theKey, Double.doubleToRawLongBits((double) value));
                 else if (value instanceof Long)
                     prefsEditor.putLong(theKey, (Long) value);
                 else if (value instanceof Boolean)
@@ -559,10 +559,14 @@ public class SharedPrefsHelper {
             logNullParams(theKey);
             return null;
         }
-        if (defaultValue == null)
-            return (double) getFloat(prefs, theKey, null);
-        else
-            return (double) getFloat(prefs, theKey, defaultValue.floatValue());
+        if (defaultValue != null) {
+            return Double.longBitsToDouble(prefs.getLong(theKey, Double.doubleToLongBits(defaultValue)));
+        } else {
+            if (!prefs.contains(theKey))
+                return defaultValue;
+
+            return Double.longBitsToDouble(prefs.getLong(theKey, 0));
+        }
     }
 
     /*
