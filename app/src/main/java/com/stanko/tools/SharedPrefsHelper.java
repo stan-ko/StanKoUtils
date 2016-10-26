@@ -8,6 +8,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 
 import com.securepreferences.SecurePreferences;
+import com.tozny.crypto.android.AesCbcWithIntegrity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -32,8 +33,6 @@ import java.util.Set;
  */
 public class SharedPrefsHelper {
 
-    private static final Class<SharedPrefsHelper> LOGTAG = SharedPrefsHelper.class;
-
     private static final String SHARED_PREFS_AVATAR_FILE_NAME = "avatar.jpg";
 
     private static String mLastUsedSharedPrefsName = "SharedPrefsHelper";
@@ -51,6 +50,10 @@ public class SharedPrefsHelper {
 
     // context NPE not safe
     public static synchronized void init(final Context context, final String sharedPrefsName) {
+        if (isSecuredMode){
+            // switching from secured to nonsecured
+            sharedPreferencesInstances.remove(sharedPrefsName);
+        }
         isSecuredMode = false;
         SharedPrefsHelper.appContext = context.getApplicationContext();
         getSharedPreferences(appContext, sharedPrefsName);
@@ -61,12 +64,27 @@ public class SharedPrefsHelper {
         Exception caughtException = null;
         final Context appContext = context.getApplicationContext();
         final String packageName = appContext.getPackageName();
+
+        // attempt #1
         try {
             initSecured(appContext, packageName);
         } catch (Exception e) {
             caughtException = e;
             // most probably NoSuchAlgorithmException
         }
+
+        // attempt #2
+        if (caughtException != null) {
+            AesCbcWithIntegrity.PrngFixes.apply();
+            try {
+                initSecured(appContext, packageName);
+            } catch (Exception e) {
+                // most probably NoSuchAlgorithmException
+                caughtException = e;
+            }
+        }
+
+        // attempt #3
         if (caughtException != null) {
             Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
             try {
@@ -76,6 +94,7 @@ public class SharedPrefsHelper {
                 caughtException = e;
             }
         }
+
         if (caughtException != null) {
             Log.e(caughtException);
             Log.e("Initializing regular (not secured) version");
@@ -86,6 +105,10 @@ public class SharedPrefsHelper {
 
     // context NPE not safe
     public static synchronized void initSecured(final Context context, final String sharedPrefsName) {
+        if (!isSecuredMode){
+            // switching from nonsecured to secured
+            sharedPreferencesInstances.remove(sharedPrefsName);
+        }
         isSecuredMode = true;
         SharedPrefsHelper.appContext = context.getApplicationContext();
         getSharedPreferences(appContext, sharedPrefsName);
@@ -206,12 +229,9 @@ public class SharedPrefsHelper {
                         && !(value instanceof Boolean)
                         && !(value instanceof JSONObject || value instanceof JSONArray)
                         && !(value instanceof Serializable)) {
-            Log.e(LOGTAG, new NullPointerException("save(): null or incompatible type (not String, Number, Boolean, JSONObject, JSONArray or Serializable) in parameters. Key: " + theKey + " Value: " + value));
+            Log.e(new NullPointerException("save(): null or incompatible type (not String, Number, Boolean, JSONObject, JSONArray or Serializable) in parameters. Key: " + theKey + " Value: " + value));
             return false;
         }
-
-        //final SharedPreferences.Editor prefsEditor = getSharedPreferencesEditor(context);
-//		Log.d(LOGTAG,"Saving the key: "+theKey+" with value: "+value);
 
         if (value instanceof String)
             prefsEditor.putString(theKey, (String) value);
@@ -264,7 +284,7 @@ public class SharedPrefsHelper {
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
         if (prefsEditor == null || keys == null || keys.length == 0 || values == null) {
-            //Log.e(LOGTAG, "save(): null in parameters");
+            //Log.e("save(): null in parameters");
             logNullParams(keys.toString());
             return false;
         }
@@ -327,7 +347,7 @@ public class SharedPrefsHelper {
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
         if (prefsEditor == null || keysAndValues == null || keysAndValues.size() == 0) {
-            //Log.e(LOGTAG, "save(): null in parameters");
+            //Log.e("save(): null in parameters");
             logNullParams(keysAndValues.getClass().getName());
             return false;
         }
@@ -386,7 +406,7 @@ public class SharedPrefsHelper {
 
     public static String getString(final SharedPreferences prefs, final String theKey, final String defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getString(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getString(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
@@ -459,11 +479,11 @@ public class SharedPrefsHelper {
 
     public static Integer getInteger(final SharedPreferences prefs, final String theKey, final Integer defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getInteger(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getInteger(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
-//		Log.d(LOGTAG, "Loading value for key: "+theKey+" with default: "+defaultValue);
+//		Log.d("Loading value for key: "+theKey+" with default: "+defaultValue);
         //restorePreferences
         Integer result = defaultValue;
         //final SharedPreferences prefs = getSharedPreferences(context);
@@ -507,7 +527,7 @@ public class SharedPrefsHelper {
 
     public static Long getLong(final SharedPreferences prefs, final String theKey, final Long defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getLong(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getLong(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
@@ -555,7 +575,7 @@ public class SharedPrefsHelper {
 
     public static Double getDouble(final SharedPreferences prefs, final String theKey, final Double defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getDouble(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getDouble(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
@@ -598,7 +618,7 @@ public class SharedPrefsHelper {
 
     public static Float getFloat(final SharedPreferences prefs, final String theKey, final Float defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getFloat(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getFloat(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
@@ -646,7 +666,7 @@ public class SharedPrefsHelper {
 
     public static Boolean getBoolean(final SharedPreferences prefs, final String theKey, final Boolean defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
-            //Log.e(LOGTAG, "getBoolean(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getBoolean(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
             return null;
         }
@@ -693,7 +713,7 @@ public class SharedPrefsHelper {
     public static Object getObject(final SharedPreferences prefs, final String theKey, final Object defaultValue) {
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             logNullParams(theKey);
-            //Log.e(LOGTAG, "getObject(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
+            //Log.e("getObject(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             return null;
         }
         //restorePreferences
@@ -815,11 +835,11 @@ public class SharedPrefsHelper {
     }
 
     private static void logNullContext(final String theKey) {
-        Log.w(LOGTAG, new NullPointerException("null context in parameters. Key: " + theKey).toString());
+        Log.w(new NullPointerException("null context in parameters. Key: " + theKey).toString());
     }
 
     private static void logNullParams(final String theKey) {
-        Log.e(LOGTAG, new NullPointerException("null in parameters. Key: " + theKey));
+        Log.e(new NullPointerException("null in parameters. Key: " + theKey));
     }
 
 
