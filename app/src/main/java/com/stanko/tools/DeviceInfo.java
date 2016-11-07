@@ -884,188 +884,65 @@ public class DeviceInfo {
 
     public static boolean isAPI7() { //ECLAIR_MR1
         return Build.VERSION.SDK_INT == 7;
-//        Boolean isAPI7 = null;
-//        try{
-//            isAPI7 = hasAPILievel >= 7; //Build.VERSION_CODES.ECLAIR_MR1;
-//        } catch (Exception e){}
-//
-//        if (isAPI7 == null)
-//            isAPI7 = Build.VERSION.RELEASE.startsWith("2.1");
-//
-//        return isAPI7.booleanValue();
     }
 
     public static boolean isAPI8() { //FROYO;
         return Build.VERSION.SDK_INT == 8;
-//        Boolean isAPI8 = null;
-//        try{
-//            isAPI8 = hasAPILievel >= 8; //Build.VERSION_CODES.FROYO;
-//        } catch (Exception e){}
-//
-//        if (isAPI8 == null)
-//            isAPI8 = Build.VERSION.RELEASE.startsWith("2.2");
-//
-//        return isAPI8.booleanValue();
     }
 
     public static boolean isAPI9() { //GINGERBREAD
         return Build.VERSION.SDK_INT == 9;
-//        Boolean isAPI9 = null;
-//        try{
-//            isAPI9 = hasAPILievel >= 9; //Build.VERSION_CODES.GINGERBREAD;
-//        } catch (Exception e){}
-//
-//        if (isAPI9 == null)
-//            isAPI9 = Build.VERSION.RELEASE.startsWith("2.3") &&  !Build.VERSION.RELEASE.startsWith("2.3.");
-//
-//        return isAPI9.booleanValue();
     }
 
     public static boolean isAPI10() { //GINGERBREAD_MR1
         return Build.VERSION.SDK_INT == 10;
-//        Boolean isAPI10 = null;
-//        try{
-//            isAPI10 = hasAPILievel >= 10; //Build.VERSION_CODES.GINGERBREAD_MR1;
-//        } catch (Exception e){}
-//
-//        if (isAPI10 == null)
-//            isAPI10 = Build.VERSION.RELEASE.startsWith("2.3.3") || Build.VERSION.RELEASE.startsWith("2.3.4") || Build.VERSION.RELEASE.startsWith("2.3.5");
-//
-//        return isAPI10.booleanValue();
     }
 
     public static boolean isAPI11() { //HONEYCOMB
         return Build.VERSION.SDK_INT == 11;
-//        Boolean isAPI11 = null;
-//        try{
-//            isAPI11 = hasAPILievel >= 11; //Build.VERSION_CODES.HONEYCOMB;
-//        } catch (Exception e){}
-//
-//        if (isAPI11 == null)
-//            isAPI11 = Build.VERSION.RELEASE.startsWith("3.0");
-//
-//        return isAPI11.booleanValue();
     }
 
     public static boolean isAPI12() { //HONEYCOMB_MR1
         return Build.VERSION.SDK_INT == 12;
-//        Boolean isAPI12 = null;
-//        try{
-//            isAPI12 = hasAPILievel >= 12; //Build.VERSION_CODES.HONEYCOMB_MR1;
-//        } catch (Exception e){}
-//
-//        if (isAPI12 == null)
-//            isAPI12 = Build.VERSION.RELEASE.startsWith("3.1");
-//
-//        return isAPI12.booleanValue();
     }
 
     public static boolean isAPI13() { //HONEYCOMB_MR2
         return Build.VERSION.SDK_INT == 13;
-//        Boolean isAPI13 = null;
-//        try{
-//            isAPI13 = hasAPILievel >= 13; //Build.VERSION_CODES.HONEYCOMB_MR2;
-//        } catch (Exception e){}
-//
-//        if (isAPI13 == null)
-//            isAPI13 = Build.VERSION.RELEASE.startsWith("3.2");
-//
-//        return isAPI13.booleanValue();
     }
 
     public static boolean isAPI14() { //ICE_CREAM_SANDWICH
         return Build.VERSION.SDK_INT == 14;
-//        Boolean isAPI14 = null;
-//        try{
-//            isAPI14 = hasAPILievel >= 14; //Build.VERSION_CODES.ICE_CREAM_SANDWICH;
-//        } catch (Exception e){}
-//
-//        if (isAPI14 == null)
-//            isAPI14 = Build.VERSION.RELEASE.startsWith("4.0");
-//
-//        return isAPI14.booleanValue();
     }
 
     public static boolean isAPI15() { //ICE_CREAM_SANDWICH_MR1
         return Build.VERSION.SDK_INT == 15;
-//        Boolean isAPI15 = null;
-//        try{
-//            isAPI15 = hasAPILievel >= 15; //Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1;
-//        } catch (Exception e){}
-//
-//        if (isAPI15 == null)
-//            isAPI15 = Build.VERSION.RELEASE.startsWith("4.0.3");
-//
-//        return isAPI15.booleanValue();
     }
 
     public static boolean isAPI16() { //JELLY_BEAN
         return Build.VERSION.SDK_INT == 16;
-//        Boolean isAPI16 = null;
-//        try{
-//            isAPI16 = hasAPILievel >= 16; //Build.VERSION_CODES.JELLY_BEAN;
-//        } catch (Exception e){}
-//
-//        if (isAPI16 == null)
-//            isAPI16 = Build.VERSION.RELEASE.startsWith("4.1");
-//
-//        return isAPI16.booleanValue();
     }
 
     public static boolean isAPI17() { //JELLY_BEAN_MR1
         return Build.VERSION.SDK_INT == 17;
-//        Boolean isAPI17 = null;
-//        try{
-//            isAPI17 = hasAPILievel >= 17; //Build.VERSION_CODES.JELLY_BEAN_MR1;
-//        } catch (Exception e){}
-//
-//        if (isAPI17 == null)
-//            isAPI17 = Build.VERSION.RELEASE.startsWith("4.2");
-//
-//        return isAPI17.booleanValue();
     }
 
     public static boolean isAPI18() { //JELLY_BEAN_MR2
         return Build.VERSION.SDK_INT == 18;
-//        Boolean isAPI18 = null;
-//        try{
-//            isAPI18 = hasAPILievel >= 18; //JELLY_BEAN_MR2;
-//        } catch (Exception e){}
-//
-//        if (isAPI18 == null)
-//            isAPI18 = Build.VERSION.RELEASE.startsWith("4.3");
-//
-//        return isAPI18.booleanValue();
     }
 
     public static boolean isAPI19() { //KITKAT
-        return Build.VERSION.SDK_INT == 18;
-//        Boolean isAPI19 = null;
-//        try{
-//            isAPI19 = hasAPILievel >= 19; //Build.VERSION_CODES.KITKAT;
-//        } catch (Exception e){}
-//
-//        if (isAPI19 == null)
-//            isAPI19 = Build.VERSION.RELEASE.startsWith("4.4");
-//
-//        return isAPI19.booleanValue();
+        return Build.VERSION.SDK_INT == 19;
     }
 
     public static boolean isAPI20() {
         return Build.VERSION.SDK_INT == 20;
-//        Boolean isAPI20 = hasAPILievel >= 20;
-//        return isAPI20.booleanValue();
     }
 
     public static boolean isAPI21() { //LOLIPOP
         return Build.VERSION.SDK_INT == 21;
-//        Boolean isAPI21 = hasAPILievel >= 21;
-//        return isAPI21.booleanValue();
     }
 
     public static boolean isAPI22() {
         return Build.VERSION.SDK_INT == 22;
-//        Boolean isAPI22 = hasAPILievel >= 22;
-//        return isAPI22.booleanValue();
     }
 }
