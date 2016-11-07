@@ -53,6 +53,7 @@ public class SharedPrefsHelper {
     public static synchronized void init(final Context context, final String sharedPrefsName) {
         isSecuredMode = false;
         SharedPrefsHelper.appContext = context.getApplicationContext();
+        sharedPreferencesInstances.clear();
         getSharedPreferences(appContext, sharedPrefsName);
     }
 
@@ -88,6 +89,7 @@ public class SharedPrefsHelper {
     public static synchronized void initSecured(final Context context, final String sharedPrefsName) {
         isSecuredMode = true;
         SharedPrefsHelper.appContext = context.getApplicationContext();
+        sharedPreferencesInstances.clear();
         getSharedPreferences(appContext, sharedPrefsName);
     }
 
@@ -113,21 +115,19 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences getSharedPreferences(final Context context, final String sharedPrefsName) {
-        if (TextUtils.isEmpty(sharedPrefsName))
-            return sharedPreferencesInstances.get(mLastUsedSharedPrefsName);
-
-        if (!TextUtils.isEmpty(sharedPrefsName) && !mLastUsedSharedPrefsName.equals(sharedPrefsName) && !sharedPreferencesInstances.containsKey(sharedPrefsName)) {
-            mLastUsedSharedPrefsName = sharedPrefsName;
-            if (appContext == null && context != null)
+        if (!TextUtils.isEmpty(sharedPrefsName) && !sharedPreferencesInstances.containsKey(sharedPrefsName)) {
+            if (appContext == null && context != null) // if init called from this method
                 appContext = context.getApplicationContext();
             if (appContext != null) {
+                mLastUsedSharedPrefsName = sharedPrefsName;
                 if (isSecuredMode)
                     sharedPreferencesInstances.put(mLastUsedSharedPrefsName, new SecurePreferences(
                             appContext,
                             Hash.getMD5(sharedPrefsName),
                             sharedPrefsName));
                 else
-                    sharedPreferencesInstances.put(mLastUsedSharedPrefsName, appContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
+                    sharedPreferencesInstances.put(mLastUsedSharedPrefsName,
+                            appContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
             }
         }
         return sharedPreferencesInstances.get(mLastUsedSharedPrefsName);
@@ -815,11 +815,22 @@ public class SharedPrefsHelper {
     }
 
     private static void logNullContext(final String theKey) {
-        Log.w(LOGTAG, new NullPointerException("null context in parameters. Key: " + theKey).toString());
+        Log.w(new NullPointerException("Null/NPE in parameters."
+                + "\nappContext: " + appContext
+                + "\nmLastUsedSharedPrefsName: " + mLastUsedSharedPrefsName
+                + "\ninstances size: " + sharedPreferencesInstances.size()
+                + "\ngetSharedPreferences(): " + getSharedPreferences()
+                + "\nKey: " + theKey).toString());
     }
 
     private static void logNullParams(final String theKey) {
-        Log.e(LOGTAG, new NullPointerException("null in parameters. Key: " + theKey));
+        Log.e(new NullPointerException("Null/NPE in parameters."
+                + "\nappContext: " + appContext
+                + "\nmLastUsedSharedPrefsName: " + mLastUsedSharedPrefsName
+                + "\ninstances size: " + sharedPreferencesInstances.size()
+                + "\ngetSharedPreferences(): " + getSharedPreferences()
+                + "\nKey: " + theKey).toString());
+//        Log.e(new NullPointerException("Null in parameters. Key: " + theKey));
     }
 
 
