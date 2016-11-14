@@ -191,9 +191,6 @@ public class IntentHelper {
         return startIntent(context, sharingIntent, pickerTitle);
     }
 
-
-
-
     private static boolean startIntent(final Context context, final Intent sharingIntent, final String pickerTitle) {
         boolean isSharingIntentStarted = true;
         try {
@@ -210,4 +207,51 @@ public class IntentHelper {
         }
         return isSharingIntentStarted;
     }
+
+    /**
+     * Dials phone number
+     * @param context
+     * @param phoneNumber
+     * @return
+     */
+    public static boolean dialPhoneNumber(final Context context, final String phoneNumber) {
+        boolean isStarted = true;
+        Intent intent = new Intent(Intent.ACTION_DIAL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        // could be device with no browser installed OR SecurityException
+        try {
+            if (intent.resolveActivity(context.getPackageManager()) != null)
+                context.startActivity(intent);
+//        } catch (SecurityException e) {
+//            e.printStackTrace();
+        } catch (Exception e) {
+            isStarted = false;
+            e.printStackTrace();
+        }
+        return isStarted;
+    }
+
+    /**
+     * Shows map positioned by geoLocation
+     * @param context
+     * @param geoLocation
+     * @return
+     */
+    public static boolean showMap(final Context context, final Uri geoLocation) {
+        boolean isStarted = true;
+        final Intent intent = new Intent(Intent.ACTION_VIEW);
+        intent.setData(geoLocation);
+        // could be device with no browser installed OR SecurityException
+        try {
+            if (intent.resolveActivity(context.getPackageManager()) != null)
+                context.startActivity(intent);
+//        } catch (SecurityException e) {
+//            e.printStackTrace();
+        } catch (Exception e) {
+            isStarted = false;
+            e.printStackTrace();
+        }
+        return isStarted;
+    }
+
 }
