@@ -156,7 +156,7 @@ public class NetworkStateHelper {
         if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
             if (!isHostReachable) {
                 // emulate was no network and now we got it
-                checkIfHostResponds(NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
+                checkIfHostResponds(false, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
             }
             return isHostReachable;
         }
@@ -208,8 +208,8 @@ public class NetworkStateHelper {
 
 //        sLastNetworkState = newNetworkState;
         if (isNetworkAvailable && !TextUtils.isEmpty(sHostToCheck)) {
-            // first check host then post Event bia EventBus
-            checkIfHostResponds(lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
+            // first check host then post NetworkStateEvent using EventBus
+            checkIfHostResponds(wasNetworkAvailable, lastNetworkState, newNetworkState, lastNetworkID, newNetworkID);
         } else {
             // no host to check - post Event about connectivity change
             final EventBus eventBus = EventBus.getDefault();
@@ -234,7 +234,8 @@ public class NetworkStateHelper {
      * @param lastNetworkID
      * @param newNetworkID
      */
-    static void checkIfHostResponds(final NetworkState lastNetworkState,
+    static void checkIfHostResponds(final boolean wasNetworkAvailable,
+                                    final NetworkState lastNetworkState,
                                     final NetworkState newNetworkState,
                                     final String lastNetworkID,
                                     final String newNetworkID) {
@@ -252,8 +253,9 @@ public class NetworkStateHelper {
         final NSHRunnable checkIfHostRespondsTask = new NSHRunnable() {
             @Override
             public void run() {
+                Log.i("checkIfHostRespondsTask started");
                 isRunning = true;
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
@@ -261,7 +263,7 @@ public class NetworkStateHelper {
                 Log.i("checkIfHostRespondsTask isHostReachable: " + isHostReachable);
                 final EventBus eventBus = EventBus.getDefault();
                 if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
-                    eventBus.post(new NetworkStateReceiverEvent(false,
+                    eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable,
                             isNetworkConnectionAvailable,
                             doesHostRespond,
                             lastNetworkState,
