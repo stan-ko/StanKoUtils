@@ -7,7 +7,6 @@ import android.net.NetworkInfo;
 import android.os.Looper;
 import android.text.TextUtils;
 
-import com.stanko.tools.BackgroundThreadFactory;
 import com.stanko.tools.Log;
 
 import org.greenrobot.eventbus.EventBus;
@@ -22,8 +21,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Stack;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HostnameVerifier;
@@ -48,8 +45,7 @@ public class NetworkStateHelper {
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
 
-    static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
-    //    private static StoppableThread sCheckIfHostRespondsThread;
+//    static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
     private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
 
@@ -140,7 +136,8 @@ public class NetworkStateHelper {
     }
 
     /**
-     * Checks if currently device has any network connection without ensuring it has Internet access.
+     * Checks if currently device has any network connection without ensuring it has Internet access
+     * And additionally it starts a host check task to ping the host
      *
      * @return true if connection persists or false otherwise
      */
@@ -158,7 +155,7 @@ public class NetworkStateHelper {
                 // emulate was no network and now we got it
                 checkIfHostResponds(false, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
             }
-            return isHostReachable;
+//            return isHostReachable; // wrong because network could be available but not the host
         }
         return isNetworkConnectionAvailable;
     }
@@ -255,7 +252,7 @@ public class NetworkStateHelper {
             public void run() {
                 Log.i("checkIfHostRespondsTask started");
                 isRunning = true;
-                //android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
@@ -276,7 +273,8 @@ public class NetworkStateHelper {
                     sCheckIfHostRespondsTasks.remove(this); // could be already removed
                     if (sCheckIfHostRespondsTasks.size() > 0) {
                         Log.i("ExecutorService.execute(sCheckIfHostRespondsTasks.pop()) from task inside");
-                        sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
+                        //sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
+                        executeTask(sCheckIfHostRespondsTasks.pop());
                     }
                 }
                 isRunning = false;
@@ -299,10 +297,18 @@ public class NetworkStateHelper {
             sCheckIfHostRespondsTasks.add(checkIfHostRespondsTask);
 //            // if there was no tasks
 //            if (!hasTasks) {
-            sExecutorService.execute(checkIfHostRespondsTask);
+            //sExecutorService.execute(checkIfHostRespondsTask);
+            executeTask(checkIfHostRespondsTask);
             Log.i("ExecutorService.execute(sCheckIfHostRespondsTask) from task inside");
 //            }
         }
+    }
+
+    static void executeTask(Runnable checkIfHostRespondsTask) {
+        final Thread checkIfHostRespondsTaskThread = new Thread(checkIfHostRespondsTask);
+        checkIfHostRespondsTaskThread.setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+        checkIfHostRespondsTaskThread.setName("checkIfHostRespondsTaskThread");
+        checkIfHostRespondsTaskThread.start();
     }
 
 
@@ -363,10 +369,22 @@ public class NetworkStateHelper {
                 new X509TrustManager() {
                     @Override
                     public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        try {
+                            chain[0].checkValidity();
+                        } catch (Exception e) {
+                            //throw new CertificateException("Certificate not valid or trusted.");
+                            Log.e(e);
+                        }
                     }
 
                     @Override
                     public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                        try {
+                            chain[0].checkValidity();
+                        } catch (Exception e) {
+                            //throw new CertificateException("Certificate not valid or trusted.");
+                            Log.e(e);
+                        }
                     }
 
                     @Override
