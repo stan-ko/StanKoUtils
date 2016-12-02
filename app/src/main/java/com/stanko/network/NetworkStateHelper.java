@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 
@@ -53,6 +54,8 @@ public class NetworkStateHelper {
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
 
     private static NetworkStateReceiver sNetworkStateReceiver;
+
+    private static final Handler sHandler = new Handler();
 
     public static synchronized void init(final Context context) {
         if (sAppContext == null)
@@ -150,17 +153,26 @@ public class NetworkStateHelper {
         if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable) {
             // when isNetworkConnectionAvailable is wrong due to app was paused/on bg too long
             // or due to doze mode. Assume host is reachable
-            handleNetworkState(false, true, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, null, null);
-            return true;
-        }
-        if (!TextUtils.isEmpty(sHostToCheck) && isNetworkConnectionAvailable && isHostReachable != null) {
-            if (!isHostReachable) {
-                // emulate was no network and now we got it
-                checkIfHostResponds(false, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
+            sHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    handleNetworkState(false, true, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, null, null);
+                }
+            }, 111); // first return result then handle
+        } else
+            // if network state has been changed but network still available
+            if (!TextUtils.isEmpty(sHostToCheck)) {
+                if (isAnyNetworkConnectionAvailable) {
+                    if (isHostReachable == null || !isHostReachable) {
+                        // emulate was no network and now we got it
+                        checkIfHostResponds(false, NetworkState.NRNoNetwork, NetworkState.NRGotNetwork, "", "");
+                    }
+                } else {
+                    isHostReachable = false;
+                }
+                //return isHostReachable; // wrong because network could be available but not the host
             }
-//            return isHostReachable; // wrong because network could be available but not the host
-        }
-        return isNetworkConnectionAvailable;
+        return isAnyNetworkConnectionAvailable;
     }
 
     /**
