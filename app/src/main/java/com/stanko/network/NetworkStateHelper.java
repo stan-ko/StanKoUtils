@@ -402,7 +402,7 @@ public class NetworkStateHelper {
      */
     public static void checkIfHostResponds(final String hostUrl, final ICheckIfHostResponds callback) {
         // Creating and starting a thread for sending a request to Host
-        new Thread(new Runnable() {
+        executeTask(new Runnable() {
             @Override
             public void run() {
                 Looper.prepare();
@@ -412,7 +412,7 @@ public class NetworkStateHelper {
                 callback.doesHostRespond(doesHostRespond);
                 Looper.loop();
             }
-        }).start();
+        });
     }
 
     /**
@@ -420,7 +420,6 @@ public class NetworkStateHelper {
      */
     public interface ICheckIfHostResponds {
         void doesHostRespond(boolean doestIt);
-
     }
 
 
