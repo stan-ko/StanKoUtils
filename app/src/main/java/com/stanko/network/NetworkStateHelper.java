@@ -7,6 +7,7 @@ import android.net.NetworkInfo;
 import android.os.Looper;
 import android.text.TextUtils;
 
+import com.stanko.tools.BackgroundThreadFactory;
 import com.stanko.tools.Log;
 
 import org.greenrobot.eventbus.EventBus;
@@ -21,6 +22,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Stack;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.net.ssl.HostnameVerifier;
@@ -45,7 +48,7 @@ public class NetworkStateHelper {
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
 
-//    static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
+    static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
     private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
 
@@ -253,7 +256,7 @@ public class NetworkStateHelper {
                 Log.i("checkIfHostRespondsTask started");
                 isRunning = true;
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
-                Looper.prepare();
+                //Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
                 isHostReachable = doesHostRespond;
@@ -273,12 +276,12 @@ public class NetworkStateHelper {
                     sCheckIfHostRespondsTasks.remove(this); // could be already removed
                     if (sCheckIfHostRespondsTasks.size() > 0) {
                         Log.i("ExecutorService.execute(sCheckIfHostRespondsTasks.pop()) from task inside");
-                        //sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
-                        executeTask(sCheckIfHostRespondsTasks.pop());
+                        sExecutorService.execute(sCheckIfHostRespondsTasks.pop());
+                        //executeTask(sCheckIfHostRespondsTasks.pop());
                     }
                 }
                 isRunning = false;
-                Looper.loop();
+                //Looper.loop();
             }
         };
         synchronized (sCheckIfHostRespondsTasks) {
@@ -297,8 +300,8 @@ public class NetworkStateHelper {
             sCheckIfHostRespondsTasks.add(checkIfHostRespondsTask);
 //            // if there was no tasks
 //            if (!hasTasks) {
-            //sExecutorService.execute(checkIfHostRespondsTask);
-            executeTask(checkIfHostRespondsTask);
+            sExecutorService.execute(checkIfHostRespondsTask);
+            //executeTask(checkIfHostRespondsTask);
             Log.i("ExecutorService.execute(sCheckIfHostRespondsTask) from task inside");
 //            }
         }
