@@ -52,6 +52,9 @@ public class NetworkStateHelper {
     static final Executor sExecutorService = Executors.newSingleThreadExecutor(new BackgroundThreadFactory());
     private static final AtomicInteger aiCheckIfHostRespondsThreadsCount = new AtomicInteger();
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
+    static long lastTimeHostWasChecked;
+    // a limit of checking if network state was not changed
+    static final long HOST_CHECK_PERIOD_LIMIT = 7 * 1000; // 7c
 
     private static NetworkStateReceiver sNetworkStateReceiver;
 
@@ -63,18 +66,26 @@ public class NetworkStateHelper {
     }
 
     public static synchronized void init(final Context context, final String hostToCheck) {
-        if (sAppContext == null)
+        if (sAppContext == null) {
             sAppContext = context.getApplicationContext();
-        isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
-        sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-        if (setConnectivityManager())
-            registerReceiver(); // will trigger handleNetworkState() method
+        } else {
+            // if sAppContext!=null - helper was initialized already
+            if (!TextUtils.equals(hostToCheck, sHostToCheck)) {
+                sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
+                isNetworkConnectionAvailable = isNetworkAvailable(); // ends up with checkHost
+            } else {
+                isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+            }
+            if (setConnectivityManager())
+                registerReceiver(); // will trigger handleNetworkState() method
+        }
     }
 
     public static synchronized void registerReceiver() {
-        final IntentFilter mIFNetwork = getReceiverIntentFilter();
-        sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
-        sAppContext.registerReceiver(sNetworkStateReceiver, mIFNetwork);
+        if (sNetworkStateReceiver == null) {
+            sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
+            sAppContext.registerReceiver(sNetworkStateReceiver, getReceiverIntentFilter());
+        }
     }
 
     public static synchronized void registerReceiver(Context context) {
@@ -261,6 +272,9 @@ public class NetworkStateHelper {
             Log.i("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
             return;
         }
+        if (wasNetworkAvailable && isNetworkConnectionAvailable
+                && System.currentTimeMillis() - lastTimeHostWasChecked < HOST_CHECK_PERIOD_LIMIT)
+            return;
         // Creating and starting a thread for sending a request to Host
         final NSHRunnable checkIfHostRespondsTask = new NSHRunnable() {
             @Override
@@ -273,6 +287,7 @@ public class NetworkStateHelper {
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
                 isHostReachable = doesHostRespond;
                 Log.i("checkIfHostRespondsTask isHostReachable: " + isHostReachable);
+                lastTimeHostWasChecked = System.currentTimeMillis();
                 final EventBus eventBus = EventBus.getDefault();
                 if (eventBus.hasSubscriberForEvent(NetworkStateReceiverEvent.class)) {
                     eventBus.post(new NetworkStateReceiverEvent(wasNetworkAvailable,
@@ -423,6 +438,7 @@ public class NetworkStateHelper {
                 Looper.prepare();
                 android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
                 boolean doesHostRespond = isHostReachable(hostUrl);
+                lastTimeHostWasChecked = System.currentTimeMillis();
                 // sending check result using callback
                 callback.doesHostRespond(doesHostRespond);
                 Looper.loop();
