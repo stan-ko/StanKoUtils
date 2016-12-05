@@ -54,7 +54,7 @@ public class NetworkStateHelper {
     private static final Stack<Runnable> sCheckIfHostRespondsTasks = new Stack<>();
     static long lastTimeHostWasChecked;
     // a limit of checking if network state was not changed
-    static final long HOST_CHECK_PERIOD_LIMIT = 7 * 1000; // 7c
+    static long sHostCheckPeriodLimit = 30 * 1000; // 30c
 
     private static NetworkStateReceiver sNetworkStateReceiver;
 
@@ -79,6 +79,17 @@ public class NetworkStateHelper {
             if (setConnectivityManager())
                 registerReceiver(); // will trigger handleNetworkState() method
         }
+    }
+
+    /**
+     *
+     * @param context - any context, context.getApplicationContext() will be used
+     * @param hostToCheck - String host url
+     * @param hostCheckFrequencyLimit - do not ping host if it responded less than, ms. Default is 30 000 ms.
+     */
+    public static synchronized void init(final Context context, final String hostToCheck, final int hostCheckFrequencyLimit) {
+        sHostCheckPeriodLimit = hostCheckFrequencyLimit;
+        init(context, hostToCheck);
     }
 
     public static synchronized void registerReceiver() {
@@ -273,7 +284,7 @@ public class NetworkStateHelper {
             return;
         }
         if (wasNetworkAvailable && isHostReachable != null && isHostReachable
-                && System.currentTimeMillis() - lastTimeHostWasChecked < HOST_CHECK_PERIOD_LIMIT)
+                && System.currentTimeMillis() - lastTimeHostWasChecked < sHostCheckPeriodLimit)
             return;
         // Creating and starting a thread for sending a request to Host
         final NSHRunnable checkIfHostRespondsTask = new NSHRunnable() {
