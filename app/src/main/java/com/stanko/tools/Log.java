@@ -231,9 +231,9 @@ public class Log {
         StackTraceElement[] stackTraceElements;
         StackTraceElement stackTraceElement;
         stackTraceElements = Thread.currentThread().getStackTrace();
-        if (stackTraceElements == null || stackTraceElements.length < 4) {
+        if (stackTraceElements == null || stackTraceElements.length < 5) {
             stackTraceElements = (new Throwable()).getStackTrace();
-            if (stackTraceElements == null || stackTraceElements.length < 2) {
+            if (stackTraceElements == null || stackTraceElements.length < 3) {
                 return methodName;
             } else {
                 stackTraceElement = stackTraceElements[2];

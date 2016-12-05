@@ -272,7 +272,7 @@ public class NetworkStateHelper {
             Log.i("Wont start checkIfHostResponds() task - same NetworkState or NetworkID");
             return;
         }
-        if (wasNetworkAvailable && isNetworkConnectionAvailable
+        if (wasNetworkAvailable && isHostReachable != null && isHostReachable
                 && System.currentTimeMillis() - lastTimeHostWasChecked < HOST_CHECK_PERIOD_LIMIT)
             return;
         // Creating and starting a thread for sending a request to Host
