@@ -366,7 +366,7 @@ public class NetworkStateHelper {
             // adding http:// if its just a pure host name like google.com instead of http://google.com
             final URL url = new URL(hostUrl.contains("://") ? hostUrl : "http://" + hostUrl);
 //            if (hostUrl.startsWith("https")){
-            setTrustAnySSLCertificateMode();
+            setTrustAnySSLCertificateMode(url);
 //            }
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 //            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
@@ -399,9 +399,12 @@ public class NetworkStateHelper {
         return doesHostRespond;
     }
 
-    public static void setTrustAnySSLCertificateMode() throws NoSuchAlgorithmException, KeyManagementException {
+    public static void setTrustAnySSLCertificateMode(final URL url) throws NoSuchAlgorithmException, KeyManagementException {
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-            public boolean verify(String hostname, SSLSession session) {
+            public boolean verify(final String hostname, final SSLSession session) {
+                if (TextUtils.isEmpty(url.toString())) {
+                    return false;
+                }
                 return true;
             }
         });
