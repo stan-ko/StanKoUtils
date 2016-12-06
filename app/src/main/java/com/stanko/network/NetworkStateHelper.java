@@ -68,23 +68,20 @@ public class NetworkStateHelper {
     public static synchronized void init(final Context context, final String hostToCheck) {
         if (sAppContext == null) {
             sAppContext = context.getApplicationContext();
-        } else {
-            // if sAppContext!=null - helper was initialized already
-            if (!TextUtils.equals(hostToCheck, sHostToCheck)) {
-                sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
-                isNetworkConnectionAvailable = isNetworkAvailable(); // ends up with checkHost
-            } else {
-                isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
-            }
-            if (setConnectivityManager())
-                registerReceiver(); // will trigger handleNetworkState() method
         }
+        // if sAppContext!=null - helper was initialized already
+        if (!TextUtils.equals(hostToCheck, sHostToCheck)) {
+            sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
+            isNetworkConnectionAvailable = isNetworkAvailable(); // ends up with checkHost
+        } else {
+            isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
+        }
+        registerReceiver(); // will trigger handleNetworkState() method
     }
 
     /**
-     *
-     * @param context - any context, context.getApplicationContext() will be used
-     * @param hostToCheck - String host url
+     * @param context                 - any context, context.getApplicationContext() will be used
+     * @param hostToCheck             - String host url
      * @param hostCheckFrequencyLimit - do not ping host if it responded less than, ms. Default is 30 000 ms.
      */
     public static synchronized void init(final Context context, final String hostToCheck, final int hostCheckFrequencyLimit) {
@@ -93,7 +90,8 @@ public class NetworkStateHelper {
     }
 
     public static synchronized void registerReceiver() {
-        if (sNetworkStateReceiver == null) {
+        // if no receiver
+        if (sNetworkStateReceiver == null && setConnectivityManager()) {
             sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
             sAppContext.registerReceiver(sNetworkStateReceiver, getReceiverIntentFilter());
         }
