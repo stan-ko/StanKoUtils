@@ -24,8 +24,13 @@ public class FontsHelperBase {
         lastUsedFontFileName = fontFileName;
         lastUsedFont = lastUsedFonts.get(fontFileName);
         if (lastUsedFont == null) {
-            lastUsedFont = Typeface.createFromAsset(context.getAssets(), FONTHELPER_FONTS_PATH + fontFileName);
-            lastUsedFonts.put(lastUsedFontFileName, lastUsedFont);
+            try {
+                lastUsedFont = Typeface.createFromAsset(context.getAssets(), FONTHELPER_FONTS_PATH + fontFileName);
+                lastUsedFonts.put(lastUsedFontFileName, lastUsedFont);
+            } catch (Throwable e) { //java.lang.RuntimeException: native typeface cannot be made
+                e.printStackTrace();
+                lastUsedFont = Typeface.defaultFromStyle(Typeface.NORMAL);
+            }
         }
 
         return lastUsedFont;
