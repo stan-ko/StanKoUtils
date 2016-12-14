@@ -127,6 +127,10 @@ public class Log {
         android.util.Log.e(getMethodName(), e.getMessage(), e);
     }
 
+    public static void e(final Throwable e) {
+        android.util.Log.e(getMethodName(), e.getMessage(), e);
+    }
+
     // String as logTag
     public static void v(final String logTag, final String msg) {
         if (isDebuggable)
@@ -155,10 +159,17 @@ public class Log {
         e(logTag, e.getMessage(), e);
     }
 
+    public static void e(final String logTag, final Throwable e) {
+        e(logTag, e.getMessage(), e);
+    }
+
     public static void e(final String logTag, final String msg, final Exception e) {
         android.util.Log.e(logTag, msg, e);
     }
 
+    public static void e(final String logTag, final String msg, final Throwable e) {
+        android.util.Log.e(logTag, msg, e);
+    }
 
     // Object as logTag => Object.getClass().getName()
     public static void v(final Object logTag, final String msg) {
@@ -188,7 +199,15 @@ public class Log {
         e(getLogTag(logTag), msg, e);
     }
 
+    public static void e(final Object logTag, final String msg, final Throwable e) {
+        e(getLogTag(logTag), msg, e);
+    }
+
     public static void e(final Object logTag, final Exception e) {
+        e(getLogTag(logTag), e);
+    }
+
+    public static void e(final Object logTag, final Throwable e) {
         e(getLogTag(logTag), e);
     }
 
@@ -221,10 +240,17 @@ public class Log {
         e(getLogTag(logTag), msg, e);
     }
 
+    public static void e(final Class<?> logTag, final String msg, final Throwable e) {
+        e(getLogTag(logTag), msg, e);
+    }
+
     public static void e(final Class<?> logTag, final Exception e) {
         e(getLogTag(logTag), e);
     }
 
+    public static void e(final Class<?> logTag, final Throwable e) {
+        e(getLogTag(logTag), e);
+    }
 
     public static String getMethodName() {
         String methodName = "U/D";

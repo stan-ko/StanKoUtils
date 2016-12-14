@@ -37,7 +37,7 @@ public class ResHelper {
     }
 
     public static String getString(final int resId, final Object... args) {
-        if (args == null || args.length==0)
+        if (args == null || args.length == 0)
             return getString(resId);
         else
             return sResources.getString(resId, args);
@@ -110,4 +110,18 @@ public class ResHelper {
             return -1;
         }
     }
+
+    public static boolean isResourceAvailable(int resId) {
+        try {
+            final String name = sResources.getResourceName(resId);
+            if (name == null || !name.startsWith(sAppContext.getPackageName())) {
+                return false;
+            }
+            //Didn't catch so id is in res
+            return true;
+        } catch (Resources.NotFoundException e) {
+            return false;
+        }
+    }
+
 }
