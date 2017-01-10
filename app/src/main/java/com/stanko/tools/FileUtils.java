@@ -190,7 +190,7 @@ public class FileUtils {
      */
     public static boolean stringToFile(final String data, final File targetFile, final boolean doAppend) {
         if (targetFile == null || !isWritable(targetFile, true)) {
-            Log.e(FileUtils.class, "stringToFile(): File is null or cant make path dirs");
+            Log.e("stringToFile(): File is null or cant make path dirs");
             //new IOException("File is null or cant make path dirs").printStackTrace();
             return false;
         }
@@ -230,7 +230,7 @@ public class FileUtils {
      */
     public static boolean streamToFile(final InputStream inputStream, final File targetFile, final boolean doAppend) {
         if (inputStream == null || !isWritable(targetFile, true)) {
-            Log.e(FileUtils.class, "streamToFile(): Null parameter or can't make path dirs");
+            Log.e("streamToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
@@ -286,7 +286,7 @@ public class FileUtils {
      */
     public static boolean byteArrayOutputStreamToFile(final ByteArrayOutputStream bos, final File targetFile, final boolean doAppend) {
         if (bos == null || targetFile == null) {
-            Log.e(FileUtils.class, "byteArrayOutputStreamToFile(): Null parameters given");
+            Log.e("byteArrayOutputStreamToFile(): Null parameters given");
             //new IOException("Null parameters given").printStackTrace();
             return false;
         }
@@ -315,7 +315,7 @@ public class FileUtils {
     public static boolean byteArrayToFile(final byte[] array, final File targetFile, final boolean doAppend) {
 
         if (array == null || array.length == 0 || !isWritable(targetFile, true)) {
-            Log.e(FileUtils.class, "byteArrayToFile(): Null parameter or can't make path dirs");
+            Log.e("byteArrayToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
@@ -375,7 +375,7 @@ public class FileUtils {
     public static boolean intentDataToFile(final Context context, final Uri uri, final File targetFile) {
 
         if (context == null || uri == null || uri.toString().length() == 0 || !isWritable(targetFile, true)) {
-            Log.e(FileUtils.class, "intentDataToFile(): Null parameter or can't make path dirs");
+            Log.e("intentDataToFile(): Null parameter or can't make path dirs");
             //new IOException("Null parameter or can't make path dirs").printStackTrace();
             return false;
         }
@@ -415,7 +415,7 @@ public class FileUtils {
      */
     public static boolean makeDirsForFile(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class, "makeDirsForFile(): Null or Empty parameter given");
+            Log.e("makeDirsForFile(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
@@ -465,7 +465,7 @@ public class FileUtils {
      */
     public static boolean isWritable(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
+            Log.e("isWritable(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
@@ -481,7 +481,7 @@ public class FileUtils {
     public static boolean isWritable(final File file) {
 
         if (file == null) {
-            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
+            Log.e("isWritable(): Null or Empty parameter given");
             return false;
         }
 
@@ -515,7 +515,7 @@ public class FileUtils {
      */
     public static boolean isWritable(final String file, final boolean makeDirs) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
+            Log.e("isWritable(): Null or Empty parameter given");
             //new Exception("Empty parameter").printStackTrace();
             return false;
         }
@@ -531,7 +531,7 @@ public class FileUtils {
     public static boolean isWritable(final File file, final boolean makeDirs) {
 
         if (file == null) {
-            Log.e(FileUtils.class, "isWritable(): Null or Empty parameter given");
+            Log.e("isWritable(): Null or Empty parameter given");
             return false;
         }
 
@@ -571,7 +571,7 @@ public class FileUtils {
      */
     public static boolean isReadable(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class, "isReadable(): Null or Empty parameter given");
+            Log.e("isReadable(): Null or Empty parameter given");
             //new Exception("Empty or null parameter").printStackTrace();
             return false;
         }
@@ -587,7 +587,7 @@ public class FileUtils {
     public static boolean isReadable(final File file) {
 
         if (file == null || !file.isFile()) {
-            Log.e(FileUtils.class, "isReadable(): Null parameter given or not a File");
+            Log.e("isReadable(): Null parameter given or not a File");
             return false;
         }
 
@@ -606,7 +606,7 @@ public class FileUtils {
      */
     public static boolean sync(final OutputStream stream) {
         if (stream == null) {
-            Log.e(FileUtils.class, "sync(): Null parameter given");
+            Log.e("sync(): Null parameter given");
             return false;
         }
 
@@ -624,7 +624,7 @@ public class FileUtils {
      */
     public static boolean sync(final FileOutputStream stream) {
         if (stream == null) {
-            Log.e(FileUtils.class, "sync(): Null parameter given");
+            Log.e("sync(): Null parameter given");
             return false;
         }
         try {
@@ -641,7 +641,7 @@ public class FileUtils {
 
     public static boolean syncAndClose(final FileOutputStream stream) {
         if (stream == null) {
-            Log.e(FileUtils.class, "sync(): Null parameter given");
+            Log.e("sync(): Null parameter given");
             return false;
         }
         boolean result = false;
@@ -676,7 +676,7 @@ public class FileUtils {
      */
     public static boolean deleteFilesAndDirsRecursive(final String file) {
         if (TextUtils.isEmpty(file)) {
-            Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null or Empty parameter given");
+            Log.e("deleteFilesAndDirsRecursive(): Null or Empty parameter given");
             return false;
         }
         return deleteFilesAndDirsRecursive(new File(file));
@@ -690,7 +690,7 @@ public class FileUtils {
      */
     public static boolean deleteFilesAndDirsRecursive(final File directory) {
         if (directory == null || !directory.isDirectory()) {
-            Log.e(FileUtils.class, "deleteFilesAndDirsRecursive(): Null parameter given or not a Directory");
+            Log.e("deleteFilesAndDirsRecursive(): Null parameter given or not a Directory");
             return false;
         }
 
@@ -718,15 +718,19 @@ public class FileUtils {
      */
     public static boolean deleteFiles(final File targetDir) {
         if (targetDir == null || !targetDir.isDirectory()) {
-            Log.e(FileUtils.class, "deleteFiles(): Null parameter given or not a Directory");
+            Log.e("deleteFiles(): Null parameter given or not a Directory");
             return false;
         }
 
         boolean isDeleted = true;
         final File[] filesList = targetDir.listFiles();
-        for (File file2Delete : filesList)
-            if (file2Delete.isFile()) // excluding dirs!
-                isDeleted &= file2Delete.delete();
+        if (filesList == null) {
+            Log.e("deleteFiles(): targetDir (" + targetDir + ") is not a Directory");
+        } else {
+            for (File file2Delete : filesList)
+                if (file2Delete.isFile()) // excluding dirs!
+                    isDeleted &= file2Delete.delete();
+        }
         return isDeleted;
     }
 
@@ -738,7 +742,7 @@ public class FileUtils {
      */
     public static boolean isFileExists(final String path) {
         if (TextUtils.isEmpty(path)) {
-            Log.e(FileUtils.class, "isFileExists(): Null or Empty parameter given");
+            Log.e("isFileExists(): Null or Empty parameter given");
             return false;
         }
         final File fileToCheck = new File(path);
@@ -823,7 +827,7 @@ public class FileUtils {
      */
     public static String[] getFilenamesByExtension(final File directory, final String extension) {
         if (directory == null || !directory.isDirectory() || TextUtils.isEmpty(extension)) {
-            Log.e(FileUtils.class, "getFilenamesByExtension(): Null, not a directory or empty extension");
+            Log.e("getFilenamesByExtension(): Null, not a directory or empty extension");
             //new IOException("Null not a directory or empty extension").printStackTrace();
             return null;
         }
@@ -843,7 +847,7 @@ public class FileUtils {
      */
     public static File[] getFilesByExtension(final File directory, final String extension) {
         if (directory == null || !directory.isDirectory() || TextUtils.isEmpty(extension)) {
-            Log.e(FileUtils.class, "getFilesByExtension(): Null not a directory or empty extension");
+            Log.e("getFilesByExtension(): Null not a directory or empty extension");
             //new IOException("Null not a directory or empty extension").printStackTrace();
             return null;
         }

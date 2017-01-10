@@ -22,16 +22,18 @@ public class FontsHelperBase {
             return lastUsedFont;
 
         lastUsedFontFileName = fontFileName;
-        lastUsedFont = lastUsedFonts.get(fontFileName);
+        lastUsedFont = lastUsedFonts.get(fontFileName); // get from cache
         if (lastUsedFont == null) {
             try {
                 lastUsedFont = Typeface.createFromAsset(context.getAssets(), FONTHELPER_FONTS_PATH + fontFileName);
                 lastUsedFonts.put(lastUsedFontFileName, lastUsedFont);
             } catch (Throwable e) { //java.lang.RuntimeException: native typeface cannot be made
                 e.printStackTrace();
-                lastUsedFont = Typeface.defaultFromStyle(Typeface.NORMAL);
             }
         }
+        // CostYL: if desired font could not be instantiated - set default font.NORMAL
+        if (lastUsedFont == null)
+            lastUsedFont = Typeface.defaultFromStyle(Typeface.NORMAL);
 
         return lastUsedFont;
     }
