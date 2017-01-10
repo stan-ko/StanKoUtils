@@ -16,6 +16,7 @@ import org.greenrobot.eventbus.EventBus;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -40,12 +41,14 @@ import javax.net.ssl.X509TrustManager;
 public class NetworkStateHelper {
 
     public static final int TIME_OUT = 1000 * 2; //2s
+    private static final String DEFAULT_HTTP_METHOD = "HEAD";
 
 //    static final BooleanLock checkIfHostRespondsLock = new BooleanLock();
 
     private static Context sAppContext;
     private static ConnectivityManager sConnectivityManager;
     private static String sHostToCheck;
+    private static String sHostCheckHTTPMethod;
     private static boolean isNetworkConnectionAvailable;
     private static Boolean isHostReachable;
 
@@ -66,12 +69,17 @@ public class NetworkStateHelper {
     }
 
     public static synchronized void init(final Context context, final String hostToCheck) {
+        init(context, hostToCheck, DEFAULT_HTTP_METHOD);
+    }
+
+    public static synchronized void init(final Context context, final String hostToCheck, final String httpMethod) {
         if (sAppContext == null) {
             sAppContext = context.getApplicationContext();
         }
         // if sAppContext!=null - helper was initialized already
         if (!TextUtils.equals(hostToCheck, sHostToCheck)) {
             sHostToCheck = TextUtils.isEmpty(hostToCheck) ? null : hostToCheck;
+            sHostCheckHTTPMethod = httpMethod;
             isNetworkConnectionAvailable = isNetworkAvailable(); // ends up with checkHost
         } else {
             isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
@@ -369,6 +377,14 @@ public class NetworkStateHelper {
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 //            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
             httpURLConnection.setRequestProperty("Connection", "close");
+            if (TextUtils.isEmpty(sHostCheckHTTPMethod))
+                sHostCheckHTTPMethod = DEFAULT_HTTP_METHOD;
+            try {
+                httpURLConnection.setRequestMethod(sHostCheckHTTPMethod);
+            } catch (ProtocolException e){
+                sHostCheckHTTPMethod = DEFAULT_HTTP_METHOD;
+                httpURLConnection.setRequestMethod(DEFAULT_HTTP_METHOD);
+            }
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
             final int responseCode = httpURLConnection.getResponseCode();
