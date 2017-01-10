@@ -388,7 +388,7 @@ public class NetworkStateHelper {
      * @param hostUrl - the host to check. By default http:// prefix will be added if no any
      * @return true if host reachable (connection were established)
      */
-    public static boolean isHostReachable(final String hostUrl) {
+    public static synchronized boolean isHostReachable(final String hostUrl) {
         boolean doesHostRespond = false;
         try {
             // adding http:// if its just a pure host name like google.com instead of http://google.com
@@ -399,9 +399,13 @@ public class NetworkStateHelper {
             final HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
 //            httpURLConnection.setRequestProperty("User-Agent", "Android Application");
             httpURLConnection.setRequestProperty("Connection", "close");
-            if (!isPermittedHTTPMethod(sHostCheckHTTPMethod))
+            String method = sHostCheckHTTPMethod;
+            if (!isPermittedHTTPMethod(method)) {
+                Log.e("Incorrect HTTP method: "+sHostCheckHTTPMethod+" swapping to default - HEAD");
+                method = DEFAULT_HTTP_METHOD;
                 sHostCheckHTTPMethod = DEFAULT_HTTP_METHOD;
-            httpURLConnection.setRequestMethod(sHostCheckHTTPMethod);
+            }
+            httpURLConnection.setRequestMethod(method);
             httpURLConnection.setConnectTimeout(TIME_OUT); // Timeout in seconds
             httpURLConnection.connect();
             final int responseCode = httpURLConnection.getResponseCode();
