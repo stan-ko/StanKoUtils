@@ -242,10 +242,7 @@ public class SDCardHelper {
         if (sURL == null || img == null || !isWriteable())
             return false;
         final File file = getFile(sURL);
-        if (!FileUtils.makeDirsForFile(file))
-            return false;
-
-        return FileUtils.byteArrayToFile(img, file);
+        return FileUtils.makeDirsForFile(file) && FileUtils.byteArrayToFile(img, file);
     }
 
     /**

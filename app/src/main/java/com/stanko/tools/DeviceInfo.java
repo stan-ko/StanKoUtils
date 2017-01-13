@@ -127,8 +127,8 @@ public class DeviceInfo {
         final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
         if (hasAPILevel < 14) {
-//            realDisplayHeight = displayMetrics.heightPixels;
-//            realDisplayWidth =  displayMetrics.widthPixels;
+            realDisplayHeight = displayMetrics.heightPixels;
+            realDisplayWidth =  displayMetrics.widthPixels;
         } else if (hasAPILevel > 13 && hasAPILevel < 17) {
             // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
             try {

@@ -241,7 +241,7 @@ public class FileUtils {
         try {
             outputStream = new FileOutputStream(targetFile, doAppend);
             byte[] bytes = new byte[buffer_size];
-            int count = 0;
+            int count;
             while ((count = inputStream.read(bytes, 0, buffer_size)) > 0)
                 outputStream.write(bytes, 0, count);
 
@@ -539,10 +539,7 @@ public class FileUtils {
         if (!TextUtils.isEmpty(fileParentDir)) {
             final File fileDir = new File(fileParentDir);
             if (!fileDir.exists()) {
-                if (makeDirs)
-                    return makeDirsForFile(file);
-                else
-                    return false;
+                return makeDirs && makeDirsForFile(file);
             }
         }
 
@@ -610,10 +607,7 @@ public class FileUtils {
             return false;
         }
 
-        if (!(stream instanceof FileOutputStream))
-            return false;
-        else
-            return sync((FileOutputStream) stream);
+        return stream instanceof FileOutputStream && sync((FileOutputStream) stream);
     }
 
     /**
@@ -707,7 +701,7 @@ public class FileUtils {
                 isDeleted &= deleteFilesAndDirs(child);
         }
 
-        return isDeleted &= fileOrDirectory.delete();
+        return isDeleted & fileOrDirectory.delete();
     }
 
     /**
@@ -784,7 +778,7 @@ public class FileUtils {
         if (!file.exists())
             mFileRootPath = file.getParent();
 
-        long availableBytez = 0;
+        long availableBytez;
         try {
             final StatFs stat = new StatFs(mFileRootPath);
             stat.restat(mFileRootPath);

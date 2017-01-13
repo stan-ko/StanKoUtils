@@ -437,10 +437,7 @@ public class NetworkStateHelper {
     public static void setTrustAnySSLCertificateMode(final URL url) throws NoSuchAlgorithmException, KeyManagementException {
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
             public boolean verify(final String hostname, final SSLSession session) {
-                if (TextUtils.isEmpty(url.toString())) {
-                    return false;
-                }
-                return true;
+                return !TextUtils.isEmpty(url.toString());
             }
         });
         final SSLContext sslContext = SSLContext.getInstance("TLS");

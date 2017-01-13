@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.text.TextUtils;
 
+import java.util.Locale;
+
 /*
 * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com>
 */
@@ -268,7 +270,7 @@ public class Log {
             stackTraceElement = stackTraceElements[4];
         }
         if (stackTraceElement != null) {
-            methodName = String.format("%s.%s():%d", stackTraceElement.getFileName(), stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
+            methodName = String.format(Locale.US, "%s.%s():%d", stackTraceElement.getFileName(), stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
         }
         return methodName;
     }
@@ -291,7 +293,7 @@ public class Log {
         }
         if (stackTraceElement != null) {
             classMethod[0] = stackTraceElement.getFileName();
-            classMethod[1] = String.format("%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
+            classMethod[1] = String.format(Locale.US, "%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
         }
         return classMethod;
     }

@@ -53,15 +53,7 @@ public class DefaultArtifactVersion implements ArtifactVersion {
 
     @Override
     public boolean equals(Object other) {
-        if (this == other) {
-            return true;
-        }
-
-        if (!(other instanceof ArtifactVersion)) {
-            return false;
-        }
-
-        return compareTo((ArtifactVersion) other) == 0;
+        return this == other || other instanceof ArtifactVersion && compareTo((ArtifactVersion) other) == 0;
     }
 
     public int compareTo(ArtifactVersion otherVersion) {

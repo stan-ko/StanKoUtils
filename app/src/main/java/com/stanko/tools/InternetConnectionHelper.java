@@ -385,7 +385,7 @@ public class InternetConnectionHelper extends AsyncTask<Void, Void, Integer> {
 
     // interface (callback) to deliver host availability check result
     public interface ServerChecking {
-        public void handleServerCheckingResult(final int result);
+        void handleServerCheckingResult(final int result);
     }
 
 }

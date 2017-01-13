@@ -262,7 +262,7 @@ public class Hash {
         if (!FileUtils.isReadable(file))
             return null;
 
-        InputStream inputStream = null;
+        InputStream inputStream;
         try {
             inputStream = new FileInputStream(file);
         } catch (FileNotFoundException e) {
@@ -279,7 +279,6 @@ public class Hash {
         }
 
         return hash;
-
     }
 
     /**

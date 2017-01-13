@@ -224,7 +224,7 @@ public class ImageUtils {
         if (!FileUtils.isReadable(bitmapFile))
             return null;
 
-        int maxWidth = 0, maxHeight = 0;
+        int maxWidth, maxHeight;
         if (sideSizeLimit > 0) {
             maxWidth = sideSizeLimit;
             maxHeight = sideSizeLimit;
@@ -302,9 +302,7 @@ public class ImageUtils {
 
 
     public static boolean rotateBitmapByExifAndSave(final String targetFilePath) {
-        if (targetFilePath == null || targetFilePath.length() == 0)
-            return false;
-        return rotateBitmapByExifAndSave(new File(targetFilePath));
+        return !(targetFilePath == null || targetFilePath.length() == 0) && rotateBitmapByExifAndSave(new File(targetFilePath));
     }
 
     public static boolean rotateBitmapByExifAndSave(final File targetFile) {
@@ -733,7 +731,7 @@ public class ImageUtils {
         if (bitmap == null || newHeight < 0 || newWidth < 0 || newHeight + newWidth == 0)
             return null;
 
-        Bitmap resizedBitmap = null;
+        Bitmap resizedBitmap;
         final int height = bitmap.getHeight();
         final int width = bitmap.getWidth();
 
@@ -813,7 +811,7 @@ public class ImageUtils {
         if (resources == null || contentResolver == null)
             return null;
 
-        Bitmap bitmap = null;
+        Bitmap bitmap;
 
         if (newHeight > 0 && newWidth > 0)
             bitmap = getBitmapFromResources(resources, contentResolver, bitmapResId, Math.max(newHeight, newWidth), isOptimistic);
@@ -922,7 +920,7 @@ public class ImageUtils {
         Bitmap bitmap = null;
         InputStream inputStream = null;
 
-        int maxWidth = 0, maxHeight = 0;
+        int maxWidth, maxHeight;
         if (sideSizeLimit > 0) {
             maxWidth = sideSizeLimit;
             maxHeight = sideSizeLimit;
@@ -1360,7 +1358,7 @@ public class ImageUtils {
         if (mLeftBitmap == null)
             return mRightBitmap;
 
-        int m_width = 0, m_height = 0;
+        int m_width, m_height;
         if (mLeftBitmap.getWidth() > mRightBitmap.getWidth()) {
             m_width = mLeftBitmap.getWidth();
             m_height = mLeftBitmap.getHeight() + mRightBitmap.getHeight();
@@ -1406,7 +1404,7 @@ public class ImageUtils {
 //			     );
 //			}
 
-        int m_width = 0, m_height = 0;
+        int m_width, m_height;
         if (mBitmap1.getWidth() > mBitmap2.getWidth()) {
             m_width = mBitmap2.getWidth();
             m_height = mBitmap2.getHeight();
@@ -1584,7 +1582,7 @@ public class ImageUtils {
         if (maxAllowedQuality > 100 || maxAllowedQuality < 0)
             maxAllowedQuality = 100;
 
-        boolean isSucceed = false;
+        boolean isSucceed;
 
         // save it
         // Convert bitmap to byte array
@@ -1615,7 +1613,7 @@ public class ImageUtils {
         if (imageFile.exists() && !imageFile.delete())
             return false;
 
-        boolean isSucceed = false;
+        boolean isSucceed;
 
         // save it
         // Convert bitmap to byte array
@@ -1941,11 +1939,11 @@ public class ImageUtils {
 //		while (bitmapInfo.width<cropToWidth || bitmapInfo.height<cropToHeight)
 //			bitmapInfo = new BitmapInfo(bitmapInfo.width*2, bitmapInfo.height*2);
 
-        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
-        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float bitmapWHProportions = bitmapInfo.width / bitmapInfo.height;
+        float bitmapHWProportions = bitmapInfo.height / bitmapInfo.width;
         float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
-        Bitmap bitmapToCrop = null;
+        Bitmap bitmapToCrop;
         // crop Portrait from Portrait
         if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap
@@ -2089,11 +2087,11 @@ public class ImageUtils {
             return null;
         }
 
-        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
-        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float bitmapWHProportions = bitmapInfo.width / bitmapInfo.height;
+        float bitmapHWProportions = bitmapInfo.height / bitmapInfo.width;
         float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
-        Bitmap bitmapToCrop = null;
+        Bitmap bitmapToCrop;
         // crop Portrait from Portrait
         if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap
@@ -2227,11 +2225,11 @@ public class ImageUtils {
 
         BitmapInfo bitmapInfo = new BitmapInfo(bitmapToScale.getWidth(), bitmapToScale.getHeight());
 
-        float bitmapWHProportions = (float) bitmapInfo.width / (float) bitmapInfo.height;
-        float bitmapHWProportions = (float) bitmapInfo.height / (float) bitmapInfo.width;
+        float bitmapWHProportions = bitmapInfo.width / bitmapInfo.height;
+        float bitmapHWProportions = bitmapInfo.height / bitmapInfo.width;
         float cropWHProportions = (float) cropToWidth / (float) cropToHeight;
 
-        Bitmap bitmapToCrop = null;
+        Bitmap bitmapToCrop;
         // crop Portrait from Portrait
         if ((bitmapInfo.hasPortraitOrientation || bitmapInfo.hasSquareForm) && cropToHeight > cropToWidth) {
             // 480x800 -> 300x400, result is wider than original bitmap

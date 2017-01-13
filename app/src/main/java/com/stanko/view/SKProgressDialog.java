@@ -56,7 +56,7 @@ public class SKProgressDialog extends ProgressDialog {
 
 	// callback interface
 	public interface ISKProgressDialog {
-		public void onProgressCancelled();
+		void onProgressCancelled();
 	}
 	
 	public void releaseCallBack()

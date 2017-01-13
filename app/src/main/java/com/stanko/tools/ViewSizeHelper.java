@@ -26,7 +26,7 @@ public class ViewSizeHelper {
 		}
 		
 		final int targetHeight = (int) lastUsedBitmapInfo.getHeightByWidth(targetWidth);
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.height = targetHeight;
 		view2Fix.setLayoutParams(viewLP);
 		return targetHeight;
@@ -44,7 +44,7 @@ public class ViewSizeHelper {
 		}
 		
 		final int targetWidth = (int) lastUsedBitmapInfo.getWidthByHeight(targetHeight); 
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.width = targetWidth;
 		view2Fix.setLayoutParams(viewLP);
 		return targetWidth;
@@ -56,7 +56,7 @@ public class ViewSizeHelper {
 		BitmapInfo mBitmapInfo = new BitmapInfo(bitmap);
 		
 		final int targetHeight = (int) mBitmapInfo.getHeightByWidth(targetWidth);
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.height = targetHeight;
 		view2Fix.setLayoutParams(viewLP);
 		return targetHeight;
@@ -68,7 +68,7 @@ public class ViewSizeHelper {
 		BitmapInfo mBitmapInfo = new BitmapInfo(bitmap);
 		
 		final int targetWidth = (int) mBitmapInfo.getWidthByHeight(targetHeight); 
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.width = targetWidth;
 		view2Fix.setLayoutParams(viewLP);
 		return targetWidth;
@@ -78,7 +78,7 @@ public class ViewSizeHelper {
 	public static void setHeightAndWitdh(View view2Fix, int targetHeight, int targetWidth){
 		if (view2Fix==null)
 			return;
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.height = targetHeight;
 		viewLP.width = targetWidth;
 		view2Fix.setLayoutParams(viewLP);
@@ -87,7 +87,7 @@ public class ViewSizeHelper {
 	public static void setHeight(View view2Fix, int targetHeight){
 		if (view2Fix==null)
 			return;
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.height = targetHeight;
 		view2Fix.setLayoutParams(viewLP);
 	}
@@ -95,7 +95,7 @@ public class ViewSizeHelper {
 	public static void setWidth(View view2Fix, int targetWidth){
 		if (view2Fix==null)
 			return;
-		final ViewGroup.LayoutParams viewLP = (ViewGroup.LayoutParams) view2Fix.getLayoutParams();
+		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
 		viewLP.width = targetWidth;
 		view2Fix.setLayoutParams(viewLP);
 	}
@@ -120,7 +120,7 @@ public class ViewSizeHelper {
 	}
 	
 	public interface IViewSize{
-		public void onGotViewSize(final int height, final int width);
+		void onGotViewSize(final int height, final int width);
 	} 
 	
 //	public static final class ViewSize {

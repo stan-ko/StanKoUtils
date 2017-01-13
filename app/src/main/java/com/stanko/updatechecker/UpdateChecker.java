@@ -209,7 +209,7 @@ public class UpdateChecker implements Runnable {
             // store last update time
             setLastTimeUpdateCheckedVersion(mContext, webVersion);
             if (!TextUtils.isEmpty(webVersionInt) && TextUtils.isDigitsOnly(webVersionInt)) {
-                int weVersionCode = 0;
+                int weVersionCode;
                 try {
                     weVersionCode = Integer.valueOf(webVersionInt);
                     return weVersionCode > mCurrentVersionCode;
