@@ -12,7 +12,10 @@ import android.os.Bundle;
 import com.stanko.tools.Log;
 
 /**
- * Created by Stan Koshutsky <Stan.Koshutsky@gmail.com> on 06.04.2015.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 class NetworkStateReceiver extends BroadcastReceiver {
 

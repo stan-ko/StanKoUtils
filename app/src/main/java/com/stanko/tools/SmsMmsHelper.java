@@ -15,9 +15,11 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Created by Stan Koshutsky <stan.koshutsky@gmail.com> on 26.09.2015.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
-
 public class SmsMmsHelper {
 
     private static String SMSH_DEFAULT_PICKER_TITLE = "Send SMS using:";

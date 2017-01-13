@@ -245,8 +245,8 @@ public class DeviceInfo {
                 break;
         }
 
-        Log.i(String.format("Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
-        Log.i(String.format("Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
+        Log.i(String.format(Locale.US, "Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
+        Log.i(String.format(Locale.US, "Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
         checkHasTelephony(appContext);
 
@@ -489,9 +489,8 @@ public class DeviceInfo {
             uuid = id;
         else {
             uuid = UUID.randomUUID().toString();
-
             // Store the value in SharedPrefs for further usage
-            prefs.edit().putString(PREFS_DEVICE_UUID_KEY, uuid).commit();
+            prefs.edit().putString(PREFS_DEVICE_UUID_KEY, uuid).apply();
         }
 
         return uuid;

@@ -1,7 +1,10 @@
 package com.stanko.network;
 
 /**
- * Created by stan on 14.09.16.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 abstract class NSHRunnable implements Runnable {
     public boolean isRunning;

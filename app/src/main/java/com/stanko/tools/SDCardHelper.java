@@ -125,7 +125,8 @@ public class SDCardHelper {
      * @return File to save the image to or null if given url is null
      */
     public static File getFileForPreviewImageCaching(final String sURL) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null)
             return null;
         final File file = getPreviewFile(sURL);
@@ -153,7 +154,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getFileForImageCaching(final String sURL) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null)
             return null;
         final File file = getFile(sURL);
@@ -181,7 +183,8 @@ public class SDCardHelper {
      * @return true if file with such name exists of false otherwise
      */
     public static boolean isImageCached(final String sURL) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null || !isExternalStorageAvailable())
             return false;
 
@@ -199,7 +202,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getTempFile(String fileExtension) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         if (!fileExtension.contains("."))
             fileExtension = "." + fileExtension;
         File file = new File(getCacheDir(), Hash.getMD5("tempfile" + System.currentTimeMillis()) + fileExtension);
@@ -219,7 +223,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getTempFile() {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         File file = new File(getCacheDir(), Hash.getMD5("tempfile" + System.currentTimeMillis()));
         if (!FileUtils.makeDirsForFile(file))
             return null;
@@ -238,7 +243,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean saveImage(final String sURL, final byte[] img) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null || img == null || !isWriteable())
             return false;
         final File file = getFile(sURL);
@@ -252,7 +258,8 @@ public class SDCardHelper {
      * @return
      */
     private static File getFile(final String sURL) {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         // generate a filename
         final String fileName = Hash.getMD5(sURL);
         final File file = new File(getCacheDir(), fileName);
@@ -367,7 +374,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean clearImagesCache() {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
 
         // depends on isExternalStorageAvailable()
         final File cacheDir = getCacheDir(); //new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
@@ -396,7 +404,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean clearCacheFilesAndDirs() {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
 
         // depends on isExternalStorageAvailable()
         final File cacheDir = getCacheDir(); //new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
@@ -417,7 +426,8 @@ public class SDCardHelper {
      * @return File or null if class wasn't initialized previously
      */
     public static File getTempDir() {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         return getCacheDir(null);
     }
 
@@ -430,7 +440,8 @@ public class SDCardHelper {
      * @return File or null if class wasn't initialized previously
      */
     public static File getCacheDir() {
-        assert isInitialized || SD_CACHE_PATH != null : SD_CARD_HELPER_INIT_ERR;
+        if (!isInitialized || SD_CACHE_PATH == null)
+            Log.e(SD_CARD_HELPER_INIT_ERR);
         return getCacheDir(null);
     }
 

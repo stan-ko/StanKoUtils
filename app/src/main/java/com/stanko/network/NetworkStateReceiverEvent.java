@@ -1,8 +1,12 @@
 package com.stanko.network;
 
 /**
- * Created by CTAC on 03.09.2015.
- */ // Class to use with EventBus
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
+ * Class to be used with EventBus
+ */
 public class NetworkStateReceiverEvent {
 
     public final boolean wasNetworkAvailable;

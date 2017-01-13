@@ -35,7 +35,10 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
 /**
- * Created by Stan Koshutsky <stan.koshutsky@gmail.com> on 03.09.2015.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class NetworkStateHelper {
 

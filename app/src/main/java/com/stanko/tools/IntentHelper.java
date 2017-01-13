@@ -13,7 +13,10 @@ import java.io.File;
 import java.util.List;
 
 /**
- * Created by stan on 06.01.16.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class IntentHelper {
 

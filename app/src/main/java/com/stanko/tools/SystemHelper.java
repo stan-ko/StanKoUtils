@@ -1,7 +1,10 @@
 package com.stanko.tools;
 
 /**
- * Created by stan on 17.03.16.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class SystemHelper {
 

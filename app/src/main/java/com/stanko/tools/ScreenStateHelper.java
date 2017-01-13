@@ -6,7 +6,10 @@ import android.content.Intent;
 import android.content.IntentFilter;
 
 /**
- * Created by stan on 26.02.16.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class ScreenStateHelper extends BroadcastReceiver {
 

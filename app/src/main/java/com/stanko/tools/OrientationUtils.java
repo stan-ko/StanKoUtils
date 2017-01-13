@@ -82,7 +82,9 @@ public class OrientationUtils {
 
     private static int getManifestOrientation(Activity activity){
         try {
-            ActivityInfo app = activity.getPackageManager().getActivityInfo(activity.getComponentName(), PackageManager.GET_ACTIVITIES|PackageManager.GET_META_DATA);
+            ActivityInfo app = activity
+					.getPackageManager()
+					.getActivityInfo(activity.getComponentName(), PackageManager.GET_ACTIVITIES|PackageManager.GET_META_DATA);
             return app.screenOrientation;
         } catch (PackageManager.NameNotFoundException e) {
             return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;

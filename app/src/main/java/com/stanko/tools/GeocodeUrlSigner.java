@@ -1,8 +1,5 @@
 package com.stanko.tools;
 
-/**
- * Created by stan on 15.04.16.
- */
 import android.util.Base64;
 
 import java.io.IOException;
@@ -17,7 +14,10 @@ import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
 /**
- * Created by stan on 05.02.16.
+ * by Devlight
+ *
+ * Authors:
+ * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class GeocodeUrlSigner {
 

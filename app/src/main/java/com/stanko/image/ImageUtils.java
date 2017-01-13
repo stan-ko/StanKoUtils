@@ -557,10 +557,14 @@ public class ImageUtils {
             if (uri.getScheme().equals("content")) {
                 //From the media gallery
                 String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
-                Cursor c = context.getContentResolver().query(uri, projection, null, null, null);
-                if (c.moveToFirst()) {
-                    return c.getInt(0);
+                final Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                int value = 0;
+                if (cursor != null) {
+                    if (cursor.moveToFirst())
+                        value = cursor.getInt(0);
+                    cursor.close();
                 }
+                return value;
             } else if (uri.getScheme().equals("file")) {
                 //From a file saved by the camera
                 final ExifInterface exifReader = new ExifInterface(uri.getPath());
@@ -2336,7 +2340,7 @@ public class ImageUtils {
 //            return bitmapToCrop;
     }
 
-    public static Bitmap getCroppedFromCenterBitmap(final Bitmap bitmapToCrop, int cropToHeight, int cropToWidth){
+    public static Bitmap getCroppedFromCenterBitmap(final Bitmap bitmapToCrop, int cropToHeight, int cropToWidth) {
         if (bitmapToCrop == null || cropToHeight == 0 || cropToWidth == 0)
             return null;
 
