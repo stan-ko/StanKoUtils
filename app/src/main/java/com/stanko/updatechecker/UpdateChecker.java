@@ -21,9 +21,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 /*
- * <p/>
  * Authors:
- * Stan Koshutsky<Stan.Koshutsky@gmail.com>
+ * Stan Koshutsky {Stan.Koshutsky@gmail.com}
  */
 
 public class UpdateChecker implements Runnable {
