@@ -40,7 +40,7 @@ public class GeocodeUrlSigner {
             final GeocodeUrlSigner signer = new GeocodeUrlSigner(key);
             final String request = signer.signRequest(url.getPath(),url.getQuery());
             result = url.getProtocol() + "://" + url.getHost() + request;
-            Log.i("Signed URL :" + url.getProtocol() + "://" + url.getHost() + request);
+//            Log.i("Signed URL :" + url.getProtocol() + "://" + url.getHost() + request);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (UnsupportedEncodingException e) {

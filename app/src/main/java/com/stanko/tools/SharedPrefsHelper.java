@@ -24,6 +24,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -37,7 +38,7 @@ public class SharedPrefsHelper {
 
     private static String mLastUsedSharedPrefsName = "SharedPrefsHelper";
 
-    private static Context appContext;
+    private static Context appContext; // Application context is singleton and could be kept static
 
     private static boolean isSecuredMode;
 
@@ -247,7 +248,7 @@ public class SharedPrefsHelper {
             prefsEditor.putBoolean(theKey, (Boolean) value);
         else if (value instanceof JSONObject || value instanceof JSONArray)
             prefsEditor.putString(theKey, value.toString());
-        else if (value instanceof Serializable)
+        else //if (value instanceof Serializable)
             try {
                 prefsEditor.putString(theKey, getStringFromObject((Serializable) value));
             } catch (Exception ignored) {
@@ -276,7 +277,7 @@ public class SharedPrefsHelper {
 
     public static boolean save(Context context, final String[] keys, final Object[] values) {
         if (context == null) {
-            logNullContext(keys.toString());
+            logNullContext(keys == null ? "" : Arrays.toString(keys));
             return save(getSharedPreferencesEditor(), keys, values);
         } else
             return save(getSharedPreferencesEditor(context), keys, values);
@@ -284,18 +285,17 @@ public class SharedPrefsHelper {
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
         if (prefsEditor == null || keys == null || keys.length == 0 || values == null) {
-            //Log.e("save(): null in parameters");
-            logNullParams(keys.toString());
+            logNullParams(keys == null ? "" : Arrays.toString(keys));
             return false;
         }
 
-        String theKey = null;
-        Object value = null;
+        String theKey;
+        Object value;
         final int keysCount = keys.length;
         final int valuesCount = values.length;
         for (int index = 0; index < keysCount; index++) {
             theKey = keys[index];
-            value = null;
+//            value = null;
             if (index > valuesCount - 1)
                 prefsEditor.putString(theKey, null);
             else {
@@ -325,11 +325,11 @@ public class SharedPrefsHelper {
         return save(keysAndValues);
     }
 
-    public static boolean put(Context context, final Map<String, Object> keysAndValues) {
+    public static boolean put(final Context context, final Map<String, Object> keysAndValues) {
         return save(context, keysAndValues);
     }
 
-    public static boolean put(SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
+    public static boolean put(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
         return save(prefsEditor, keysAndValues);
     }
 
@@ -337,7 +337,7 @@ public class SharedPrefsHelper {
         return save(getSharedPreferencesEditor(), keysAndValues);
     }
 
-    public static boolean save(Context context, final Map<String, Object> keysAndValues) {
+    public static boolean save(final Context context, final Map<String, Object> keysAndValues) {
         if (context == null) {
             logNullContext(keysAndValues.toString());
             return save(getSharedPreferencesEditor(), keysAndValues);
@@ -345,15 +345,15 @@ public class SharedPrefsHelper {
             return save(getSharedPreferencesEditor(context), keysAndValues);
     }
 
-    public static boolean save(SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
+    public static boolean save(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
         if (prefsEditor == null || keysAndValues == null || keysAndValues.size() == 0) {
             //Log.e("save(): null in parameters");
-            logNullParams(keysAndValues.getClass().getName());
+            logNullParams(keysAndValues == null ? "null" : keysAndValues.getClass().getName());
             return false;
         }
 
         Set<String> keys = keysAndValues.keySet();
-        Object value = null;
+        Object value;
         for (String theKey : keys) {
             value = keysAndValues.get(theKey);
             if (value == null)
@@ -430,11 +430,13 @@ public class SharedPrefsHelper {
      * INT AND INTEGER VALUE
      */
     public static int getInt(final String theKey) {
-        return getInteger(getSharedPreferences(), theKey, 0);
+        final Integer value = getInteger(getSharedPreferences(), theKey, 0);
+        return value == null ? 0 : value;
     }
 
     public static int getInt(final String theKey, final int defaultValue) {
-        return getInteger(getSharedPreferences(), theKey, defaultValue);
+        final Integer value = getInteger(getSharedPreferences(), theKey, defaultValue);
+        return value == null ? defaultValue : value;
     }
 
     public static int getInt(final Context context, final String theKey) {
@@ -444,13 +446,17 @@ public class SharedPrefsHelper {
     public static int getInt(final Context context, final String theKey, final int defaultValue) {
         if (context == null) {
             logNullContext(theKey);
-            return getInteger(getSharedPreferences(), theKey, defaultValue);
+            final Integer value = getInteger(getSharedPreferences(), theKey, defaultValue);
+            return value == null ? defaultValue : value;
+        } else {
+            final Integer value = getInteger(getSharedPreferences(context), theKey, defaultValue);
+            return value == null ? defaultValue : value;
         }
-        return getInteger(getSharedPreferences(context), theKey, defaultValue);
     }
 
     public static int getInt(final SharedPreferences prefs, final String theKey) {
-        return getInteger(prefs, theKey, 0);
+        final Integer value = getInteger(prefs, theKey, 0);
+        return value == null ? 0 : value;
     }
 
     public static Integer getInteger(final String theKey) {
@@ -579,13 +585,13 @@ public class SharedPrefsHelper {
             logNullParams(theKey);
             return null;
         }
-        if (defaultValue != null) {
-            return Double.longBitsToDouble(prefs.getLong(theKey, Double.doubleToLongBits(defaultValue)));
+        if (prefs.contains(theKey)) {
+            if (defaultValue != null)
+                return Double.longBitsToDouble(prefs.getLong(theKey, Double.doubleToLongBits(defaultValue)));
+            else
+                return Double.longBitsToDouble(prefs.getLong(theKey, 0));
         } else {
-            if (!prefs.contains(theKey))
-                return defaultValue;
-
-            return Double.longBitsToDouble(prefs.getLong(theKey, 0));
+            return defaultValue;
         }
     }
 
@@ -737,7 +743,7 @@ public class SharedPrefsHelper {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(object);
         oos.close();
-        return new String(Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT));
+        return Base64.encodeToString(baos.toByteArray(), Base64.DEFAULT);
     }
 
     private static Object getObjectFromString(String string) throws IOException, ClassNotFoundException {
@@ -920,6 +926,8 @@ public class SharedPrefsHelper {
     public static Bitmap getAvatarBitmap() {
         Bitmap avatar = null;
         File filePath = getAvatarFile();
+        if (filePath == null)
+            return null;
         FileInputStream fi = null;
         try {
             fi = new FileInputStream(filePath);
