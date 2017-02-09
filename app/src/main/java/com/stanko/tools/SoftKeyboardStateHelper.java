@@ -1,8 +1,11 @@
 package com.stanko.tools;
 
+import android.content.Context;
 import android.graphics.Rect;
 import android.view.View;
 import android.view.ViewTreeObserver;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -109,5 +112,32 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
                 listener.onSoftKeyboardClosed();
             }
         }
+    }
+
+    public static void showKeyboard(final EditText view) {
+        view.setFocusableInTouchMode(true);
+        view.requestFocus();
+        view.requestLayout();
+        view.setCursorVisible(true);
+        final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        view.postInvalidate();
+    }
+
+    public static void hideKeyboard(final EditText... editTexts) {
+        for (EditText editText : editTexts) {
+            if (editText != null && editText.hasFocus()) {
+                hideKeyboard(editText);
+                return;
+            }
+        }
+    }
+
+    public static void hideKeyboard(final EditText view) {
+        view.clearFocus();
+//        editText.setCursorVisible(false);
+        view.requestLayout();
+        final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
     }
 }

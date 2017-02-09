@@ -2,11 +2,14 @@ package com.stanko.tools;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Environment;
 import android.os.StatFs;
 import android.text.TextUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
@@ -25,6 +28,7 @@ import java.util.regex.Pattern;
 public class SDCardHelper {
 
     private static final String SD_CARD_HELPER_INIT_ERR = "SDCardHelper is not initialized properly";
+
     private static final String SD_DEFAULT_DIR_ANDROID = "/Android";
     private static final String SD_DEFAULT_DIR_DATA = SD_DEFAULT_DIR_ANDROID + File.separator + "data" + File.separator;
     private static final String SD_DEFAULT_DIR_OBB = SD_DEFAULT_DIR_ANDROID + File.separator + "obb" + File.separator;
@@ -32,11 +36,11 @@ public class SDCardHelper {
 
     private static final String SD_DEFAULT_PACKAGE = SDCardHelper.class.getName();
 
-    private static String SD_CACHE_PATH = SD_DEFAULT_DIR_DATA + SD_DEFAULT_PACKAGE + File.separator +  "cache" + File.separator;
+    private static String SD_CACHE_PATH = SD_DEFAULT_DIR_DATA + SD_DEFAULT_PACKAGE + File.separator + "cache" + File.separator;
     private static boolean isInitialized;
+    private static Context appContext;
     private static File internalCacheDir;
-//	private static Context appContext;
-    private static File sdCacheDir;
+    private static File externalCacheDir;
 
     public static synchronized void init(Context context) {
         init(context.getPackageName(), context);
@@ -45,10 +49,10 @@ public class SDCardHelper {
     public static synchronized void init(final String appPackageName, Context context) {
         SD_CACHE_PATH = String.format("/Android/data/%s/cache/", appPackageName);
         internalCacheDir = context.getCacheDir();
-        sdCacheDir = new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
-//		appContext = context.getApplicationContext();
-        if (isExternalStorageWritable())
-            FileUtils.makeDirsForFile(new File(sdCacheDir, "tempfile.tmp"));
+        externalCacheDir = new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
+        appContext = context.getApplicationContext();
+//        if (isExternalStorageWritable()) {
+//        }
         isInitialized = true;
     }
 
@@ -209,9 +213,7 @@ public class SDCardHelper {
         File file = new File(getCacheDir(), Hash.getMD5("tempfile" + System.currentTimeMillis()) + fileExtension);
         if (!FileUtils.makeDirsForFile(file))
             return null;
-//		final File fileDir = new File(file.getParent());
-//		if (fileDir!=null && !fileDir.exists())
-//			fileDir.mkdirs();
+        file.deleteOnExit();
         return file;
     }
 
@@ -309,9 +311,54 @@ public class SDCardHelper {
             //  to know is we can neither read nor write
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
-
+        if (mExternalStorageAvailable) {
+            final File tempFile = new File(externalCacheDir, "tempfile.tmp");
+            FileUtils.makeDirsForFile(tempFile);
+            try {
+                mExternalStorageAvailable = tempFile.createNewFile();
+                FileUtils.stringToFile(SDCardHelper.class.getName(), tempFile);
+                if (!tempFile.delete())
+                    tempFile.deleteOnExit();
+            } catch (IOException e) {
+                e.printStackTrace();
+                mExternalStorageAvailable = false;
+            }
+        }
         return mExternalStorageAvailable && mExternalStorageWriteable;
     }
+
+    public static boolean isExternalStorageWritePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (appContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Log.i("Permission is granted");
+                return true;
+            } else {
+                Log.i("Permission is revoked");
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        //else { //permission is automatically granted on sdk<23 upon installation
+        Log.i("Permission is granted");
+        return true;
+    }
+
+    public static boolean isExternalStorageReadPermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (appContext.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                Log.i("Permission is granted");
+                return true;
+            } else {
+                Log.i("Permission is revoked");
+//                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        }
+        //else { //permission is automatically granted on sdk<23 upon installation
+        Log.i("Permission is granted");
+        return true;
+    }
+
 
     /**
      * Checks if SD card available to read from
@@ -330,7 +377,7 @@ public class SDCardHelper {
     public static boolean isExternalStorageReadable() {
         String state = Environment.getExternalStorageState();
 
-        if (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state)) {
+        if (isExternalStorageReadPermissionGranted() && (Environment.MEDIA_MOUNTED.equals(state) || Environment.MEDIA_MOUNTED_READ_ONLY.equals(state))) {
             return true;
         } else {
             // Something else is wrong. It may be one of many other states, but all we need
@@ -355,7 +402,28 @@ public class SDCardHelper {
      */
     public static boolean isExternalStorageWritable() {
         String state = Environment.getExternalStorageState();
-        return Environment.MEDIA_MOUNTED.equals(state);
+        if (!Environment.MEDIA_MOUNTED.equals(state) || !isExternalStorageWritePermissionGranted())
+            return false;
+
+        // now try to write file physically
+        boolean isStorageAvailable;
+        final File tempFile = new File(externalCacheDir, "tempfile.tmp");
+        FileUtils.makeDirsForFile(tempFile);
+        try {
+            if (!tempFile.createNewFile())
+                isStorageAvailable = false;
+            else {
+                if (!FileUtils.stringToFile(SDCardHelper.class.getName(), tempFile))
+                    isStorageAvailable = false;
+                else if (!tempFile.delete())
+                    tempFile.deleteOnExit();
+            }
+            isStorageAvailable = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            isStorageAvailable = false;
+        }
+        return isStorageAvailable;
 //		if (Environment.MEDIA_MOUNTED.equals(state)) {
 //		    // We can read and write the media
 //		    return true;
@@ -454,12 +522,10 @@ public class SDCardHelper {
      * @return File or null if class wasn't initialized previously
      */
     public static File getCacheDir(Context context) {
-        if (isExternalStorageAvailable())
-            return sdCacheDir;
-
+        if (isExternalStorageAvailable() && isExternalStorageWritable())
+            return externalCacheDir;
         if (context == null)
             return internalCacheDir;
-
         return context.getCacheDir();
     }
 
