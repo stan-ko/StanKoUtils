@@ -37,8 +37,6 @@ public class DeviceInfo {
     private static boolean isInitialized;
     private static Context appContext;
 
-    private static Boolean isHiResDisplay;
-
     private static boolean hasTelephony;
     //private static Boolean hasCamera;
 
@@ -75,13 +73,6 @@ public class DeviceInfo {
     public static int navigationBarHeight;
     public static int statusBarHeight;
 
-    /**
-     * Obtaining screen width and height.
-     * Determining the type of the device e.g. hdpi,mdpi,ldpi
-     */
-    public static Boolean isHiResDisplay() {
-        return isHiResDisplay;
-    }
 
     /**
      * To determine device portrait width
@@ -103,16 +94,16 @@ public class DeviceInfo {
 
 
     /**
+     * if given context is null a NPE will be thrown
+     *
      * @return boolean  true if initialized successfully
      */
     @SuppressLint("NewApi")
     public static boolean init(final Context context) {
 
-        if (isInitialized)
+        if (isInitialized && context != null) {
             return true;
-
-        if (context == null)
-            return false;
+        }
 
         appContext = context.getApplicationContext(); // to be sure its appContext
         displayMetrics = appContext.getResources().getDisplayMetrics();
@@ -128,7 +119,7 @@ public class DeviceInfo {
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
         if (hasAPILevel < 14) {
             realDisplayHeight = displayMetrics.heightPixels;
-            realDisplayWidth =  displayMetrics.widthPixels;
+            realDisplayWidth = displayMetrics.widthPixels;
         } else if (hasAPILevel > 13 && hasAPILevel < 17) {
             // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
             try {
@@ -285,16 +276,53 @@ public class DeviceInfo {
     }
 
     public static boolean isTablet() {
-        Log.i("this device DeviceInfo.screenSize: " + DeviceInfo.screenSize + " " + DeviceInfo.displayDensity+"\n"+
-              "screenInchesByMetrics: " + DeviceInfo.screenInchesByMetrics + " screenInchesByConfig: " + DeviceInfo.screenInchesByConfig);
-        final boolean isTabletByResources = appContext.getResources().getBoolean(R.bool.isTablet);
-        //final boolean isTabletByTelephony = !DeviceInfo.hasTelephony();
-        final boolean isTabletByScreen = DeviceInfo.screenSize > 2 && DeviceInfo.screenInchesByMetrics > 7f;
-        //DeviceInfo.isTabletByScreen();
-        Log.i("isTabletByResources: " + isTabletByResources + " isTabletByScreen: " + isTabletByScreen + " DeviceInfo.screenSize: " + DeviceInfo.screenSize);
-        return isTabletByResources || isTabletByScreen;
+        return isTabletByResources();
     }
 
+    public static boolean isTabletByResources() {
+        final boolean isTabletByResources = appContext.getResources().getBoolean(R.bool.isTablet);
+        Log.i("isTabletByResources: " + isTabletByResources);
+        return isTabletByResources;
+    }
+
+//    public static boolean isTabletByScreen() {
+//        Log.i("this device DeviceInfo.screenSize: " + DeviceInfo.screenSize + " " + DeviceInfo.displayDensity + "\n" +
+//                "screenInchesByMetrics: " + DeviceInfo.screenInchesByMetrics + " screenInchesByConfig: " + DeviceInfo.screenInchesByConfig);
+//        final boolean isTabletByScreen = DeviceInfo.screenSize > 2 && DeviceInfo.screenInchesByMetrics > 7f;
+//        return isTabletByScreen;
+//    }
+
+    /**
+     * Tries to determine device is Tablet or SmartPhone by its screen
+     *
+     * @return
+     */
+    public static Boolean isTabletByScreen() {
+
+        if (!isInitialized)
+            return null;
+
+        boolean byScreen = screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE
+                & screenInches >= 7
+                & (displayDensity == DisplayMetrics.DENSITY_DEFAULT
+                || displayDensity == DisplayMetrics.DENSITY_HIGH
+                || displayDensity == DisplayMetrics.DENSITY_MEDIUM
+                || displayDensity == 213 //DisplayMetrics.DENSITY_TV
+                || displayDensity == 320 /*DisplayMetrics.DENSITY_XHIGH*/
+        );
+        // If >Large, checks if the Generalized Density is at least MDPI
+        // MDPI=160, DEFAULT=160, DENSITY_HIGH=240, DENSITY_MEDIUM=160,
+        // DENSITY_TV=213, DENSITY_XHIGH=320
+        Log.i("isTabletByScreen: " + byScreen + " screenSize: " + screenSize);
+        return byScreen;
+    }
+
+    /**
+     * Converts pixels to dp based on device density
+     *
+     * @param px
+     * @return
+     */
     public static float px2dp(float px) {
         if (isInitialized)
             return (float) ((px / displayMetrics.density) + 0.5);
@@ -305,6 +333,12 @@ public class DeviceInfo {
         }
     }
 
+    /**
+     * Converts dps to pixels based on device density
+     *
+     * @param dp
+     * @return
+     */
     public static float dp2px(float dp) {
         if (isInitialized)
             return (float) ((dp * displayMetrics.density) + 0.5);
@@ -315,6 +349,12 @@ public class DeviceInfo {
         }
     }
 
+    /**
+     * Converts sp (Font size) to pixels
+     *
+     * @param sp
+     * @return
+     */
     public static float sp2px(float sp) {
         if (isInitialized)
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics);
@@ -347,10 +387,6 @@ public class DeviceInfo {
 
     public static boolean hasTelephony() {
         return hasTelephony;
-    }
-
-    public static void checkHasTelephony() {
-        checkHasTelephony(appContext);
     }
 
     public static void checkHasTelephony(Context context) {
@@ -409,15 +445,14 @@ public class DeviceInfo {
                 return Camera.getNumberOfCameras() > 0;
         } else
             return false;
-
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
-    public static boolean hasCameraApi2(){
+    public static boolean hasCameraApi2() {
         try {
             final android.hardware.camera2.CameraManager cameraManager = (android.hardware.camera2.CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE);
             final String[] cameraIdList = cameraManager.getCameraIdList();
-            return cameraIdList!=null && cameraIdList.length > 0;
+            return cameraIdList != null && cameraIdList.length > 0;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -559,51 +594,24 @@ public class DeviceInfo {
      */
     public static int getDeviceMaxSideSizeByDensity() {
         int maxSideSize = 128;
-        if (isHiResDisplay != null) {
-            switch (displayDensity) {
-                case 120:
-                    maxSideSize = 64;
-                    break;
-                case 160:
-                    maxSideSize = 96;
-                    break;
-                case 240:
-                    maxSideSize = 128;
-                    break;
-                case 320:
-                    maxSideSize = 256;
-                    break;
-                default:
-                    maxSideSize = 512;
-                    break;
-            }
+        switch (displayDensity) {
+            case 120:
+                maxSideSize = 64;
+                break;
+            case 160:
+                maxSideSize = 96;
+                break;
+            case 240:
+                maxSideSize = 128;
+                break;
+            case 320:
+                maxSideSize = 256;
+                break;
+            default:
+                maxSideSize = 512;
+                break;
         }
         return maxSideSize;
-    }
-
-    /**
-     * Tries to determine device is Tablet or SmartPhone by its screen
-     *
-     * @return
-     */
-    public static Boolean isTabletByScreen() {
-
-        if (!isInitialized)
-            return null;
-
-        boolean byScreen = screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE
-                & screenInches >= 7
-                & (displayDensity == DisplayMetrics.DENSITY_DEFAULT
-                || displayDensity == DisplayMetrics.DENSITY_HIGH
-                || displayDensity == DisplayMetrics.DENSITY_MEDIUM
-                || displayDensity == 213 //DisplayMetrics.DENSITY_TV
-                || displayDensity == 320 /*DisplayMetrics.DENSITY_XHIGH*/
-        );
-        // If >Large, checks if the Generalized Density is at least MDPI
-        // MDPI=160, DEFAULT=160, DENSITY_HIGH=240, DENSITY_MEDIUM=160,
-        // DENSITY_TV=213, DENSITY_XHIGH=320
-
-        return byScreen;
     }
 
     /**

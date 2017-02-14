@@ -21,15 +21,15 @@ public class BooleanLock {
         return true;
     }
 
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return isLocked;
     }
 
-    public void setFinished() {
+    public synchronized void setFinished() {
         this.isLocked = false;
     }
 
-    public boolean isFinished() {
+    public synchronized boolean isFinished() {
         return !isLocked;
     }
 
