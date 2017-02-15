@@ -17,34 +17,12 @@ import java.util.regex.Pattern;
 
 public class EMailHelper {
 
-    //
-//	public static void shareMessage(Context context, final String subject, final String text, final File... files) {
-//		final Intent sharingIntent;
-//		if (files != null && files.length > 0) {
-//			sharingIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-//			ArrayList<Uri> uris = new ArrayList<Uri>();
-//			//convert from files to Android friendly Parcelable Uri's
-//			for (File file : files)
-//				uris.add(Uri.fromFile(file));
-//			sharingIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-//		} else
-//			sharingIntent = new Intent(Intent.ACTION_SEND);
-//		if (!TextUtils.isEmpty(subject))
-//			sharingIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-//		if (!TextUtils.isEmpty(text))
-//			sharingIntent.putExtra(Intent.EXTRA_TEXT, text);
-//		sharingIntent.setType("audio/*");
-//
-//		try {
-//			context.startActivity(Intent.createChooser(sharingIntent, context.getString(R.string.share_msg_chooser_label)));
-//		} catch (ActivityNotFoundException e) {
-//			Toast.makeText(context, R.string.toast_no_email_client_intent, Toast.LENGTH_LONG).show();
-//		} catch (SecurityException e) {
-//			Toast.makeText(context, R.string.toast_email_client_intent_not_allowed, Toast.LENGTH_LONG).show();
-//			return;
-//		}
-//	}
-
+    /**
+     * Checks if given EMail address might be a valid one.
+     *
+     * @param email - String, EMail address to check
+     * @return
+     */
     public static boolean isValidEmail(final String email) {
         if (TextUtils.isEmpty(email))
             return false;
@@ -71,6 +49,9 @@ public class EMailHelper {
             return false;
     }
 
+    /**
+     * A list of known EMail application packages to apply to EMail Intent
+     */
     private final static String[] knownPackages = new String[]{
             "com.google.android.gm",
             "com.google.android.apps.inbox",
@@ -116,6 +97,14 @@ public class EMailHelper {
             "com.sec.android.email",
             "com.htc.android.mail"};
 
+    /**
+     * This method tries to apply one of known EMail App packages. This is useful to avoid
+     * appearing of standard Android OS picker and thus it results in faster EMail app launch.
+     *
+     * @param context
+     * @param emailIntent
+     * @return true if any package was found and applied
+     */
     private static boolean applyKnownPackage(final Context context, final Intent emailIntent) {
         final List<ResolveInfo> resInfo = context.getPackageManager().queryIntentActivities(emailIntent, 0);
         if (resInfo.size() == 0)
@@ -149,16 +138,16 @@ public class EMailHelper {
      * Starts EMail intent with filled by given receiver, subject and text
      *
      * @param context
-     * @param receiver
-     * @param subject
-     * @param text
+     * @param receiver - email address of whom to send this mail
+     * @param subject  - subject (theme, topic) of email
+     * @param text     - the message
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(Context context,
-                                 final String receiver,
-                                 final String subject,
-                                 final String text
-    ) {
-        sendEmail(context,
+    public static boolean sendEmail(Context context,
+                                    final String receiver,
+                                    final String subject,
+                                    final String text) {
+        return sendEmail(context,
                 new String[]{receiver},
                 subject,
                 text,
@@ -168,19 +157,19 @@ public class EMailHelper {
     }
 
     /**
-     * Starts EMail intent with filled by given receiver, subject and text
+     * Starts EMail intent with filled by given receivers, subject and text
      *
      * @param context
-     * @param receivers
-     * @param subject
-     * @param text
+     * @param receivers - array of email addresses of whom to send this mail
+     * @param subject   - subject (theme, topic) of email
+     * @param text      - the message
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(Context context,
-                                 final String[] receivers,
-                                 final String subject,
-                                 final String text
-    ) {
-        sendEmail(context,
+    public static boolean sendEmail(Context context,
+                                    final String[] receivers,
+                                    final String subject,
+                                    final String text) {
+        return sendEmail(context,
                 receivers,
                 subject,
                 text,
@@ -189,185 +178,56 @@ public class EMailHelper {
                 null);
     }
 
-//    /**
-//     * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//     *
-//     * @param context
-//     * @param emailResId
-//     * @param subjectResId
-//     * @param textResId
-//     */
-//    public static void sendEmail(final Context context,
-//                                 final int emailResId,
-//                                 final int subjectResId,
-//                                 final int textResId)
-//    {
-//        final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        final String text = textResId > 0 ? context.getString(textResId) : null;
-//        sendEmail(context, email, subject, text, null, null, null);
-//    }
-//
-//
-//    /**
-//     * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//     *
-//     * @param context
-//     * @param emailResId
-//     * @param subjectResId
-//     * @param text
-//     */
-//    public static void sendEmail(final Context context,
-//                                 final int emailResId,
-//                                 final int subjectResId,
-//                                 final String text)
-//    {
-//        final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        sendEmail(context, email, subject, text, null, null, null);
-//    }
-//
-//    /**
-//     * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//     *
-//     * @param context
-//     * @param emailResId
-//     * @param subjectResId
-//     * @param textResId
-//     */
-//    public static void sendEmail(final Context context,
-//                                 final int emailResId,
-//                                 final int subjectResId,
-//                                 final int textResId,
-//                                 final int pickerTitleResId,
-//                                 final int securityErrorResId,
-//                                 final int noAssociatedAppErrorResId)
-//    {
-//        final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        final String text = textResId > 0 ? context.getString(textResId) : null;
-//        final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : null;
-//        final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : null;
-//        final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : null;
-//        sendEmail(context, email, subject, text, pickerTitle, securityError, noAssociatedAppError);
-//    }
-//
-//    /**
-//     * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//     *
-//     * @param context
-//     * @param emailResId
-//     * @param subjectResId
-//     * @param text
-//     */
-//    public static void sendEmail(final Context context,
-//                                 final int emailResId,
-//                                 final int subjectResId,
-//                                 final String text,
-//                                 final int pickerTitleResId,
-//                                 final int securityErrorResId,
-//                                 final int noAssociatedAppErrorResId)
-//    {
-//        final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : null;
-//        final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : null;
-//        final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : null;
-//        sendEmail(context, email, subject, text, pickerTitle, securityError, noAssociatedAppError);
-//    }
-//
-//
-//    /**
-//     * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
-//     *
-//     * @param context
-//     * @param receiver
-//     * @param subjectResId
-//     * @param textResId
-//     */
-//    public static void sendEmail(Context context,
-//                                 final String receiver,
-//                                 final int subjectResId,
-//                                 final int textResId,
-//                                 final int pickerTitleResId,
-//                                 final int securityErrorResId,
-//                                 final int noAssociatedAppErrorResId
-//    ) {
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        final String text = textResId > 0 ? context.getString(textResId) : null;
-//        final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : null;
-//        final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : null;
-//        final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : null;
-//        sendEmail(context, receiver, subject, text, pickerTitle, securityError, noAssociatedAppError);
-//    }
-//
-//    /**
-//     * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
-//     *
-//     * @param context
-//     * @param receivers
-//     * @param subjectResId
-//     * @param textResId
-//     */
-//    public static void sendEmail(Context context,
-//                                 final String[] receivers,
-//                                 final int subjectResId,
-//                                 final int textResId,
-//                                 final int pickerTitleResId,
-//                                 final int securityErrorResId,
-//                                 final int noAssociatedAppErrorResId
-//    ) {
-//        final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//        final String text = textResId > 0 ? context.getString(textResId) : null;
-//        final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : null;
-//        final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : null;
-//        final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : null;
-//        sendEmail(context, receivers, subject, text, pickerTitle, securityError, noAssociatedAppError);
-//    }
-
-
     /**
-     * Starts EMail intent with filled by given receiver, subject and text
+     * Starts EMail intent with filled by given receiver, subject and text with custom picker
+     * title and custom erros messages
      *
      * @param context
-     * @param receiver
-     * @param subject
-     * @param text
+     * @param receiver                    - email address of whom to send this mail
+     * @param subject                     - subject (theme, topic) of email
+     * @param text                        - the message
+     * @param pickerTitle                 - custom title tof an EMail app picker/chooser
+     * @param securityExceptionMessage    - custom message to be shown in Toast in case of SEx)
+     * @param noAssociatedAppErrorMessage - custom message to be shown in Toast in case of no EMail App found
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(final Context context,
-                                 final String receiver,
-                                 final String subject,
-                                 final String text,
-                                 final String pickerTitle,
-                                 final String securityErrorMessage,
-                                 final String noAssociatedAppErrorMessage
-    ) {
-        sendEmail(context,
+    public static boolean sendEmail(final Context context,
+                                    final String receiver,
+                                    final String subject,
+                                    final String text,
+                                    final String pickerTitle,
+                                    final String securityExceptionMessage,
+                                    final String noAssociatedAppErrorMessage) {
+        return sendEmail(context,
                 !TextUtils.isEmpty(receiver) ? new String[]{receiver} : null,
                 subject,
                 text,
                 pickerTitle,
-                securityErrorMessage,
+                securityExceptionMessage,
                 noAssociatedAppErrorMessage);
     }
 
 
     /**
-     * Starts EMail intent with filled by given receiver, subject and text
+     * Starts EMail intent with filled by given receiver, subject and text with custom picker
+     * title and custom erros messages
      *
      * @param context
-     * @param receivers
-     * @param subject
-     * @param text
+     * @param receivers                   - array of email addresses whom to send this mail
+     * @param subject                     - subject (theme, topic) of email
+     * @param text                        - the message
+     * @param pickerTitle                 - custom title tof an EMail app picker/chooser
+     * @param securityExceptionMessage    - custom message to be shown in Toast in case of SEx)
+     * @param noAssociatedAppErrorMessage - custom message to be shown in Toast in case of no EMail App found
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(final Context context,
-                                 final String[] receivers,
-                                 final String subject,
-                                 final String text,
-                                 String pickerTitle,
-                                 String securityExceptionMessage,
-                                 String noAssociatedAppErrorMessage
-    ) {
+    public static boolean sendEmail(final Context context,
+                                    final String[] receivers,
+                                    final String subject,
+                                    final String text,
+                                    String pickerTitle,
+                                    String securityExceptionMessage,
+                                    String noAssociatedAppErrorMessage) {
         if (TextUtils.isEmpty(pickerTitle))
             pickerTitle = EMH_DEFAULT_PICKER_TITLE;
         if (TextUtils.isEmpty(securityExceptionMessage))
@@ -387,10 +247,12 @@ public class EMailHelper {
 //        emailIntent.setType("text/plain");
         emailIntent.setType("message/rfc822");
 
+        boolean isIntentSent = false;
         if (applyKnownPackage(context, emailIntent)) {
             //Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             try {
                 context.startActivity(Intent.createChooser(emailIntent, pickerTitle));
+                isIntentSent = true;
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             } catch (SecurityException e) {
@@ -399,6 +261,7 @@ public class EMailHelper {
         } else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(emailIntent);
+                isIntentSent = true;
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             } catch (ActivityNotFoundException e) {
@@ -407,247 +270,169 @@ public class EMailHelper {
         else
             try {
                 context.startActivity(Intent.createChooser(emailIntent, pickerTitle));
+                isIntentSent = true;
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             }
+        return isIntentSent;
     }
 
 
-    // mail with attaches
+    //
+    // mail with attachments section
+    //
 
     /**
-     * Starts EMail intent with filled by given receiver, subject and text
+     * Starts EMail intent with filled by given receiver, subject, text and file(s) to be send as
+     * attachment(s) with custom picker title and custom errors messages
      *
      * @param context
-     * @param receiver
-     * @param subject
-     * @param text
+     * @param receiver - email address of whom to send this mail
+     * @param subject  - subject (theme, topic) of email
+     * @param text     - the message
+     * @param files    - vararg of files. If null or zero-length common EMail (with no attachments)
+     *                 will be sent.
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(Context context,
-                                 final String receiver,
-                                 final String subject,
-                                 final String text,
-                                 final File... files
-    ) {
-        sendEmail(context,
-                new String[]{receiver},
-                subject,
-                text,
-                null,
-                null,
-                null,
-                files);
+    public static boolean sendEmail(Context context,
+                                    final String receiver,
+                                    final String subject,
+                                    final String text,
+                                    final File... files) {
+        if (files == null || files.length == 0) {
+            return sendEmail(context,
+                    new String[]{receiver},
+                    subject,
+                    text,
+                    null,
+                    null,
+                    null);
+        } else {
+            return sendEmail(context,
+                    new String[]{receiver},
+                    subject,
+                    text,
+                    null,
+                    null,
+                    null,
+                    files);
+        }
     }
 
     /**
-     * Starts EMail intent with filled by given receiver, subject and text
+     * Starts EMail intent with filled by given receiver, subject, text and file(s) to be send as
+     * attachment(s)
      *
      * @param context
-     * @param receivers
-     * @param subject
-     * @param text
+     * @param receivers - array of email addresses whom to send this mail
+     * @param subject   - subject (theme, topic) of email
+     * @param text      - the message
+     * @param files     - vararg of files. If null or zero-length common EMail (with no attachments)
+     *                  will be sent.
+     * @return true if no exception happens (SecurityException or no email app found)
      */
-    public static void sendEmail(Context context,
-                                 final String[] receivers,
-                                 final String subject,
-                                 final String text,
-                                 final File... files
-    ) {
-        sendEmail(context,
-                receivers,
-                subject,
-                text,
-                null,
-                null,
-                null,
-                files);
+    public static boolean sendEmail(Context context,
+                                    final String[] receivers,
+                                    final String subject,
+                                    final String text,
+                                    final File... files) {
+        if (files == null || files.length == 0) {
+            return sendEmail(context,
+                    receivers,
+                    subject,
+                    text,
+                    null,
+                    null,
+                    null);
+        } else {
+            return sendEmail(context,
+                    receivers,
+                    subject,
+                    text,
+                    null,
+                    null,
+                    null,
+                    files);
+        }
     }
 
-//	/**
-//	 * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
-//	 *
-//	 * @param context
-//	 * @param receiver - Receiver EMail address or addresses
-//	 * @param subjectResId - EMail subject string Resource Id (R.string.xxx)
-//	 * @param textResId - EMail text/body string Resource Id (R.string.xxx)
-//	 */
-//	public static void sendEmail(final Context context,
-//								 final String receiver,
-//								 final int subjectResId,
-//								 final int textResId,
-//								 final File... files
-//	) {
-//		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//		final String text = textResId > 0 ? context.getString(textResId) : null;
-//		sendEmail(context,
-//				receiver,
-//				subject,
-//				text,
-//				EMH_DEFAULT_PICKER_TITLE,
-//				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
-//				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
-//				files);
-//	}
-//
-//	/**
-//	 * Starts EMail intent with filled by given receiver email and R.string.ids: subject and text
-//	 *
-//	 * @param context
-//	 * @param receiver
-//	 * @param subjectResId
-//	 * @param textResId
-//	 */
-//	public static void sendEmail(Context context,
-//								 final String receiver,
-//								 final int subjectResId,
-//								 final int textResId,
-//								 final int pickerTitleResId,
-//								 final int securityErrorResId,
-//								 final int noAssociatedAppErrorResId,
-//								 final File... files
-//	) {
-//		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//		final String text = textResId > 0 ? context.getString(textResId) : null;
-//		final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : EMH_DEFAULT_PICKER_TITLE;
-//		final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
-//		final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
-//		sendEmail(context,
-//				receiver,
-//				subject,
-//				text,
-//				pickerTitle,
-//				securityError,
-//				noAssociatedAppError,
-//				files);
-//	}
-//
-//	/**
-//	 * Starts EMail intent with filled by given R.string.ids: subject and text
-//	 *
-//	 * @param context
-//	 * @param subjectResId
-//	 * @param textResId
-//	 */
-//	public static void sendEmail(Context context,
-//								 final int subjectResId,
-//								 final int textResId,
-//								 final File... files)
-//	{
-//		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//		final String text = textResId > 0 ? context.getString(textResId) : null;
-//		sendEmail(context,
-//				"",
-//				subject,
-//				text,
-//				EMH_DEFAULT_PICKER_TITLE,
-//				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
-//				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
-//				files);
-//	}
-//
-//	/**
-//	 * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//	 *
-//	 * @param context
-//	 * @param emailResId
-//	 * @param subjectResId
-//	 * @param textResId
-//	 */
-//	public static void sendEmail(Context context,
-//								 final int emailResId,
-//								 final int subjectResId,
-//								 final int textResId,
-//								 final int pickerTitleResId,
-//								 final int securityErrorResId,
-//								 final int noAssociatedAppErrorResId,
-//								 final File... files) {
-//		final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//		final String text = textResId > 0 ? context.getString(textResId) : null;
-//		final String pickerTitle = pickerTitleResId > 0 ? context.getString(pickerTitleResId) : EMH_DEFAULT_PICKER_TITLE;
-//		final String securityError = securityErrorResId > 0 ? context.getString(securityErrorResId) : EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE;
-//		final String noAssociatedAppError = noAssociatedAppErrorResId > 0 ? context.getString(noAssociatedAppErrorResId) : EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
-//		sendEmail(context,
-//				email,
-//				subject,
-//				text,
-//				pickerTitle,
-//				securityError,
-//				noAssociatedAppError,
-//				files);
-//	}
-//
-//	/**
-//	 * Starts EMail intent with filled by given R.string.ids: email address, subject and text
-//	 *
-//	 * @param context
-//	 * @param emailResId
-//	 * @param subjectResId
-//	 * @param textResId
-//	 */
-//	public static void sendEmail(Context context,
-//								 final int emailResId,
-//								 final int subjectResId,
-//								 final int textResId,
-//								 final File... files) {
-//		final String email = emailResId > 0 ? context.getString(emailResId) : null;
-//		final String subject = subjectResId > 0 ? context.getString(subjectResId) : null;
-//		final String text = textResId > 0 ? context.getString(textResId) : null;
-//		sendEmail(context,
-//				email,
-//				subject,
-//				text,
-//				EMH_DEFAULT_PICKER_TITLE,
-//				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
-//				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
-//				files);
-//	}
-//
-//
-//
-//	public static void sendEmail(Context context,
-//								 final String receiver,
-//								 final String subject,
-//								 final String text,
-//								 final File... files) {
-//		sendEmail(context,
-//				new String[]{receiver},
-//				subject,
-//				text,
-//				EMH_DEFAULT_PICKER_TITLE,
-//				EMH_DEFAULT_SECURITY_EXCEPTION_ERROR_MESSAGE,
-//				EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE,
-//				files);
-//	}
-
-    public static void sendEmail(Context context,
-                                 final String receiver,
-                                 final String subject,
-                                 final String text,
-                                 final String pickerTitle,
-                                 final String securityErrorMessage,
-                                 final String noAssociatedAppErrorMessage,
-                                 final File... files) {
-        sendEmail(context,
-                new String[]{receiver},
-                subject,
-                text,
-                pickerTitle,
-                securityErrorMessage,
-                noAssociatedAppErrorMessage,
-                files);
+    /**
+     * Starts EMail intent with filled by given receiver, subject, text and file(s) to be send as
+     * attachment(s) with custom picker title and custom errors messages
+     *
+     * @param context
+     * @param receiver                    - email address of whom to send this mail
+     * @param subject                     - subject (theme, topic) of email
+     * @param text                        - the message
+     * @param pickerTitle                 - custom title tof an EMail app picker/chooser
+     * @param securityExceptionMessage    - custom message to be shown in Toast in case of SEx)
+     * @param noAssociatedAppErrorMessage - custom message to be shown in Toast in case of no EMail App found
+     * @param files                       - vararg of files. If null or zero-length common EMail (with no attachments)
+     *                                    will be sent.
+     * @return true if no exception happens (SecurityException or no email app found)
+     */
+    public static boolean sendEmail(Context context,
+                                    final String receiver,
+                                    final String subject,
+                                    final String text,
+                                    final String pickerTitle,
+                                    final String securityExceptionMessage,
+                                    final String noAssociatedAppErrorMessage,
+                                    final File... files) {
+        if (files == null || files.length == 0) {
+            return sendEmail(context,
+                    new String[]{receiver},
+                    subject,
+                    text,
+                    pickerTitle,
+                    securityExceptionMessage,
+                    noAssociatedAppErrorMessage);
+        } else {
+            return sendEmail(context,
+                    new String[]{receiver},
+                    subject,
+                    text,
+                    pickerTitle,
+                    securityExceptionMessage,
+                    noAssociatedAppErrorMessage,
+                    files);
+        }
     }
 
-    public static void sendEmail(Context context,
-                                 final String[] receivers,
-                                 final String subject,
-                                 final String text,
-                                 String pickerTitle,
-                                 String securityExceptionMessage,
-                                 String noAssociatedAppErrorMessage,
-                                 final File... files) {
+    /**
+     * Starts EMail intent with filled by given receiver, subject, text and file(s) to be send as
+     * attachment(s) with custom picker title and custom errors messages
+     *
+     * @param context
+     * @param receivers                   - array of email addresses whom to send this mail
+     * @param subject                     - subject (theme, topic) of email
+     * @param text                        - the message
+     * @param pickerTitle                 - custom title tof an EMail app picker/chooser
+     * @param securityExceptionMessage    - custom message to be shown in Toast in case of SEx)
+     * @param noAssociatedAppErrorMessage - custom message to be shown in Toast in case of no EMail App found
+     * @param files                       - vararg of files. If null or zero-length common EMail (with no attachments)
+     *                                    will be sent.
+     * @return true if no exception happens (SecurityException or no email app found)
+     */
+    public static boolean sendEmail(Context context,
+                                    final String[] receivers,
+                                    final String subject,
+                                    final String text,
+                                    String pickerTitle,
+                                    String securityExceptionMessage,
+                                    String noAssociatedAppErrorMessage,
+                                    final File... files) {
+        if (files == null || files.length == 0) {
+            return sendEmail(context,
+                    receivers,
+                    subject,
+                    text,
+                    pickerTitle,
+                    securityExceptionMessage,
+                    noAssociatedAppErrorMessage);
+        }
         if (TextUtils.isEmpty(pickerTitle))
             pickerTitle = EMH_DEFAULT_PICKER_TITLE;
         if (TextUtils.isEmpty(securityExceptionMessage))
@@ -655,16 +440,12 @@ public class EMailHelper {
         if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
             noAssociatedAppErrorMessage = EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
 
-        final Intent emailIntent;
-        if (files != null && files.length > 0) {
-            emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
-            final ArrayList<Uri> uris = new ArrayList<Uri>();
-            //convert from files to Android friendly Parcelable Uri's
-            for (File file : files)
-                uris.add(Uri.fromFile(file));
-            emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
-        } else
-            emailIntent = new Intent(Intent.ACTION_SEND);
+        final Intent emailIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
+        final ArrayList<Uri> uris = new ArrayList<>();
+        //convert from files to Android friendly Parcelable Uri's
+        for (File file : files)
+            uris.add(Uri.fromFile(file));
+        emailIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
         if (receivers != null && receivers.length > 0)
             emailIntent.putExtra(Intent.EXTRA_EMAIL, receivers);
         if (!TextUtils.isEmpty(subject))
@@ -675,10 +456,13 @@ public class EMailHelper {
 //        emailIntent.setType("text/plain");
         emailIntent.setType("message/rfc822");
 
+        boolean isIntentSent = false;
+
         if (applyKnownPackage(context, emailIntent)) {
             //Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             try {
                 context.startActivity(Intent.createChooser(emailIntent, pickerTitle));
+                isIntentSent = true;
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             } catch (SecurityException e) {
@@ -687,6 +471,7 @@ public class EMailHelper {
         } else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(emailIntent);
+                isIntentSent = true;
             } catch (SecurityException e) {
                 Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
             } catch (ActivityNotFoundException e) {
@@ -695,6 +480,7 @@ public class EMailHelper {
         else
             try {
                 context.startActivity(Intent.createChooser(emailIntent, pickerTitle));
+                isIntentSent = true;
             } catch (ActivityNotFoundException e) {
                 Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
             } catch (SecurityException e) {
@@ -713,6 +499,7 @@ public class EMailHelper {
 //        } catch (SecurityException e) {
 //            Toast.makeText(context, securityErrorMessage, Toast.LENGTH_LONG).show();
 //        }
+        return isIntentSent;
     }
 
 

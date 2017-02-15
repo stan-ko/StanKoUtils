@@ -877,6 +877,13 @@ public class FileUtils {
 //    	//return null;
 //    }
 
+    /**
+     * Retrieves a File path represented by given Uri
+     *
+     * @param context
+     * @param uri
+     * @return
+     */
     public static File getFileFromUri(final Context context, final Uri uri) {
         final String path = getPathFromUri(context, uri);
         if (TextUtils.isEmpty(path))
@@ -885,6 +892,13 @@ public class FileUtils {
             return new File(path);
     }
 
+    /**
+     * Retrieves a String path represented by given Uri
+     *
+     * @param context
+     * @param uri
+     * @return
+     */
     @SuppressLint("NewApi")
     public static String getPathFromUri(final Context context, final Uri uri) {
 //    	if (ctx==null || uri==null)
