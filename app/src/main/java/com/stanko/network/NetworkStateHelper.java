@@ -99,7 +99,7 @@ public class NetworkStateHelper {
         init(context, hostToCheck);
     }
 
-    public static synchronized void registerReceiver() {
+    public static void registerReceiver() {
         // if no receiver
         if (sNetworkStateReceiver == null && setConnectivityManager()) {
             sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
@@ -107,7 +107,7 @@ public class NetworkStateHelper {
         }
     }
 
-    public static synchronized void registerReceiver(Context context) {
+    public static void registerReceiver(Context context) {
         if (context != null) {
             sAppContext = context.getApplicationContext(); // refresh context
             isNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
@@ -122,7 +122,7 @@ public class NetworkStateHelper {
         super.finalize();
     }
 
-    public static synchronized void unregisterReceiver() {
+    public static void unregisterReceiver() {
         if (sNetworkStateReceiver != null)
             sAppContext.unregisterReceiver(sNetworkStateReceiver);
         sNetworkStateReceiver = null;
@@ -215,7 +215,7 @@ public class NetworkStateHelper {
      * @param newNetworkID
      * @param lastNetworkID
      */
-    static synchronized void handleNetworkState(final boolean wasNetworkAvailable,
+    static void handleNetworkState(final boolean wasNetworkAvailable,
                                                 final boolean isNetworkAvailable,
                                                 final NetworkState lastNetworkState,
                                                 final NetworkState newNetworkState,
@@ -391,7 +391,7 @@ public class NetworkStateHelper {
      * @param hostUrl - the host to check. By default http:// prefix will be added if no any
      * @return true if host reachable (connection were established)
      */
-    public static synchronized boolean isHostReachable(final String hostUrl) {
+    public static boolean isHostReachable(final String hostUrl) {
         boolean doesHostRespond = false;
         try {
             // adding http:// if its just a pure host name like google.com instead of http://google.com

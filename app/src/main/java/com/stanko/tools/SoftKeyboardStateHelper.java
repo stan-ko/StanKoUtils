@@ -2,11 +2,13 @@ package com.stanko.tools;
 
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.ResultReceiver;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -139,5 +141,18 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
         view.requestLayout();
         final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.RESULT_UNCHANGED_SHOWN);
+    }
+
+    public static void showIme(View view) {
+        InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        // the public methods don't seem to work for me, so… reflection.
+        try {
+            Method showSoftInputUnchecked = InputMethodManager.class.getMethod(
+                    "showSoftInputUnchecked", int.class, ResultReceiver.class);
+            showSoftInputUnchecked.setAccessible(true);
+            showSoftInputUnchecked.invoke(imm, 0, null);
+        } catch (Exception e) {
+            // ho hum
+        }
     }
 }

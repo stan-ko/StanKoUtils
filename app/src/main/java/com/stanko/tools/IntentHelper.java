@@ -14,12 +14,19 @@ import java.util.List;
 
 /**
  * by Devlight
- *
+ * <p>
  * Authors:
  * Stan Koshutsky <Stan.Koshutsky@gmail.com>
  */
 public class IntentHelper {
 
+    /**
+     * Starts Intent to open an external browser with given url
+     *
+     * @param context
+     * @param url     - url to be opened in a browser
+     * @return true if Intent starts without any Exception or false otherwise
+     */
     public static boolean openUrlInBrowser(final Context context, final String url) {
         boolean isStarted = true;
         final Intent browserIntent = new Intent(Intent.ACTION_VIEW);
@@ -76,11 +83,12 @@ public class IntentHelper {
 
     /**
      * Starts EMail intent with filled by given receiver, subject and text
+     * It calls corresponding EMailHelper.sendEmail() method
      *
      * @param context
-     * @param receivers
-     * @param subject
-     * @param text
+     * @param receivers - an array of email addresses
+     * @param subject   - email subject
+     * @param text      - the email text/message
      */
     public static void shareByEmail(final Context context,
                                     final String[] receivers,
@@ -99,6 +107,17 @@ public class IntentHelper {
                 noAssociatedAppErrorMessage);
     }
 
+    /**
+     * Starts EMail intent with filled by given subject and text (without receiver email)
+     * It calls corresponding EMailHelper.sendEmail() method
+     *
+     * @param context
+     * @param subject                     - email subject
+     * @param text                        - email text/message
+     * @param pickerTitle                 - custom title to show in app picker
+     * @param securityExceptionMessage    - custom message to Toast in case of SEx)
+     * @param noAssociatedAppErrorMessage - custom message to Toast in case of no email app installed
+     */
     public static void shareByEmail(final Context context,
                                     final String subject,
                                     final String text,
@@ -115,6 +134,15 @@ public class IntentHelper {
                 noAssociatedAppErrorMessage);
     }
 
+    /**
+     * Starts EMail intent with filled by given subject and text (without receiver email)
+     * It calls corresponding EMailHelper.sendEmail() method
+     *
+     * @param context
+     * @param subject     - email subject
+     * @param text        - email text/message
+     * @param pickerTitle - custom title to show in app picker
+     */
     public static void shareByEmail(final Context context,
                                     final String subject,
                                     final String text,
@@ -129,6 +157,14 @@ public class IntentHelper {
                 null);
     }
 
+    /**
+     * Starts EMail intent with filled by given subject and text (without receiver email)
+     * It calls corresponding EMailHelper.sendEmail() method
+     *
+     * @param context
+     * @param subject - email subject
+     * @param text    - email text/message
+     */
     public static void shareByEmail(final Context context,
                                     final String subject,
                                     final String text
@@ -142,15 +178,29 @@ public class IntentHelper {
                 null);
     }
 
+    /**
+     * Method to start share text Intent.
+     *
+     * @param context
+     * @param text    - a message to share
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareText(final Context context,
                                     final String text) {
         return shareText(context, text, null);
     }
 
+    /**
+     * Method to start share text Intent.
+     *
+     * @param context
+     * @param text        - a message to share
+     * @param pickerTitle - custom title to show in app picker
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareText(final Context context,
                                     final String text,
-                                    final String pickerTitle)
-    {
+                                    final String pickerTitle) {
         final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         if (!TextUtils.isEmpty(text))
             sharingIntent.putExtra(Intent.EXTRA_TEXT, text);
@@ -158,11 +208,27 @@ public class IntentHelper {
         return startIntent(context, sharingIntent, pickerTitle);
     }
 
+    /**
+     * Method to start share image Intent.
+     *
+     * @param context
+     * @param imageFile - a File pointing to the image to share
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareImage(final Context context,
                                      final File imageFile) {
         return shareImage(context, imageFile, null, null);
     }
 
+    /**
+     * Method to start share image Intent.
+     *
+     * @param context
+     * @param imageFile    - a File pointing to the image to share
+     * @param shareMessage - a message to share with image
+     * @param pickerTitle  - custom title to show in app picker
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareImage(final Context context,
                                      final File imageFile,
                                      final String shareMessage,
@@ -175,17 +241,31 @@ public class IntentHelper {
         return startIntent(context, sharingIntent, pickerTitle);
     }
 
+    /**
+     * Method to start share audio Intent.
+     *
+     * @param context
+     * @param messageFileMp3 - a File pointing to the mp3 to share
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareAudio(final Context context,
-                                     final File messageFileMp3)
-    {
+                                     final File messageFileMp3) {
         return shareAudio(context, messageFileMp3, null, null);
     }
 
+    /**
+     * Method to start share audio Intent.
+     *
+     * @param context
+     * @param messageFileMp3 - a File pointing to the mp3 to share
+     * @param shareMessage   - a message to share with mp3
+     * @param pickerTitle    - custom title to show in app picker
+     * @return true if Intent starts without any Exception, false otherwise
+     */
     public static boolean shareAudio(final Context context,
                                      final File messageFileMp3,
                                      final String shareMessage,
-                                     final String pickerTitle)
-    {
+                                     final String pickerTitle) {
         final Intent sharingIntent = new Intent(Intent.ACTION_SEND);
         sharingIntent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(messageFileMp3));
         if (!TextUtils.isEmpty(shareMessage))
@@ -212,10 +292,11 @@ public class IntentHelper {
     }
 
     /**
-     * Dials phone number
+     * Calls Dialer app with given phone number
+     *
      * @param context
-     * @param phoneNumber
-     * @return
+     * @param phoneNumber - string with phone number
+     * @return true is Intent starts without any Exception, false otherwise
      */
     public static boolean dialPhoneNumber(final Context context, final String phoneNumber) {
         boolean isStarted = true;
@@ -236,9 +317,10 @@ public class IntentHelper {
 
     /**
      * Shows map positioned by geoLocation
+     *
      * @param context
-     * @param geoLocation
-     * @return
+     * @param geoLocation - uri with geolocation
+     * @return true if Intent starts without exceptions, false otherwise
      */
     public static boolean showMap(final Context context, final Uri geoLocation) {
         boolean isStarted = true;
