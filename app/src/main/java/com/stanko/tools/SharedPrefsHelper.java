@@ -134,7 +134,6 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences getSharedPreferences(final Context context) {
-        initOnDemand();
         if (context == null)
             return getSharedPreferences(null, null);
         else
@@ -142,7 +141,6 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences getSharedPreferences(final Context context, final String sharedPrefsName) {
-        initOnDemand();
         if (!TextUtils.isEmpty(sharedPrefsName) && !sSharedPreferencesInstances.containsKey(sharedPrefsName)) {
             if (sAppContext == null && context != null) // if init called from this method
                 sAppContext = context.getApplicationContext();
@@ -185,7 +183,6 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences.Editor getSharedPreferencesEditor(final Context context) {
-        initOnDemand();
         if (context == null)
             return getSharedPreferencesEditor(null, null);
         else
@@ -193,12 +190,15 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences.Editor getSharedPreferencesEditor(final Context context, final String sharedPrefsName) {
-        initOnDemand();
         if (context == null && sAppContext == null && sSharedPreferencesInstances.size() == 0)
             return null;
 
-        if (!TextUtils.isEmpty(sharedPrefsName))
-            init(context, sharedPrefsName);
+        if (!TextUtils.isEmpty(sharedPrefsName)) {
+            if (context != null)
+                init(context, sharedPrefsName);
+            else if (!TextUtils.equals(sLastUsedSharedPrefsName, sharedPrefsName) && !sSharedPreferencesInstances.containsKey(sharedPrefsName))
+                init(sAppContext, sharedPrefsName);
+        }
 
         final SharedPreferences sharedPreferences = getSharedPreferences();
         if (sharedPreferences != null)
@@ -208,27 +208,22 @@ public class SharedPrefsHelper {
     }
 
     public static boolean put(final String theKey, final Object value) {
-        initOnDemand();
         return save(theKey, value);
     }
 
     public static boolean put(Context context, final String theKey, final Object value) {
-        initOnDemand();
         return save(context, theKey, value);
     }
 
     public static boolean put(SharedPreferences.Editor prefsEditor, final String theKey, final Object value) {
-        initOnDemand();
         return save(prefsEditor, theKey, value);
     }
 
     public static boolean save(final String theKey, final Object value) {
-        initOnDemand();
         return save(getSharedPreferencesEditor(), theKey, value);
     }
 
     public static boolean save(Context context, final String theKey, final Object value) {
-        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return save(getSharedPreferencesEditor(), theKey, value);
@@ -237,7 +232,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String theKey, final Object value) {
-        initOnDemand();
         if (prefsEditor == null || value == null ||
                 !(value instanceof String)
                         && !(value instanceof Number)
@@ -274,27 +268,22 @@ public class SharedPrefsHelper {
 
 
     public static boolean put(final String[] keys, final Object[] values) {
-        initOnDemand();
         return save(keys, values);
     }
 
     public static boolean put(Context context, final String[] keys, final Object[] values) {
-        initOnDemand();
         return save(context, keys, values);
     }
 
     public static boolean put(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
-        initOnDemand();
         return save(prefsEditor, keys, values);
     }
 
     public static boolean save(final String[] keys, final Object[] values) {
-        initOnDemand();
         return save(getSharedPreferencesEditor(), keys, values);
     }
 
     public static boolean save(Context context, final String[] keys, final Object[] values) {
-        initOnDemand();
         if (context == null) {
             logNullContext(keys == null ? "" : Arrays.toString(keys));
             return save(getSharedPreferencesEditor(), keys, values);
@@ -303,7 +292,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
-        initOnDemand();
         if (prefsEditor == null || keys == null || keys.length == 0 || values == null) {
             logNullParams(keys == null ? "" : Arrays.toString(keys));
             return false;
@@ -342,27 +330,22 @@ public class SharedPrefsHelper {
      * MAP OF VALUES
      */
     public static boolean put(final Map<String, Object> keysAndValues) {
-        initOnDemand();
         return save(keysAndValues);
     }
 
     public static boolean put(final Context context, final Map<String, Object> keysAndValues) {
-        initOnDemand();
         return save(context, keysAndValues);
     }
 
     public static boolean put(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
-        initOnDemand();
         return save(prefsEditor, keysAndValues);
     }
 
     public static boolean save(final Map<String, Object> keysAndValues) {
-        initOnDemand();
         return save(getSharedPreferencesEditor(), keysAndValues);
     }
 
     public static boolean save(final Context context, final Map<String, Object> keysAndValues) {
-        initOnDemand();
         if (context == null) {
             logNullContext(keysAndValues.toString());
             return save(getSharedPreferencesEditor(), keysAndValues);
@@ -371,7 +354,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
-        initOnDemand();
         if (prefsEditor == null || keysAndValues == null || keysAndValues.size() == 0) {
             //Log.e("save(): null in parameters");
             logNullParams(keysAndValues == null ? "null" : keysAndValues.getClass().getName());
@@ -431,7 +413,6 @@ public class SharedPrefsHelper {
     }
 
     public static String getString(final SharedPreferences prefs, final String theKey, final String defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getString(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -511,7 +492,6 @@ public class SharedPrefsHelper {
     }
 
     public static Integer getInteger(final SharedPreferences prefs, final String theKey, final Integer defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getInteger(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -560,7 +540,6 @@ public class SharedPrefsHelper {
     }
 
     public static Long getLong(final SharedPreferences prefs, final String theKey, final Long defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getLong(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -609,7 +588,6 @@ public class SharedPrefsHelper {
     }
 
     public static Double getDouble(final SharedPreferences prefs, final String theKey, final Double defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getDouble(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -653,7 +631,6 @@ public class SharedPrefsHelper {
     }
 
     public static Float getFloat(final SharedPreferences prefs, final String theKey, final Float defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getFloat(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -702,7 +679,6 @@ public class SharedPrefsHelper {
     }
 
     public static Boolean getBoolean(final SharedPreferences prefs, final String theKey, final Boolean defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getBoolean(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -749,7 +725,6 @@ public class SharedPrefsHelper {
     }
 
     public static Object getObject(final SharedPreferences prefs, final String theKey, final Object defaultValue) {
-        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             logNullParams(theKey);
             //Log.e("getObject(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
@@ -797,7 +772,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean remove(Context context, final String theKey) {
-        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return remove(getSharedPreferencesEditor(), theKey);
@@ -824,7 +798,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean contains(Context context, final String theKey) {
-        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return has(getSharedPreferences(), theKey);
@@ -837,7 +810,6 @@ public class SharedPrefsHelper {
     }
 
     public static boolean has(Context context, final String theKey) {
-        initOnDemand();
         if (context == null && sAppContext == null) {
             logNullContext(theKey);
             return has(getSharedPreferences(), theKey);

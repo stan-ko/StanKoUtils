@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         versionCode 23
-        versionName "1.60"
+        versionName "1.61"
         minSdkVersion 10
         targetSdkVersion 24
     }
