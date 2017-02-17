@@ -18,12 +18,12 @@ public class FontsHelperBase {
     private static Typeface lastUsedFont;
 
     /**
-     * Instantiates, cahes and returns Typeface for given font file. If font could not be
+     * Instantiates, caches and returns Typeface for given font file. If font could not be
      * instantiated for some reason Typeface.NORMAL (a regular) font will be returned.
      * The font file must be located in assets/fonts/ directory of a project. Don't use camelCase
      * in fonts file names.
      *
-     * @param context - any context
+     * @param context      - any context
      * @param fontFileName - a target font file name from assets/fonts/ directory of a project
      * @return Typeface
      */
@@ -50,6 +50,22 @@ public class FontsHelperBase {
     }
 
     /**
+     * Instantiates, caches and returns Typeface for given font file. If font could not be
+     * instantiated for some reason Typeface.NORMAL (a regular) font will be returned.
+     * The font file must be located in assets/fonts/ directory of a project. Don't use camelCase
+     * in fonts file names.
+     * Note:
+     * This method expects Initializer class to be initialized with context
+     *
+     * @param fontFileName - a target font file name from assets/fonts/ directory of a project
+     * @return Typeface
+     */
+    public static Typeface getFont(final String fontFileName) {
+        return getFont(Initializer.getsAppContext(), fontFileName);
+    }
+
+
+    /**
      * Instantiates desired font and applies this font to a given View.
      *
      * @param view - any TextView or its successor like Button, EditText and so on
@@ -66,7 +82,7 @@ public class FontsHelperBase {
      * like [TextView, EditText, TextView, TextView, Button] etc.
      *
      * @param views - any TextView or its successor like Button, EditText and so on
-     * @param font - target font file name from assets/fonts/ directory of a project
+     * @param font  - target font file name from assets/fonts/ directory of a project
      */
     public static void setFontToViews(final Typeface font, final TextView... views) {
         if (font != null)
@@ -96,6 +112,17 @@ public class FontsHelperBase {
      */
     public static float getTextSizeFromDimens(Context context, int resId) {
         return getTextSizeFromDimens(context.getResources(), resId);
+    }
+
+    /**
+     * The same method as getTextSizeFromDimens(Context context, int resId) but expects Initializer
+     * to be initialized with context (it keeps Application Context)
+     *
+     * @param resId
+     * @return
+     */
+    public static float getTextSizeFromDimens(int resId) {
+        return getTextSizeFromDimens(Initializer.getResources(), resId);
     }
 
     /**

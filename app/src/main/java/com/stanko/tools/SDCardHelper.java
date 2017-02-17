@@ -37,23 +37,23 @@ public class SDCardHelper {
     private static final String SD_DEFAULT_PACKAGE = SDCardHelper.class.getName();
 
     private static String SD_CACHE_PATH = SD_DEFAULT_DIR_DATA + SD_DEFAULT_PACKAGE + File.separator + "cache" + File.separator;
-    private static boolean isInitialized;
-    private static Context appContext;
-    private static File internalCacheDir;
-    private static File externalCacheDir;
+    private static boolean sIsInitialized;
+    private static Context sAppContext;
+    private static File sInternalCacheDir;
+    private static File sExternalCacheDir;
 
-    public static synchronized void init(Context context) {
+    public static void init(Context context) {
         init(context.getPackageName(), context);
     }
 
-    public static synchronized void init(final String appPackageName, Context context) {
+    public static void init(final String appPackageName, Context context) {
         SD_CACHE_PATH = String.format("/Android/data/%s/cache/", appPackageName);
-        internalCacheDir = context.getCacheDir();
-        externalCacheDir = new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
-        appContext = context.getApplicationContext();
+        sInternalCacheDir = context.getCacheDir();
+        sExternalCacheDir = new File(Environment.getExternalStorageDirectory() + SD_CACHE_PATH);
+        sAppContext = context.getApplicationContext();
 //        if (isExternalStorageWritable()) {
 //        }
-        isInitialized = true;
+        sIsInitialized = true;
     }
 
     /**
@@ -129,7 +129,8 @@ public class SDCardHelper {
      * @return File to save the image to or null if given url is null
      */
     public static File getFileForPreviewImageCaching(final String sURL) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null)
             return null;
@@ -158,7 +159,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getFileForImageCaching(final String sURL) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null)
             return null;
@@ -187,7 +189,8 @@ public class SDCardHelper {
      * @return true if file with such name exists of false otherwise
      */
     public static boolean isImageCached(final String sURL) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null || !isExternalStorageAvailable())
             return false;
@@ -206,7 +209,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getTempFile(String fileExtension) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         if (!fileExtension.contains("."))
             fileExtension = "." + fileExtension;
@@ -225,7 +229,8 @@ public class SDCardHelper {
      * @return
      */
     public static File getTempFile() {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         File file = new File(getCacheDir(), Hash.getMD5("tempfile" + System.currentTimeMillis()));
         if (!FileUtils.makeDirsForFile(file))
@@ -245,7 +250,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean saveImage(final String sURL, final byte[] img) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         if (sURL == null || img == null || !isWriteable())
             return false;
@@ -260,7 +266,8 @@ public class SDCardHelper {
      * @return
      */
     private static File getFile(final String sURL) {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         // generate a filename
         final String fileName = Hash.getMD5(sURL);
@@ -312,7 +319,7 @@ public class SDCardHelper {
             mExternalStorageAvailable = mExternalStorageWriteable = false;
         }
         if (mExternalStorageAvailable) {
-            final File tempFile = new File(externalCacheDir, "tempfile.tmp");
+            final File tempFile = new File(sExternalCacheDir, "tempfile.tmp");
             FileUtils.makeDirsForFile(tempFile);
             try {
                 mExternalStorageAvailable = tempFile.createNewFile();
@@ -329,7 +336,7 @@ public class SDCardHelper {
 
     public static boolean isExternalStorageWritePermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (appContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            if (sAppContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.i("Permission is granted");
                 return true;
             } else {
@@ -345,7 +352,8 @@ public class SDCardHelper {
 
     public static boolean isExternalStorageReadPermissionGranted() {
         if (Build.VERSION.SDK_INT >= 23) {
-            if (appContext.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+            initOnDemand();
+            if (sAppContext.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.i("Permission is granted");
                 return true;
             } else {
@@ -407,7 +415,7 @@ public class SDCardHelper {
 
         // now try to write file physically
         boolean isStorageAvailable;
-        final File tempFile = new File(externalCacheDir, "tempfile.tmp");
+        final File tempFile = new File(sExternalCacheDir, "tempfile.tmp");
         FileUtils.makeDirsForFile(tempFile);
         try {
             if (!tempFile.createNewFile())
@@ -442,7 +450,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean clearImagesCache() {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
 
         // depends on isExternalStorageAvailable()
@@ -472,7 +481,8 @@ public class SDCardHelper {
      * @return boolean success
      */
     public static boolean clearCacheFilesAndDirs() {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
 
         // depends on isExternalStorageAvailable()
@@ -494,7 +504,8 @@ public class SDCardHelper {
      * @return File or null if class wasn't initialized previously
      */
     public static File getTempDir() {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         return getCacheDir(null);
     }
@@ -508,7 +519,8 @@ public class SDCardHelper {
      * @return File or null if class wasn't initialized previously
      */
     public static File getCacheDir() {
-        if (!isInitialized || SD_CACHE_PATH == null)
+        initOnDemand();
+        if (!sIsInitialized || SD_CACHE_PATH == null)
             Log.e(SD_CARD_HELPER_INIT_ERR);
         return getCacheDir(null);
     }
@@ -523,10 +535,15 @@ public class SDCardHelper {
      */
     public static File getCacheDir(Context context) {
         if (isExternalStorageAvailable() && isExternalStorageWritable())
-            return externalCacheDir;
+            return sExternalCacheDir;
         if (context == null)
-            return internalCacheDir;
+            return sInternalCacheDir;
         return context.getCacheDir();
+    }
+
+    public static String[] getAPKExpansionFiles(final int mainVersion, final int patchVersion) {
+        initOnDemand();
+        return getAPKExpansionFiles(sAppContext, mainVersion, patchVersion);
     }
 
     /**
@@ -575,6 +592,11 @@ public class SDCardHelper {
         String[] retArray = new String[ret.size()];
         ret.toArray(retArray);
         return retArray;
+    }
+
+    public static File getAPKExpansionFile(int mainVersion) {
+        initOnDemand();
+        return getAPKExpansionFile(sAppContext, mainVersion);
     }
 
     /**
@@ -708,6 +730,13 @@ public class SDCardHelper {
             Collections.addAll(storageDirs, rawSecondaryStorages);
         }
         return storageDirs; //.toArray(new String[storageDirs.size()]);
+    }
+
+    private static void initOnDemand() {
+        // init on demand
+        if (sAppContext == null && Initializer.getsAppContext() != null) {
+            init(Initializer.getsAppContext());
+        }
     }
 
 }

@@ -34,8 +34,8 @@ import java.util.UUID;
  */
 public class DeviceInfo {
 
-    private static boolean isInitialized;
-    private static Context appContext;
+    private static boolean sIsInitialized;
+    private static Context sAppContext;
 
     private static boolean hasTelephony;
     //private static Boolean hasCamera;
@@ -101,21 +101,21 @@ public class DeviceInfo {
     @SuppressLint("NewApi")
     public static boolean init(final Context context) {
 
-        if (isInitialized && context != null) {
+        if (sIsInitialized && context != null) {
             return true;
         }
 
-        appContext = context.getApplicationContext(); // to be sure its appContext
-        displayMetrics = appContext.getResources().getDisplayMetrics();
+        sAppContext = context.getApplicationContext(); // to be sure its sAppContext
+        displayMetrics = sAppContext.getResources().getDisplayMetrics();
         displayDensity = displayMetrics.densityDpi;
         displayHeight = displayMetrics.heightPixels;
         displayWidth = displayMetrics.widthPixels;
         displayPortraitHeight = getBiggestScreenSideSize();
         displayPortraitWidth = getSmallestScreenSideSize();
 
-        final Resources resources = appContext.getResources();
+        final Resources resources = sAppContext.getResources();
 
-        final Display display = ((WindowManager) appContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        final Display display = ((WindowManager) sAppContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         int realDisplayHeight = displayHeight, realDisplayWidth = displayWidth;
         if (hasAPILevel < 14) {
             realDisplayHeight = displayMetrics.heightPixels;
@@ -166,7 +166,7 @@ public class DeviceInfo {
         }
 //        else {
 //            final Rect rect = new Rect();
-//            appContext.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
+//            sAppContext.getWindow().getDecorView().getWindowVisibleDisplayFrame(rect);
 //            statusBarHeight = rect.top;
 //        }
 
@@ -192,7 +192,7 @@ public class DeviceInfo {
                 deviceARM = Build.SUPPORTED_ABIS[0];
         }
 
-        final Configuration conf = appContext.getResources().getConfiguration();
+        final Configuration conf = sAppContext.getResources().getConfiguration();
         Log.i(String.format("Screen conf.screenHeightDp: %s, conf.screenWidthDp: %s", conf.screenHeightDp, conf.screenWidthDp));
         screenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp * conf.screenHeightDp + conf.screenWidthDp * conf.screenWidthDp) * 10f) / 10f;
 
@@ -239,11 +239,18 @@ public class DeviceInfo {
         Log.i(String.format(Locale.US, "Display: Density %d, Width: %d Height: %d configurationRatio: %f", displayDensity, displayWidth, displayHeight, configurationRatio));
         Log.i(String.format(Locale.US, "Display: DensityDpi %d, Density %f, Width: %d Height: %d", displayMetrics.densityDpi, displayMetrics.density, displayMetrics.widthPixels, displayMetrics.heightPixels));
 
-        checkHasTelephony(appContext);
+        checkHasTelephony(sAppContext);
 
-        isInitialized = true;
+        sIsInitialized = true;
 
         return true;
+    }
+
+    private static void initOnDemand() {
+        // init on demand
+        if (sAppContext == null && Initializer.getsAppContext() != null) {
+            init(Initializer.getsAppContext());
+        }
     }
 
 //    private static boolean deviceNotHasSoftNavigationBar() {
@@ -264,13 +271,13 @@ public class DeviceInfo {
     }
 
     public static int getStatusBarHeight(final Context context) {
-        if (!isInitialized)
+        if (!sIsInitialized)
             init(context);
         return statusBarHeight;
     }
 
     public static int getNavigationBarHeight(final Context context) {
-        if (!isInitialized)
+        if (!sIsInitialized)
             init(context);
         return navigationBarHeight;
     }
@@ -280,7 +287,8 @@ public class DeviceInfo {
     }
 
     public static boolean isTabletByResources() {
-        final boolean isTabletByResources = appContext.getResources().getBoolean(R.bool.isTablet);
+        initOnDemand();
+        final boolean isTabletByResources = sAppContext.getResources().getBoolean(R.bool.isTablet);
         Log.i("isTabletByResources: " + isTabletByResources);
         return isTabletByResources;
     }
@@ -299,7 +307,7 @@ public class DeviceInfo {
      */
     public static Boolean isTabletByScreen() {
 
-        if (!isInitialized)
+        if (!sIsInitialized)
             return null;
 
         boolean byScreen = screenSize >= Configuration.SCREENLAYOUT_SIZE_LARGE
@@ -324,7 +332,7 @@ public class DeviceInfo {
      * @return
      */
     public static float px2dp(float px) {
-        if (isInitialized)
+        if (sIsInitialized)
             return (float) ((px / displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, px, displayMetrics);
         else {
@@ -340,7 +348,7 @@ public class DeviceInfo {
      * @return
      */
     public static float dp2px(float dp) {
-        if (isInitialized)
+        if (sIsInitialized)
             return (float) ((dp * displayMetrics.density) + 0.5);
             //return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, displayMetrics);
         else {
@@ -356,7 +364,7 @@ public class DeviceInfo {
      * @return
      */
     public static float sp2px(float sp) {
-        if (isInitialized)
+        if (sIsInitialized)
             return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, displayMetrics);
         else {
             Log.w("Class is not initialized!!! Method  dp2px() returns 0");
@@ -390,8 +398,8 @@ public class DeviceInfo {
     }
 
     public static void checkHasTelephony(Context context) {
-        // isInitialized==true means this method was already executed
-//        if (!isInitialized) {
+        // sIsInitialized==true means this method was already executed
+//        if (!sIsInitialized) {
         TelephonyManager telephonyManager;
         try { // for the firecase
             telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -430,7 +438,8 @@ public class DeviceInfo {
 
     @SuppressLint("NewApi")
     public static Boolean hasCamera() {
-        final PackageManager pm = appContext.getPackageManager();
+        initOnDemand();
+        final PackageManager pm = sAppContext.getPackageManager();
         boolean hasCameraByPM;
         if (pm == null)
             return null;
@@ -449,8 +458,9 @@ public class DeviceInfo {
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
     public static boolean hasCameraApi2() {
+        initOnDemand();
         try {
-            final android.hardware.camera2.CameraManager cameraManager = (android.hardware.camera2.CameraManager) appContext.getSystemService(Context.CAMERA_SERVICE);
+            final android.hardware.camera2.CameraManager cameraManager = (android.hardware.camera2.CameraManager) sAppContext.getSystemService(Context.CAMERA_SERVICE);
             final String[] cameraIdList = cameraManager.getCameraIdList();
             return cameraIdList != null && cameraIdList.length > 0;
         } catch (Exception e) {
@@ -480,7 +490,8 @@ public class DeviceInfo {
 
 
     public static Boolean hasFlash() {
-        final PackageManager pm = appContext.getPackageManager();
+        initOnDemand();
+        final PackageManager pm = sAppContext.getPackageManager();
         if (pm == null)
             return null;
         else
@@ -500,7 +511,8 @@ public class DeviceInfo {
      * @return an UUID that may be used to uniquely identify your device for most purposes.
      */
     public static synchronized String getDeviceUuid() {
-        return getDeviceUuid(appContext);
+        initOnDemand();
+        return getDeviceUuid(sAppContext);
     }
 
     /**
@@ -537,7 +549,8 @@ public class DeviceInfo {
      * @return a ID that may be used to uniquely identify your device for most purposes.
      */
     public static String getDeviceId() {
-        return getDeviceId(appContext);
+        initOnDemand();
+        return getDeviceId(sAppContext);
     }
 
     /**
@@ -562,7 +575,8 @@ public class DeviceInfo {
      * @return a ID that may be used to uniquely identify your device for most purposes.
      */
     public static String getDeviceIMEI() {
-        return getDeviceIMEI(appContext);
+        initOnDemand();
+        return getDeviceIMEI(sAppContext);
     }
 
     /**
@@ -573,7 +587,7 @@ public class DeviceInfo {
      */
     public static String getDeviceIMEI(Context context) {
 
-        if (!isInitialized)
+        if (!sIsInitialized)
             checkHasTelephony(context);
 
         String deviceId = null;

@@ -33,10 +33,12 @@ public class ResHelper {
     }
 
     public static String getString(final int resId) {
+        initOnDemand();
         return sResources.getString(resId);
     }
 
     public static String getString(final int resId, final Object... args) {
+        initOnDemand();
         if (args == null || args.length == 0)
             return getString(resId);
         else
@@ -44,50 +46,62 @@ public class ResHelper {
     }
 
     public static Drawable getDrawable(final int resId) {
+        initOnDemand();
         return sResources.getDrawable(resId);
     }
 
     public static int getColor(final int colorResId) {
+        initOnDemand();
         return sResources.getColor(colorResId);
     }
 
     public static float getDimension(final int dimensResId) {
+        initOnDemand();
         return sResources.getDimension(dimensResId);
     }
 
     public static int getDimensPx(final int dimensResId) {
+        initOnDemand();
         return sResources.getDimensionPixelSize(dimensResId);
     }
 
     public static DisplayMetrics getDisplayMetrics() {
+        initOnDemand();
         return sDisplayMetrics;
     }
 
     public static int getInteger(final int intResId) {
+        initOnDemand();
         return sResources.getInteger(intResId);
     }
 
     public static String[] getStringArray(final int arrayResId) {
+        initOnDemand();
         return sResources.getStringArray(arrayResId);
     }
 
     public static boolean getBoolean(final int booleanResId) {
+        initOnDemand();
         return sResources.getBoolean(booleanResId);
     }
 
     public static int[] getIntArray(final int arrayResId) {
+        initOnDemand();
         return sResources.getIntArray(arrayResId);
     }
 
     public static int getIdentifier(final String name, final String defType, final String defPackage) {
+        initOnDemand();
         return sResources.getIdentifier(name, defType, defPackage);
     }
 
     public static InputStream openRawResource(final int rawResId) {
+        initOnDemand();
         return sResources.openRawResource(rawResId);
     }
 
     public static String getQuantityString(final int resId, final int quantity) {
+        initOnDemand();
         if (resId == 0)
             return null;
         else
@@ -95,6 +109,7 @@ public class ResHelper {
     }
 
     public static String getQuantityString(final int resId, final int quantity, Object... formatArgs) {
+        initOnDemand();
         if (resId == 0)
             return null;
         else
@@ -102,6 +117,7 @@ public class ResHelper {
     }
 
     public static int getResId(final String resName, final Class<?> c) {
+        initOnDemand();
         try {
             Field idField = c.getDeclaredField(resName);
             return idField.getInt(idField);
@@ -112,6 +128,7 @@ public class ResHelper {
     }
 
     public static boolean isResourceAvailable(int resId) {
+        initOnDemand();
         try {
             final String name = sResources.getResourceName(resId);
             if (name == null || !name.startsWith(sAppContext.getPackageName())) {
@@ -121,6 +138,13 @@ public class ResHelper {
             return true;
         } catch (Resources.NotFoundException e) {
             return false;
+        }
+    }
+
+    private static void initOnDemand() {
+        // init on demand
+        if (sAppContext == null && Initializer.getsAppContext() != null) {
+            init(Initializer.getsAppContext());
         }
     }
 

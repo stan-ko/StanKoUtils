@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.text.TextUtils;
 
 import com.stanko.tools.BackgroundThreadFactory;
+import com.stanko.tools.Initializer;
 import com.stanko.tools.Log;
 
 import org.greenrobot.eventbus.EventBus;
@@ -65,16 +66,16 @@ public class NetworkStateHelper {
 
     private static final Handler sHandler = new Handler();
 
-    public static synchronized void init(final Context context) {
+    public static void init(final Context context) {
         if (sAppContext == null)
             init(context, null);
     }
 
-    public static synchronized void init(final Context context, final String hostToCheck) {
+    public static void init(final Context context, final String hostToCheck) {
         init(context, hostToCheck, DEFAULT_HTTP_METHOD);
     }
 
-    public static synchronized void init(final Context context, final String hostToCheck, final String httpMethod) {
+    public static void init(final Context context, final String hostToCheck, final String httpMethod) {
         if (sAppContext == null) {
             sAppContext = context.getApplicationContext();
         }
@@ -94,12 +95,14 @@ public class NetworkStateHelper {
      * @param hostToCheck             - String host url
      * @param hostCheckFrequencyLimit - do not ping host if it responded less than, ms. Default is 30 000 ms.
      */
-    public static synchronized void init(final Context context, final String hostToCheck, final int hostCheckFrequencyLimit) {
+    public static void init(final Context context, final String hostToCheck, final int hostCheckFrequencyLimit) {
         sHostCheckPeriodLimit = hostCheckFrequencyLimit;
         init(context, hostToCheck);
     }
 
     public static void registerReceiver() {
+        // init on demand
+        initOnDemand();
         // if no receiver
         if (sNetworkStateReceiver == null && setConnectivityManager()) {
             sNetworkStateReceiver = new NetworkStateReceiver(sAppContext, sConnectivityManager);
@@ -123,6 +126,8 @@ public class NetworkStateHelper {
     }
 
     public static void unregisterReceiver() {
+        // init on demand
+        initOnDemand();
         if (sNetworkStateReceiver != null)
             sAppContext.unregisterReceiver(sNetworkStateReceiver);
         sNetworkStateReceiver = null;
@@ -135,6 +140,8 @@ public class NetworkStateHelper {
      * @return NetworkStateReceiver
      */
     public static NetworkStateReceiver getReceiver(final Context context) {
+        // init on demand
+        initOnDemand();
         if (sAppContext == null)
             init(context);
         return new NetworkStateReceiver(sAppContext, sConnectivityManager);
@@ -178,6 +185,8 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isNetworkAvailable() {
+        // init on demand
+        initOnDemand();
         final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
         Log.i("isNetworkConnectionAvailable: " + isNetworkConnectionAvailable + " isAnyNetworkConnectionAvailable(): " + isAnyNetworkConnectionAvailable + " isHostReachable: " + isHostReachable);
         if (!isNetworkConnectionAvailable && isAnyNetworkConnectionAvailable) {
@@ -228,6 +237,8 @@ public class NetworkStateHelper {
                 + " lastNetworkID: " + lastNetworkID
                 + " newNetworkID: " + newNetworkID
         );
+        // init on demand
+        initOnDemand();
         // current network state is other than incoming
         if (isNetworkConnectionAvailable != isNetworkAvailable) {
             final boolean isAnyNetworkConnectionAvailable = isAnyNetworkConnectionAvailable();
@@ -281,6 +292,8 @@ public class NetworkStateHelper {
                                     final NetworkState newNetworkState,
                                     final String lastNetworkID,
                                     final String newNetworkID) {
+        // init on demand
+        initOnDemand();
         if (TextUtils.isEmpty(sHostToCheck)) {
             Log.i("NetworkStateHelper: Can't start checkIfHostResponds() task - HostToCheck not set");
             return;
@@ -392,6 +405,8 @@ public class NetworkStateHelper {
      * @return true if host reachable (connection were established)
      */
     public static boolean isHostReachable(final String hostUrl) {
+        // init on demand
+        initOnDemand();
         boolean doesHostRespond = false;
         try {
             // adding http:// if its just a pure host name like google.com instead of http://google.com
@@ -480,6 +495,8 @@ public class NetworkStateHelper {
      * Could be run in MainUI/MainThread.
      */
     public static void checkIfHostResponds(final String hostUrl, final ICheckIfHostResponds callback) {
+        // init on demand
+        initOnDemand();
         // Creating and starting a thread for sending a request to Host
         executeTask(new Runnable() {
             @Override
@@ -509,12 +526,16 @@ public class NetworkStateHelper {
      * @return true if connection persists or false otherwise
      */
     public static boolean isActiveNetworkConnectionAvailable(final Context context) {
+        // init on demand
+        initOnDemand();
         if (sAppContext == null)
             sAppContext = context.getApplicationContext();
         return isActiveNetworkConnectionAvailable();
     }
 
     public static boolean isActiveNetworkConnectionAvailable() {
+        // init on demand
+        initOnDemand();
         if (!setConnectivityManager())
             return false;
 
@@ -541,6 +562,8 @@ public class NetworkStateHelper {
      * @return
      */
     public static boolean isAnyNetworkConnectionAvailable(final Context context) {
+        // init on demand
+        initOnDemand();
         if (sAppContext == null)
             sAppContext = context.getApplicationContext();
         return isAnyNetworkConnectionAvailable();
@@ -609,6 +632,8 @@ public class NetworkStateHelper {
      * @return
      */
     public static boolean isActiveConnectionViaWiFi() {
+        // init on demand
+        initOnDemand();
         if (!setConnectivityManager())
             return false;
 
@@ -621,6 +646,8 @@ public class NetworkStateHelper {
     }
 
     public static boolean isActiveConnectionViaWiFiOrEthernet() {
+        // init on demand
+        initOnDemand();
         if (!setConnectivityManager())
             return false;
 
@@ -634,6 +661,8 @@ public class NetworkStateHelper {
     }
 
     public static boolean isNetworkAvailableViaWiFi() {
+        // init on demand
+        initOnDemand();
 
         if (sAppContext == null) {
             throw new NullPointerException("Context is null - did you call init() with valid context?");
@@ -684,6 +713,17 @@ public class NetworkStateHelper {
         }
 
         return sConnectivityManager != null;
+    }
+
+    private static void initOnDemand(){
+        // init on demand
+        if (sAppContext==null && Initializer.getsAppContext()!=null){
+            if (!TextUtils.isEmpty(Initializer.getsHostToPing())){
+                init( Initializer.getsAppContext(),Initializer.getsHostToPing());
+            } else{
+                init( Initializer.getsAppContext());
+            }
+        }
     }
 
 }

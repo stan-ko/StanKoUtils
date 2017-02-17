@@ -36,33 +36,33 @@ public class SharedPrefsHelper {
 
     private static final String SHARED_PREFS_AVATAR_FILE_NAME = "avatar.jpg";
 
-    private static String mLastUsedSharedPrefsName = "SharedPrefsHelper";
+    private static String sLastUsedSharedPrefsName = "SharedPrefsHelper";
 
-    private static Context appContext; // Application context is singleton and could be kept static
+    private static Context sAppContext; // Application context is singleton and could be kept static
 
-    private static boolean isSecuredMode;
+    private static boolean sIsSecuredMode;
 
-    private final static HashMap<String, SharedPreferences> sharedPreferencesInstances = new HashMap<String, SharedPreferences>();
+    private final static HashMap<String, SharedPreferences> sSharedPreferencesInstances = new HashMap<String, SharedPreferences>();
 
     // context NPE not safe
-    public static synchronized void init(final Context context) {
+    public static void init(final Context context) {
         init(context, context.getApplicationContext().getPackageName());
     }
 
     // context NPE not safe
-    public static synchronized void init(final Context context, final String sharedPrefsName) {
-//        if (isSecuredMode){
+    public static void init(final Context context, final String sharedPrefsName) {
+//        if (sIsSecuredMode){
 //            // switching from secured to nonsecured
-//            sharedPreferencesInstances.remove(sharedPrefsName);
+//            sSharedPreferencesInstances.remove(sharedPrefsName);
 //        }
-        isSecuredMode = false;
-        SharedPrefsHelper.appContext = context.getApplicationContext();
-        sharedPreferencesInstances.clear();
-        getSharedPreferences(appContext, sharedPrefsName);
+        sIsSecuredMode = false;
+        SharedPrefsHelper.sAppContext = context.getApplicationContext();
+        sSharedPreferencesInstances.clear();
+        getSharedPreferences(sAppContext, sharedPrefsName);
     }
 
     // context NPE not safe
-    public static synchronized boolean initSecured(final Context context) {
+    public static boolean initSecured(final Context context) {
         Exception caughtException = null;
         final Context appContext = context.getApplicationContext();
         final String packageName = appContext.getPackageName();
@@ -102,36 +102,39 @@ public class SharedPrefsHelper {
             Log.e("Initializing regular (not secured) version");
             init(context);
         }
-        return isSecuredMode;
+        return sIsSecuredMode;
     }
 
     // context NPE not safe
-    public static synchronized void initSecured(final Context context, final String sharedPrefsName) {
-//        if (!isSecuredMode){
+    public static void initSecured(final Context context, final String sharedPrefsName) {
+//        if (!sIsSecuredMode){
 //            // switching from nonsecured to secured
-//            sharedPreferencesInstances.remove(sharedPrefsName);
+//            sSharedPreferencesInstances.remove(sharedPrefsName);
 //        }
-        isSecuredMode = true;
-        SharedPrefsHelper.appContext = context.getApplicationContext();
-        sharedPreferencesInstances.clear();
-        getSharedPreferences(appContext, sharedPrefsName);
+        sIsSecuredMode = true;
+        SharedPrefsHelper.sAppContext = context.getApplicationContext();
+        sSharedPreferencesInstances.clear();
+        getSharedPreferences(sAppContext, sharedPrefsName);
     }
 
     public static SharedPreferences getSharedPreferences() {
-        if (appContext == null && sharedPreferencesInstances.size() == 0)
+        initOnDemand();
+        if (sAppContext == null && sSharedPreferencesInstances.size() == 0)
             return null;
-        if (!sharedPreferencesInstances.containsKey(mLastUsedSharedPrefsName))
-            init(appContext, mLastUsedSharedPrefsName);
-        return sharedPreferencesInstances.get(mLastUsedSharedPrefsName);
+        if (!sSharedPreferencesInstances.containsKey(sLastUsedSharedPrefsName))
+            init(sAppContext, sLastUsedSharedPrefsName);
+        return sSharedPreferencesInstances.get(sLastUsedSharedPrefsName);
     }
 
     public static SharedPreferences getSharedPreferences(final String sharedPrefsName) {
-        if (!TextUtils.isEmpty(sharedPrefsName) && !mLastUsedSharedPrefsName.equalsIgnoreCase(sharedPrefsName) && !sharedPreferencesInstances.containsKey(sharedPrefsName))
-            return getSharedPreferences(appContext, sharedPrefsName);
-        return sharedPreferencesInstances.get(sharedPrefsName);
+        initOnDemand();
+        if (!TextUtils.isEmpty(sharedPrefsName) && !sLastUsedSharedPrefsName.equalsIgnoreCase(sharedPrefsName) && !sSharedPreferencesInstances.containsKey(sharedPrefsName))
+            return getSharedPreferences(sAppContext, sharedPrefsName);
+        return sSharedPreferencesInstances.get(sharedPrefsName);
     }
 
     public static SharedPreferences getSharedPreferences(final Context context) {
+        initOnDemand();
         if (context == null)
             return getSharedPreferences(null, null);
         else
@@ -139,37 +142,40 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences getSharedPreferences(final Context context, final String sharedPrefsName) {
-        if (!TextUtils.isEmpty(sharedPrefsName) && !sharedPreferencesInstances.containsKey(sharedPrefsName)) {
-            if (appContext == null && context != null) // if init called from this method
-                appContext = context.getApplicationContext();
-            if (appContext != null) {
-                mLastUsedSharedPrefsName = sharedPrefsName;
-                if (isSecuredMode)
-                    sharedPreferencesInstances.put(mLastUsedSharedPrefsName, new SecurePreferences(
-                            appContext,
+        initOnDemand();
+        if (!TextUtils.isEmpty(sharedPrefsName) && !sSharedPreferencesInstances.containsKey(sharedPrefsName)) {
+            if (sAppContext == null && context != null) // if init called from this method
+                sAppContext = context.getApplicationContext();
+            if (sAppContext != null) {
+                sLastUsedSharedPrefsName = sharedPrefsName;
+                if (sIsSecuredMode)
+                    sSharedPreferencesInstances.put(sLastUsedSharedPrefsName, new SecurePreferences(
+                            sAppContext,
                             Hash.getMD5(sharedPrefsName),
                             sharedPrefsName));
                 else
-                    sharedPreferencesInstances.put(mLastUsedSharedPrefsName,
-                            appContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
+                    sSharedPreferencesInstances.put(sLastUsedSharedPrefsName,
+                            sAppContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
             }
         }
-        return sharedPreferencesInstances.get(mLastUsedSharedPrefsName);
+        return sSharedPreferencesInstances.get(sLastUsedSharedPrefsName);
     }
 
     //private static SharedPreferences.Editor sharedPreferencesEditorInstance; // not a thread safe
     public static SharedPreferences.Editor getSharedPreferencesEditor() {
-        final SharedPreferences sharedPreferences = getSharedPreferences(mLastUsedSharedPrefsName);
+        initOnDemand();
+        final SharedPreferences sharedPreferences = getSharedPreferences(sLastUsedSharedPrefsName);
         if (sharedPreferences != null)
             return sharedPreferences.edit();//sharedPreferencesEditorInstance;
         else
             return null;
-        //return sharedPreferencesInstances.get(mLastUsedSharedPrefsName).edit();//sharedPreferencesEditorInstance;
+        //return sSharedPreferencesInstances.get(sLastUsedSharedPrefsName).edit();//sharedPreferencesEditorInstance;
     }
 
     public static SharedPreferences.Editor getSharedPreferencesEditor(final String sharedPrefsName) {
+        initOnDemand();
         if (!TextUtils.isEmpty(sharedPrefsName))
-            return getSharedPreferencesEditor(appContext, sharedPrefsName);
+            return getSharedPreferencesEditor(sAppContext, sharedPrefsName);
         final SharedPreferences sharedPreferences = getSharedPreferences();
         if (sharedPreferences != null)
             return sharedPreferences.edit();//sharedPreferencesEditorInstance;
@@ -179,6 +185,7 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences.Editor getSharedPreferencesEditor(final Context context) {
+        initOnDemand();
         if (context == null)
             return getSharedPreferencesEditor(null, null);
         else
@@ -186,7 +193,8 @@ public class SharedPrefsHelper {
     }
 
     public static SharedPreferences.Editor getSharedPreferencesEditor(final Context context, final String sharedPrefsName) {
-        if (context == null && appContext == null && sharedPreferencesInstances.size() == 0)
+        initOnDemand();
+        if (context == null && sAppContext == null && sSharedPreferencesInstances.size() == 0)
             return null;
 
         if (!TextUtils.isEmpty(sharedPrefsName))
@@ -200,22 +208,27 @@ public class SharedPrefsHelper {
     }
 
     public static boolean put(final String theKey, final Object value) {
+        initOnDemand();
         return save(theKey, value);
     }
 
     public static boolean put(Context context, final String theKey, final Object value) {
+        initOnDemand();
         return save(context, theKey, value);
     }
 
     public static boolean put(SharedPreferences.Editor prefsEditor, final String theKey, final Object value) {
+        initOnDemand();
         return save(prefsEditor, theKey, value);
     }
 
     public static boolean save(final String theKey, final Object value) {
+        initOnDemand();
         return save(getSharedPreferencesEditor(), theKey, value);
     }
 
     public static boolean save(Context context, final String theKey, final Object value) {
+        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return save(getSharedPreferencesEditor(), theKey, value);
@@ -224,6 +237,7 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String theKey, final Object value) {
+        initOnDemand();
         if (prefsEditor == null || value == null ||
                 !(value instanceof String)
                         && !(value instanceof Number)
@@ -260,22 +274,27 @@ public class SharedPrefsHelper {
 
 
     public static boolean put(final String[] keys, final Object[] values) {
+        initOnDemand();
         return save(keys, values);
     }
 
     public static boolean put(Context context, final String[] keys, final Object[] values) {
+        initOnDemand();
         return save(context, keys, values);
     }
 
     public static boolean put(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
+        initOnDemand();
         return save(prefsEditor, keys, values);
     }
 
     public static boolean save(final String[] keys, final Object[] values) {
+        initOnDemand();
         return save(getSharedPreferencesEditor(), keys, values);
     }
 
     public static boolean save(Context context, final String[] keys, final Object[] values) {
+        initOnDemand();
         if (context == null) {
             logNullContext(keys == null ? "" : Arrays.toString(keys));
             return save(getSharedPreferencesEditor(), keys, values);
@@ -284,6 +303,7 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(SharedPreferences.Editor prefsEditor, final String[] keys, final Object[] values) {
+        initOnDemand();
         if (prefsEditor == null || keys == null || keys.length == 0 || values == null) {
             logNullParams(keys == null ? "" : Arrays.toString(keys));
             return false;
@@ -322,22 +342,27 @@ public class SharedPrefsHelper {
      * MAP OF VALUES
      */
     public static boolean put(final Map<String, Object> keysAndValues) {
+        initOnDemand();
         return save(keysAndValues);
     }
 
     public static boolean put(final Context context, final Map<String, Object> keysAndValues) {
+        initOnDemand();
         return save(context, keysAndValues);
     }
 
     public static boolean put(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
+        initOnDemand();
         return save(prefsEditor, keysAndValues);
     }
 
     public static boolean save(final Map<String, Object> keysAndValues) {
+        initOnDemand();
         return save(getSharedPreferencesEditor(), keysAndValues);
     }
 
     public static boolean save(final Context context, final Map<String, Object> keysAndValues) {
+        initOnDemand();
         if (context == null) {
             logNullContext(keysAndValues.toString());
             return save(getSharedPreferencesEditor(), keysAndValues);
@@ -346,6 +371,7 @@ public class SharedPrefsHelper {
     }
 
     public static boolean save(final SharedPreferences.Editor prefsEditor, final Map<String, Object> keysAndValues) {
+        initOnDemand();
         if (prefsEditor == null || keysAndValues == null || keysAndValues.size() == 0) {
             //Log.e("save(): null in parameters");
             logNullParams(keysAndValues == null ? "null" : keysAndValues.getClass().getName());
@@ -405,6 +431,7 @@ public class SharedPrefsHelper {
     }
 
     public static String getString(final SharedPreferences prefs, final String theKey, final String defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getString(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -484,6 +511,7 @@ public class SharedPrefsHelper {
     }
 
     public static Integer getInteger(final SharedPreferences prefs, final String theKey, final Integer defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getInteger(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -532,6 +560,7 @@ public class SharedPrefsHelper {
     }
 
     public static Long getLong(final SharedPreferences prefs, final String theKey, final Long defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getLong(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -580,6 +609,7 @@ public class SharedPrefsHelper {
     }
 
     public static Double getDouble(final SharedPreferences prefs, final String theKey, final Double defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getDouble(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -623,6 +653,7 @@ public class SharedPrefsHelper {
     }
 
     public static Float getFloat(final SharedPreferences prefs, final String theKey, final Float defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getFloat(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -671,6 +702,7 @@ public class SharedPrefsHelper {
     }
 
     public static Boolean getBoolean(final SharedPreferences prefs, final String theKey, final Boolean defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             //Log.e("getBoolean(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
             logNullParams(theKey);
@@ -717,6 +749,7 @@ public class SharedPrefsHelper {
     }
 
     public static Object getObject(final SharedPreferences prefs, final String theKey, final Object defaultValue) {
+        initOnDemand();
         if (prefs == null || TextUtils.isEmpty(theKey)) {
             logNullParams(theKey);
             //Log.e("getObject(): null in parameters. Key: "+theKey+" defaultValue: "+defaultValue);
@@ -764,6 +797,7 @@ public class SharedPrefsHelper {
     }
 
     public static boolean remove(Context context, final String theKey) {
+        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return remove(getSharedPreferencesEditor(), theKey);
@@ -790,6 +824,7 @@ public class SharedPrefsHelper {
     }
 
     public static boolean contains(Context context, final String theKey) {
+        initOnDemand();
         if (context == null) {
             logNullContext(theKey);
             return has(getSharedPreferences(), theKey);
@@ -802,7 +837,8 @@ public class SharedPrefsHelper {
     }
 
     public static boolean has(Context context, final String theKey) {
-        if (context == null) {
+        initOnDemand();
+        if (context == null && sAppContext == null) {
             logNullContext(theKey);
             return has(getSharedPreferences(), theKey);
         } else
@@ -827,11 +863,12 @@ public class SharedPrefsHelper {
     }
 
     public static void clearStorage(Context context) {
-        if (context == null) {
+        if (context != null) {
+            clearStorage(getSharedPreferencesEditor(context));
+        } else {
             logNullContext("");
             clearStorage(getSharedPreferencesEditor());
         }
-        clearStorage(getSharedPreferencesEditor(context));
     }
 
     public static void clearStorage(final SharedPreferences.Editor prefsEditor) {
@@ -842,18 +879,18 @@ public class SharedPrefsHelper {
 
     private static void logNullContext(final String theKey) {
         Log.w(new NullPointerException("Null/NPE in parameters."
-                + "\nappContext: " + appContext
-                + "\nmLastUsedSharedPrefsName: " + mLastUsedSharedPrefsName
-                + "\ninstances size: " + sharedPreferencesInstances.size()
+                + "\nsAppContext: " + sAppContext
+                + "\nsLastUsedSharedPrefsName: " + sLastUsedSharedPrefsName
+                + "\ninstances size: " + sSharedPreferencesInstances.size()
                 + "\ngetSharedPreferences(): " + getSharedPreferences()
                 + "\nKey: " + theKey).toString());
     }
 
     private static void logNullParams(final String theKey) {
         Log.e(new NullPointerException("Null/NPE in parameters."
-                + "\nappContext: " + appContext
-                + "\nmLastUsedSharedPrefsName: " + mLastUsedSharedPrefsName
-                + "\ninstances size: " + sharedPreferencesInstances.size()
+                + "\nsAppContext: " + sAppContext
+                + "\nsLastUsedSharedPrefsName: " + sLastUsedSharedPrefsName
+                + "\ninstances size: " + sSharedPreferencesInstances.size()
                 + "\ngetSharedPreferences(): " + getSharedPreferences()
                 + "\nKey: " + theKey));
 //        Log.e(new NullPointerException("Null in parameters. Key: " + theKey));
@@ -866,12 +903,13 @@ public class SharedPrefsHelper {
     }
 
     public static boolean setAvatar(final Bitmap avatar) {
-        if (avatar == null || appContext == null)
+        initOnDemand();
+        if (avatar == null || sAppContext == null)
             return false;
         FileOutputStream fos = null;
         boolean result = true;
         try {
-            fos = appContext.openFileOutput(SHARED_PREFS_AVATAR_FILE_NAME, Context.MODE_PRIVATE);
+            fos = sAppContext.openFileOutput(SHARED_PREFS_AVATAR_FILE_NAME, Context.MODE_PRIVATE);
             avatar.compress(Bitmap.CompressFormat.JPEG, 100, fos);
 //			setAvatarSyncronized(false);
             // this.uploadUserUpdate();
@@ -893,12 +931,13 @@ public class SharedPrefsHelper {
     }
 
     public static boolean setAvatar(final byte[] avatar) {
-        if (avatar == null || appContext == null)
+        initOnDemand();
+        if (avatar == null || sAppContext == null)
             return false;
         FileOutputStream fos = null;
         boolean result = true;
         try {
-            fos = appContext.openFileOutput(SHARED_PREFS_AVATAR_FILE_NAME, Context.MODE_PRIVATE);
+            fos = sAppContext.openFileOutput(SHARED_PREFS_AVATAR_FILE_NAME, Context.MODE_PRIVATE);
             fos.write(avatar);
             fos.flush();
             FileUtils.sync(fos);
@@ -965,9 +1004,10 @@ public class SharedPrefsHelper {
     }
 
     public static File getAvatarFile() {
-        if (appContext == null)
+        initOnDemand();
+        if (sAppContext == null)
             return null;
-        return appContext.getFileStreamPath(SHARED_PREFS_AVATAR_FILE_NAME);
+        return sAppContext.getFileStreamPath(SHARED_PREFS_AVATAR_FILE_NAME);
     }
 
 
@@ -976,7 +1016,15 @@ public class SharedPrefsHelper {
     }
 
     public static boolean removeAvatar() {
-        return appContext.deleteFile(SHARED_PREFS_AVATAR_FILE_NAME);
+        initOnDemand();
+        return sAppContext.deleteFile(SHARED_PREFS_AVATAR_FILE_NAME);
+    }
+
+    private static void initOnDemand() {
+        // init on demand
+        if (sAppContext == null && Initializer.getsAppContext() != null) {
+            init(Initializer.getsAppContext());
+        }
     }
 
 }

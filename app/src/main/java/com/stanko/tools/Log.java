@@ -254,6 +254,12 @@ public class Log {
         e(getLogTag(logTag), e);
     }
 
+    /**
+     * Returns method name from where method containing Log was called (like previous level
+     * corresponding to stack)
+     *
+     * @return method name
+     */
     public static String getMethodName() {
         String methodName = "U/D";
         StackTraceElement[] stackTraceElements;
@@ -275,6 +281,12 @@ public class Log {
         return methodName;
     }
 
+    /**
+     * Returns method name from where method containing Log was called (like previous level
+     * corresponding to stack) formatted as Class.methodName
+     *
+     * @return
+     */
     public static String[] getClassDotMethod() {
         final String[] classMethod = new String[]{"U/D","U/D"};
         //String methodName = "U/D";
