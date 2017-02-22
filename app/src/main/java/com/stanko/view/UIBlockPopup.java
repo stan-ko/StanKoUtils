@@ -80,7 +80,7 @@ public class UIBlockPopup {
 
         //
         ColorDrawable colorDrawable = new ColorDrawable(0x80000000);
-        if (DeviceInfo.hasAPI16())
+        if (DeviceInfo.hasAPI(16))
             contentLayout.setBackground(colorDrawable);
         else
             contentLayout.setBackgroundDrawable(colorDrawable);

@@ -72,7 +72,7 @@ public class SDCardHelper {
         try {
             final StatFs stat = new StatFs(mSDRootPath);
             stat.restat(mSDRootPath);
-            if (DeviceInfo.hasAPI18())
+            if (DeviceInfo.hasAPI(18))
                 availableBytez = (stat.getAvailableBlocksLong() * stat.getBlockSizeLong());
             else
                 availableBytez = ((long) stat.getAvailableBlocks() * (long) stat.getBlockSize());
@@ -701,7 +701,7 @@ public class SDCardHelper {
             // Device has emulated storage; external storage paths should have
             // userId burned into them.
             final String rawUserId;
-            if (DeviceInfo.hasAPI18()) {
+            if (DeviceInfo.hasAPI(18)) {
                 final String path = Environment.getExternalStorageDirectory().getAbsolutePath();
                 final Pattern separatorPattern = Pattern.compile(File.separator);
                 final String[] folders = separatorPattern.split(path);

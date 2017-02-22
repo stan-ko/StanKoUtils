@@ -109,7 +109,7 @@ public class ViewSizeHelper {
 					@Override
         	        public void onGlobalLayout() {
         	            //This method was deprecated in API level 16. Use #removeOnGlobalLayoutListener instead
-        	            if(DeviceInfo.hasAPI16())
+        	            if(DeviceInfo.hasAPI(16))
         	            	view.getViewTreeObserver().removeOnGlobalLayoutListener(this);
         	            else
         	            	view.getViewTreeObserver().removeGlobalOnLayoutListener(this);

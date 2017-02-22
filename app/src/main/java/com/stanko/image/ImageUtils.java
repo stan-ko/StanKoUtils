@@ -228,9 +228,9 @@ public class ImageUtils {
         if (sideSizeLimit > 0) {
             maxWidth = sideSizeLimit;
             maxHeight = sideSizeLimit;
-        } else if (DeviceInfo.displayWidth > 0 && DeviceInfo.displayHeight > 0) {
-            maxWidth = DeviceInfo.displayWidth;
-            maxHeight = DeviceInfo.displayHeight;
+        } else if (DeviceInfo.getDisplayWidth() > 0 && DeviceInfo.getDisplayHeight() > 0) {
+            maxWidth = DeviceInfo.getDisplayWidth();
+            maxHeight = DeviceInfo.getDisplayHeight();
         } else {
             maxWidth = DeviceInfo.getDeviceMaxSideSizeByDensity();
             maxHeight = maxWidth;
@@ -928,9 +928,9 @@ public class ImageUtils {
         if (sideSizeLimit > 0) {
             maxWidth = sideSizeLimit;
             maxHeight = sideSizeLimit;
-        } else if (DeviceInfo.displayWidth > 0 && DeviceInfo.displayHeight > 0) {
-            maxWidth = DeviceInfo.displayWidth;
-            maxHeight = DeviceInfo.displayHeight;
+        } else if (DeviceInfo.getDisplayWidth() > 0 && DeviceInfo.getDisplayHeight() > 0) {
+            maxWidth = DeviceInfo.getDisplayWidth();
+            maxHeight = DeviceInfo.getDisplayHeight();
         } else {
             maxWidth = DeviceInfo.getDeviceMaxSideSizeByDensity();
             maxHeight = maxWidth;
@@ -1456,7 +1456,7 @@ public class ImageUtils {
 
         if (!FileUtils.isReadable(fullsizedImageFile)
                 || fullsizedImageFile.length() == 0
-                || maxAllowedSideSize == 0 && (DeviceInfo.displayWidth == 0 || DeviceInfo.displayHeight == 0))
+                || maxAllowedSideSize == 0 && (DeviceInfo.getDisplayWidth() == 0 || DeviceInfo.getDisplayHeight() == 0))
             return null;
 
         // надо ли даунсайзнуть имагу?
@@ -1489,8 +1489,8 @@ public class ImageUtils {
         }
 
         if (maxAllowedSideSize == 0) {
-            int maxDeviceWidth = DeviceInfo.displayWidth / 4;
-            int maxDeviceHeight = DeviceInfo.displayHeight / 4;
+            int maxDeviceWidth = DeviceInfo.getDisplayWidth() / 4;
+            int maxDeviceHeight = DeviceInfo.getDisplayHeight() / 4;
             maxAllowedSideSize = maxDeviceWidth < maxDeviceHeight ? maxDeviceWidth : maxDeviceHeight;
         }
 
@@ -2372,7 +2372,7 @@ public class ImageUtils {
     public static void setBackground(final View view, final Bitmap bitmap) {
         if (view == null || bitmap == null)
             return;
-        if (DeviceInfo.hasAPI16())
+        if (DeviceInfo.hasAPI(16))
             view.setBackground(ImageUtils.getDrawableFromBitmap(bitmap, view.getContext()));
         else
             view.setBackgroundDrawable(ImageUtils.getDrawableFromBitmap(bitmap, view.getContext()));
@@ -2389,7 +2389,7 @@ public class ImageUtils {
     public static void setBackground(final View view, final BitmapDrawable bitmap) {
         if (view == null || bitmap == null)
             return;
-        if (DeviceInfo.hasAPI16())
+        if (DeviceInfo.hasAPI(16))
             view.setBackground(bitmap);
         else
             view.setBackgroundDrawable(bitmap);

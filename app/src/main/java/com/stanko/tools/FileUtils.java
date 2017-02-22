@@ -782,7 +782,7 @@ public class FileUtils {
         try {
             final StatFs stat = new StatFs(mFileRootPath);
             stat.restat(mFileRootPath);
-            if (DeviceInfo.hasAPI18())
+            if (DeviceInfo.hasAPI(18))
                 availableBytez = (stat.getAvailableBlocksLong() * stat.getBlockSizeLong());
             else
                 availableBytez = ((long) stat.getAvailableBlocks() * (long) stat.getBlockSize());
