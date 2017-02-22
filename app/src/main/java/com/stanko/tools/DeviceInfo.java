@@ -62,68 +62,84 @@ public class DeviceInfo {
     public static final String sDeviceManufacturer = android.os.Build.MANUFACTURER.toLowerCase(Locale.US);
     public static final String sDeviceProduct = android.os.Build.PRODUCT.toLowerCase(Locale.US);
 
-    private static String sDeviceARM;
-    private static String[] sDeviceARMs;
+    private static String sDeviceARM = Build.CPU_ABI;
+    private static String[] sDeviceARMs = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
+
     private static boolean sHasTelephony;
     private static int sTelephonyType;
 
     public static DisplayMetrics getDisplayMetrics() {
+        initOnDemand();
         return sDisplayMetrics;
     }
 
     public static int getDisplayDensity() {
+        initOnDemand();
         return sDisplayDensity;
     }
 
     public static int getDisplayHeight() {
+        initOnDemand();
         return sDisplayHeight;
     }
 
     public static int getDisplayWidth() {
+        initOnDemand();
         return sDisplayWidth;
     }
 
     public static int getDisplayPortraitHeight() {
+        initOnDemand();
         return sDisplayPortraitHeight;
     }
 
     public static int getDisplayPortraitWidth() {
+        initOnDemand();
         return sDisplayPortraitWidth;
     }
 
     public static int getScreenSize() {
+        initOnDemand();
         return sScreenSize;
     }
 
     public static int getScreenInches() {
+        initOnDemand();
         return sScreenInches;
     }
 
     public static float getScreenInchesByMetrics() {
+        initOnDemand();
         return sScreenInchesByMetrics;
     }
 
     public static float getScreenInchesByConfig() {
+        initOnDemand();
         return sScreenInchesByConfig;
     }
 
     public static float getsConfigurationRatio() {
+        initOnDemand();
         return sConfigurationRatio;
     }
 
     public static boolean issHasPermanentMenuKeys() {
+        initOnDemand();
         return sHasPermanentMenuKeys;
     }
 
     public static boolean issHasNavigationBar() {
+        initOnDemand();
         return sHasNavigationBar;
     }
 
     public static int getNavigationBarHeight() {
+        initOnDemand();
         return sNavigationBarHeight;
     }
 
     public static int getStatusBarHeight() {
+        initOnDemand();
         return sStatusBarHeight;
     }
 
@@ -152,18 +168,22 @@ public class DeviceInfo {
     }
 
     public static String getDeviceARM() {
+        initOnDemand();
         return sDeviceARM;
     }
 
     public static String[] getDeviceARMs() {
+        initOnDemand();
         return sDeviceARMs;
     }
 
     public static boolean isHasTelephony() {
+        initOnDemand();
         return sHasTelephony;
     }
 
     public static int getTelephonyType() {
+        initOnDemand();
         return sTelephonyType;
     }
 
@@ -194,9 +214,8 @@ public class DeviceInfo {
     @SuppressLint("NewApi")
     public static boolean init(final Context context) {
 
-        if (sIsInitialized && context != null) {
+        if (sIsInitialized && context != null)
             return true;
-        }
 
         sAppContext = context.getApplicationContext(); // to be sure its sAppContext
         sDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
@@ -251,7 +270,7 @@ public class DeviceInfo {
                     sNavigationBarHeight = resources.getDimensionPixelSize(resourceId);
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(e);
             /*
              * Caused by java.lang.NullPointerException: Attempt to invoke interface method 'boolean android.hardware.input.IInputManager.hasKeys(int, int, int[], boolean[])' on a null object reference
@@ -282,8 +301,6 @@ public class DeviceInfo {
         Log.i(String.format("Model: %s, Manufacturer: %s Product: %s Name: %s", sDeviceModel, sDeviceManufacturer, sDeviceProduct, sDeviceName));
         Log.i("Device platform: ABI: " + Build.CPU_ABI + " ABI2: " + Build.CPU_ABI2);
 
-        sDeviceARM = Build.CPU_ABI;
-        sDeviceARMs = new String[]{Build.CPU_ABI, Build.CPU_ABI2};
         if (hasAPI(21)) {
             if (Build.SUPPORTED_ABIS != null)
                 sDeviceARMs = Build.SUPPORTED_ABIS;
@@ -296,38 +313,24 @@ public class DeviceInfo {
         sScreenInchesByConfig = Math.round(Math.sqrt(conf.screenHeightDp * conf.screenHeightDp + conf.screenWidthDp * conf.screenWidthDp) * 10f) / 10f;
 
         final int screenLayout = conf.screenLayout;
-//        int screenLayout = 1; // application default behavior
-//        try {
-//            Field field = conf.getClass().getDeclaredField("screenLayout");
-//            screenLayout = field.getInt(conf);
-//        } catch (Exception e) {
-//        	e.printStackTrace();
 
-        // NoSuchFieldException or related stuff
-//        }
-
-        // Configuration.SCREENLAYOUT_SIZE_MASK == 15
         sScreenSize = screenLayout & 15;
 
         switch (sScreenSize) {
             case Configuration.SCREENLAYOUT_SIZE_SMALL:
-                //Toast.makeText(activity, "SCREENLAYOUT_SIZE_SMALL", Toast.LENGTH_SHORT).show();
                 sConfigurationRatio = .75f;
                 break;
 
             case Configuration.SCREENLAYOUT_SIZE_NORMAL:
-                //Toast.makeText(activity, "SCREENLAYOUT_SIZE_NORMAL", Toast.LENGTH_SHORT).show();
                 sConfigurationRatio = 1f;
                 break;
 
             case Configuration.SCREENLAYOUT_SIZE_LARGE:
-                //Toast.makeText(activity, "SCREENLAYOUT_SIZE_LARGE", Toast.LENGTH_SHORT).show();
                 sConfigurationRatio = 1.5f;
                 break;
 
             case Configuration.SCREENLAYOUT_SIZE_XLARGE:
                 sConfigurationRatio = 2f;
-                //Toast.makeText(activity, "SCREENLAYOUT_SIZE_XLARGE", Toast.LENGTH_SHORT).show();
                 break;
 
             default:
@@ -391,13 +394,6 @@ public class DeviceInfo {
         Log.i("isTabletByResources: " + isTabletByResources);
         return isTabletByResources;
     }
-
-//    public static boolean isTabletByScreen() {
-//        Log.i("this device DeviceInfo.sScreenSize: " + DeviceInfo.sScreenSize + " " + DeviceInfo.sDisplayDensity + "\n" +
-//                "sScreenInchesByMetrics: " + DeviceInfo.sScreenInchesByMetrics + " sScreenInchesByConfig: " + DeviceInfo.sScreenInchesByConfig);
-//        final boolean isTabletByScreen = DeviceInfo.sScreenSize > 2 && DeviceInfo.sScreenInchesByMetrics > 7f;
-//        return isTabletByScreen;
-//    }
 
     /**
      * Tries to determine device is Tablet or SmartPhone by its screen
@@ -888,7 +884,7 @@ public class DeviceInfo {
      * at java.lang.reflect.Method.invoke(Method.java)
      * at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:797)
      * at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:687)
-     *
+     * <p>
      * list of known devices with BT bug, HTC + Android M only!
      * HTC One (E8) dual sim
      * HTC Desire 630 dual sim
@@ -908,7 +904,7 @@ public class DeviceInfo {
      * @return boolean
      */
     public static boolean hasBlueToothBug() {
-        return sAPILevel==23 && (sDeviceModel.startsWith("htc ") || sDeviceModel.startsWith("htc_"));
+        return sAPILevel == 23 && (sDeviceModel.startsWith("htc ") || sDeviceModel.startsWith("htc_"));
     }
 
     /**
