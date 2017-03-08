@@ -1,4 +1,4 @@
-package com.stanko.image;
+package com.stanko.tools;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -26,13 +26,10 @@ import android.os.Build;
 import android.provider.BaseColumns;
 import android.provider.MediaStore;
 import android.provider.MediaStore.MediaColumns;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.view.View;
 import android.widget.ImageView;
-
-import com.stanko.tools.DeviceInfo;
-import com.stanko.tools.FileUtils;
-import com.stanko.tools.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -46,14 +43,17 @@ import java.io.InputStream;
  * class used to store/restore of images
  *
  * @author Stan Koshutsky
- *         depends on class DeviceInfo
  */
 public class ImageUtils {
 
-    private static final String TAG = "ImageUtils";
-
+    /**
+     * Returns instance of BitmapInfo for given image File
+     *
+     * @param bitmapFile - am image File
+     * @return BitmapInfo or null if File is null or not readable
+     */
     public static BitmapInfo getBitmapInfoFromFile(final File bitmapFile) {
-        if (!FileUtils.isReadable(bitmapFile))
+        if (!FileUtils.isReadable(bitmapFile) || bitmapFile != null && bitmapFile.length() < 32)
             return null;
 
         BitmapInfo bitmapInfo = null;
@@ -69,12 +69,10 @@ public class ImageUtils {
                 fileDescriptor = fileInputStream.getFD();
             } catch (IOException ignored) {
             }
-
             if (fileDescriptor != null)
                 BitmapFactory.decodeFileDescriptor(fileDescriptor, null, bmfOtions);
             else
                 BitmapFactory.decodeStream(fileInputStream, null, bmfOtions);
-
             bitmapInfo = new BitmapInfo(bmfOtions.outWidth, bmfOtions.outHeight);
         } catch (FileNotFoundException e) {
             Log.e("ImageUtils", e);
@@ -88,6 +86,12 @@ public class ImageUtils {
         return bitmapInfo;
     }
 
+    /**
+     * Returns instance of BitmapInfo for given image File stream
+     *
+     * @param inputStream
+     * @return BitmapInfo or null if stream is null or any Exception happens
+     */
     public static BitmapInfo getBitmapInfoFromStream(final InputStream inputStream) {
         if (inputStream == null)
             return null;
@@ -103,11 +107,30 @@ public class ImageUtils {
             BitmapFactory.decodeStream(inputStream, null, bmfOtions);
             bitmapInfo = new BitmapInfo(bmfOtions.outWidth, bmfOtions.outHeight);
         } catch (Exception e) {
-            Log.e(TAG, e.toString());
+            Log.e(e);
         }
         return bitmapInfo;
     }
 
+    /**
+     * Returns instance of BitmapInfo for given image Uri, needs Context so it depends to
+     * Initializer's one so it has to be initialized first.
+     *
+     * @param uri of an image
+     * @return BitmapInfo or null if Uri or Context is null (Initializer was not initialized)
+     */
+    public static BitmapInfo getBitmapInfoFromUri(final Uri uri) {
+        final Context context = Initializer.getsAppContext();
+        return getBitmapInfoFromUri(uri, context);
+    }
+
+    /**
+     * Returns instance of BitmapInfo for given image Uri
+     *
+     * @param uri     of an image
+     * @param context any Context
+     * @return BitmapInfo or null if Uri or Context is null
+     */
     public static BitmapInfo getBitmapInfoFromUri(final Uri uri, final Context context) {
         if (context == null || uri == null)
             return null;
@@ -115,8 +138,16 @@ public class ImageUtils {
         return getBitmapInfoFromUri(uri, contentResolver);
     }
 
+    /**
+     * Returns instance of BitmapInfo for given image Uri, instead of Context it uses given
+     * ContentResolver instance
+     *
+     * @param uri             of an image
+     * @param contentResolver - ContentResolver instance
+     * @return BitmapInfo or null if Uri or ContentResolver is null
+     */
     public static BitmapInfo getBitmapInfoFromUri(final Uri uri, final ContentResolver contentResolver) {
-        if (uri == null)
+        if (uri == null || contentResolver == null)
             return null;
         InputStream inputStream = null;
         BitmapInfo bitmapInfo = null;
@@ -135,27 +166,51 @@ public class ImageUtils {
         return bitmapInfo;
     }
 
-    public static BitmapInfo getBitmapInfoFromResources(final Context context, final int mBitmapResId) {
-        if (context == null || mBitmapResId == 0)
+    /**
+     * Returns Uri of given drawable resource. It needs Context so it depends to Initializer's one
+     * and thus Initializer has to be initialized first.
+     *
+     * @param bitmapResId
+     * @return BitmapInfo or null if bitmapResId==0 or Initializer was not initialized
+     */
+    public static BitmapInfo getUriOfBitmapFromResources(final int bitmapResId) {
+        return getBitmapInfoFromResources(Initializer.getsAppContext(), bitmapResId);
+    }
+
+    /**
+     * Returns Uri of given drawable resource. It needs Context so it depends to Initializer's one
+     *
+     * @param context
+     * @param bitmapResId
+     * @return BitmapInfo or null if context is null or bitmapResId==0
+     */
+    public static BitmapInfo getBitmapInfoFromResources(final Context context, final int bitmapResId) {
+        if (context == null || bitmapResId == 0)
             return null;
-        Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
+        final Uri uri = getUriOfBitmapFromResources(context, bitmapResId);
         return getBitmapInfoFromUri(uri, context);
     }
 
-    public static BitmapInfo getBitmapInfoFromResources(final Resources resources, final ContentResolver contentResolver, final int mBitmapResId) {
+    /**
+     * Returns Uri of given drawable resource. Instead of using Context this method uses
+     * Resources and ContentResolver instances.
+     *
+     * @param resources
+     * @param contentResolver
+     * @param bitmapResId
+     * @return  BitmapInfo or null if Resources/ContentResolver is null or bitmapResId==0
+     */
+    public static BitmapInfo getBitmapInfoFromResources(final Resources resources, final ContentResolver contentResolver, final int bitmapResId) {
         if (resources == null)
             return null;
-        Uri uri = getUriOfBitmapFromResources(resources, mBitmapResId);
+        final Uri uri = getUriOfBitmapFromResources(resources, bitmapResId);
         return getBitmapInfoFromUri(uri, contentResolver);
     }
 
-    public static BitmapInfo getBitmapInfoFromResId(final int mBitmapResId, final Context context) {
-        if (context == null || mBitmapResId == 0)
-            return null;
-        Uri uri = getUriOfBitmapFromResources(context, mBitmapResId);
-        return getBitmapInfoFromUri(uri, context);
-    }
-
+    /**
+     * Class represents generic Bitmap information like heght, width and orientation (ignoring EXIF)
+     * Since all fields are final and public no getters need.
+     */
     public static class BitmapInfo {
 
         public final float height;
@@ -163,6 +218,7 @@ public class ImageUtils {
         public final boolean hasPortraitOrientation;
         public final boolean hasLandscapeOrientation;
         public final boolean hasSquareForm;
+        public final long sizeInBytes;
 
         public BitmapInfo(final float width, final float height) {
             this.height = height;
@@ -170,6 +226,7 @@ public class ImageUtils {
             hasPortraitOrientation = height > width;
             hasLandscapeOrientation = width > height;
             hasSquareForm = width == height;
+            sizeInBytes = (long) (height * width);
         }
 
         public BitmapInfo(final Bitmap bitmap) {
@@ -178,12 +235,25 @@ public class ImageUtils {
             hasPortraitOrientation = height > width;
             hasLandscapeOrientation = width > height;
             hasSquareForm = width == height;
+            sizeInBytes = getBitmapSizeInBytes(bitmap);
         }
 
+        /**
+         * Returns height in px corresponding to given width regarding image aspect ratio
+         *
+         * @param newWidth
+         * @return
+         */
         public float getHeightByWidth(final float newWidth) {
             return (newWidth * height / width);
         }
 
+        /**
+         * Returns width in px corresponding to given height regarding image aspect ratio
+         *
+         * @param newHeight
+         * @return
+         */
         public float getWidthByHeight(final float newHeight) {
             return (newHeight * width / height);
         }
@@ -194,34 +264,100 @@ public class ImageUtils {
         }
     }
 
+    @SuppressLint("NewApi")
+    /**
+     * Returns size of a bitmap in bytes
+     *
+     * @param bitmap
+     * @return
+     */
+    public static int getBitmapSizeInBytes(final Bitmap bitmap) {
+        if (bitmap == null)
+            return 0;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
+            return bitmap.getRowBytes() * bitmap.getHeight();
+        } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            return bitmap.getByteCount();
+        } else {
+            return bitmap.getAllocationByteCount();
+        }
+    }
 
-    //decodes image and scales it to reduce memory consumption
+
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption
+     * Uses default sideSizeLimit (0) and isOptimistic(false)
+     *
+     * @param bitmapFile
+     * @return
+     */
     public static Bitmap getBitmapFromFile(final String bitmapFile) {
-        if (bitmapFile == null || bitmapFile.length() == 0)
-            return null;
-        return getBitmapFromFile(new File(bitmapFile), 0);
+        return getBitmapFromFile(new File(bitmapFile), 0, false);
     }
 
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption
+     * Uses default sideSizeLimit (0) and isOptimistic(false)
+     *
+     * @param bitmapFile
+     * @return
+     */
     public static Bitmap getBitmapFromFile(final File bitmapFile) {
-        return getBitmapFromFile(bitmapFile, 0);
+        return getBitmapFromFile(bitmapFile, 0, false);
     }
 
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption.
+     * Uses default isOptimistic(false)
+     *
+     * @param bitmapFile
+     * @param sideSizeLimit - max size of biggest image dimension (height or width). Uses DeviceInfo
+     *                      height or width if 0 passed.
+     * @return
+     */
     public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit) {
         return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
     }
 
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption.
+     * Uses default isOptimistic(false)
+     *
+     * @param bitmapFile
+     * @param sideSizeLimit - max size of biggest image dimension (height or width). Uses DeviceInfo
+     *                      height or width if 0 passed.
+     * @return
+     */
+    public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit) {
+        return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
+    }
+
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption.
+     *
+     * @param bitmapFile
+     * @param sideSizeLimit - max size of biggest image dimension (height or width). Uses DeviceInfo
+     *                      height or width if 0 passed.
+     * @param isOptimistic - if true may return bigger image, smaller or equal if false
+     * @return
+     */
     public static Bitmap getBitmapFromFile(final String bitmapFile, final int sideSizeLimit, final boolean isOptimistic) {
         if (bitmapFile == null || bitmapFile.length() == 0)
             return null;
         return getBitmapFromFile(new File(bitmapFile), sideSizeLimit, isOptimistic);
     }
 
-    public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit) {
-        return getBitmapFromFile(bitmapFile, sideSizeLimit, false);
-    }
-
+    /**
+     * Decodes an image to Bitmap downscaling it to reduce memory consumption.
+     *
+     * @param bitmapFile
+     * @param sideSizeLimit - max size of biggest image dimension (height or width). Uses DeviceInfo
+     *                      height or width if 0 passed.
+     * @param isOptimistic - if true may return bigger image, smaller or equal if false
+     * @return
+     */
     public static Bitmap getBitmapFromFile(final File bitmapFile, final int sideSizeLimit, final boolean isOptimistic) {
-        if (!FileUtils.isReadable(bitmapFile))
+        if (bitmapFile == null || bitmapFile.length() == 0 || !FileUtils.isReadable(bitmapFile))
             return null;
 
         int maxWidth, maxHeight;
@@ -300,18 +436,33 @@ public class ImageUtils {
         return null;
     }
 
-
+    /**
+     * Rotates given image corresponding to EXIF.
+     * Warning! Samsung and LG cameras has an EXIF bug so result may be wrong.
+     * Also could produce OOM which will be caught, false will be returned in such case.
+     *
+     * @param targetFilePath
+     * @return true if succeed and no Exception happens
+     */
     public static boolean rotateBitmapByExifAndSave(final String targetFilePath) {
-        return !(targetFilePath == null || targetFilePath.length() == 0) && rotateBitmapByExifAndSave(new File(targetFilePath));
+        return !TextUtils.isEmpty(targetFilePath) && rotateBitmapByExifAndSave(new File(targetFilePath));
     }
 
+    /**
+     * Rotates given image corresponding to EXIF.
+     * Warning! Samsung and LG cameras has an EXIF bug so result may be wrong.
+     * Also could produce OOM which will be caught, false will be returned in such case.
+     *
+     * @param targetFile
+     * @return true if succeed and no Exception happens
+     */
     public static boolean rotateBitmapByExifAndSave(final File targetFile) {
 
-        if (!FileUtils.isWritable(targetFile))
+        if (!FileUtils.isWritable(targetFile) && targetFile.length() > 0)
             return false;
 
         boolean isSucceed;
-        // определяем необходимость поворота фотки
+        // detecting if an image needs to be rotated
         try {
             final Matrix matrix = new Matrix();
             final int rotateAngle = getExifRotateAngle(targetFile);
@@ -357,16 +508,23 @@ public class ImageUtils {
 
         } catch (Exception e) {
             isSucceed = false;
-            Log.e(TAG, e);
+            Log.e(e);
         } catch (Throwable e) {
             // Out of stupid vedroid's memory
             isSucceed = false;
-            Log.e(TAG, e.toString());
+            Log.e(e);
         }
 
         return isSucceed;
     }
 
+    /**
+     * Detects and returns image rotate angle bty its EXIF information.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid.
+     *
+     * @param targetFile
+     * @return
+     */
     public static int getExifRotateAngle(final File targetFile) {
         if (!FileUtils.isReadable(targetFile)) {
             Log.e("File is not readable! " + targetFile);
@@ -379,12 +537,55 @@ public class ImageUtils {
             return getExifRotateAngle(orientation);
         } catch (Exception e) {
             // like there is no EXIF support?
-            Log.e(TAG, e);
+            Log.e(e);
         }
 
         return 0;
     }
 
+    /**
+     * Detects and returns image rotate angle bty its EXIF information.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid. This
+     * method has a workaround which may help.
+     *
+     * @param context
+     * @param uri
+     * @return
+     */
+    public static float getExifRotateAngle(final Context context, final Uri uri) {
+        try {
+            if (uri.getScheme().equals("content")) {
+                //From the media gallery
+                String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
+                final Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
+                int value = 0;
+                if (cursor != null) {
+                    if (cursor.moveToFirst())
+                        value = cursor.getInt(0);
+                    cursor.close();
+                }
+                return value;
+            } else if (uri.getScheme().equals("file")) {
+                //From a file saved by the camera
+                final ExifInterface exifReader = new ExifInterface(uri.getPath());
+                final int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
+                final int rotateAngle = getExifRotateAngle(orientation);
+                return rotateAngle;
+            }
+            return 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
+        }
+    }
+
+    /**
+     * Returns rotate angle in degrees according to ExifInterface.ORIENTATION
+     *
+     * @param orientation
+     * @return
+     */
     private static int getExifRotateAngle(final int orientation) {
         switch (orientation) {
             case ExifInterface.ORIENTATION_ROTATE_90:
@@ -401,6 +602,13 @@ public class ImageUtils {
         }
     }
 
+    /**
+     * Returns Bitmap rotated according to EXIF.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid.
+     *
+     * @param targetFilePath
+     * @return Bitmap or null if targetFilePath is null or OOM/other Exception happens
+     */
     public static Bitmap getRotatedBitmapByExif(final String targetFilePath) {
         if (targetFilePath == null || targetFilePath.length() == 0) {
             Log.e("File is not readable! " + targetFilePath);
@@ -409,6 +617,13 @@ public class ImageUtils {
         return getRotatedBitmapByExif(new File(targetFilePath));
     }
 
+    /**
+     * Returns Bitmap rotated according to EXIF.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid.
+     *
+     * @param targetFile
+     * @return Bitmap or null if targetFile is null/not readable or OOM/other Exception happens
+     */
     public static Bitmap getRotatedBitmapByExif(final File targetFile) {
 
         if (!FileUtils.isReadable(targetFile)) {
@@ -417,7 +632,7 @@ public class ImageUtils {
         }
 
         Bitmap bitmap = null;
-        // определяем необходимость поворота фотки
+        // detecting if an image needs to be rotated
         try {
             final Matrix matrix = new Matrix();
             final int rotateAngle = getExifRotateAngle(targetFile);
@@ -488,6 +703,14 @@ public class ImageUtils {
         return bitmap;
     }
 
+    /**
+     * Returns Bitmap rotated according to EXIF limiting the resulting image size.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid.
+     *
+     * @param targetFilePath
+     * @param maxSideSize - the biggest image dimension (height or width) limit
+     * @return Bitmap or null if targetFile is null/not readable or OOM/other Exception happens
+     */
     public static Bitmap getRotatedBitmapByExif(final String targetFilePath, final int maxSideSize) {
         if (targetFilePath == null || targetFilePath.length() == 0) {
             Log.e("File is not readable! " + targetFilePath);
@@ -496,6 +719,14 @@ public class ImageUtils {
         return getRotatedBitmapByExif(new File(targetFilePath), maxSideSize);
     }
 
+    /**
+     * Returns Bitmap rotated according to EXIF limiting the resulting image size.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid.
+     *
+     * @param targetFile
+     * @param maxSideSize - the biggest image dimension (height or width) limit
+     * @return Bitmap or null if targetFile is null/not readable or OOM/other Exception happens
+     */
     public static Bitmap getRotatedBitmapByExif(final File targetFile, final int maxSideSize) {
 
         if (!FileUtils.isReadable(targetFile)) {
@@ -504,7 +735,7 @@ public class ImageUtils {
         }
 
         Bitmap bitmap = null;
-        // определяем необходимость поворота фотки
+        // detecting if an image needs to be rotated
         try {
             final int rotateAngle = getExifRotateAngle(targetFile);
             boolean isRotationNeeded = rotateAngle > 0;
@@ -524,10 +755,20 @@ public class ImageUtils {
         return bitmap;
     }
 
+    /**
+     * Returns Bitmap rotated according to EXIF limiting the resulting image size.
+     * WARNING! Samsung and LG cameras has well known bug and their EXIF is invalid. This method
+     * includes workaround so it may work for such devices.
+     *
+     * @param context
+     * @param targetUri
+     * @param maxSideSize - the biggest image dimension (height or width) limit
+     * @return Bitmap or null if targetFile is null/not readable or OOM/other Exception happens
+     */
     public static Bitmap getRotatedBitmapByExif(final Context context, final Uri targetUri, final int maxSideSize) {
 
         Bitmap bitmap = null;
-        // определяем необходимость поворота фотки
+        // detecting if an image needs to be rotated
         try {
             final int rotateAngle = (int) getExifRotateAngle(context, targetUri);
             boolean isRotationNeeded = rotateAngle > 0;
@@ -552,33 +793,8 @@ public class ImageUtils {
         return bitmap;
     }
 
-    public static float getExifRotateAngle(Context context, Uri uri) {
-        try {
-            if (uri.getScheme().equals("content")) {
-                //From the media gallery
-                String[] projection = {MediaStore.Images.ImageColumns.ORIENTATION};
-                final Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null);
-                int value = 0;
-                if (cursor != null) {
-                    if (cursor.moveToFirst())
-                        value = cursor.getInt(0);
-                    cursor.close();
-                }
-                return value;
-            } else if (uri.getScheme().equals("file")) {
-                //From a file saved by the camera
-                final ExifInterface exifReader = new ExifInterface(uri.getPath());
-                final int orientation = exifReader.getAttributeInt(ExifInterface.TAG_ORIENTATION, 1);
-                final int rotateAngle = getExifRotateAngle(orientation);
-                return rotateAngle;
-            }
-            return 0;
 
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
-        }
-    }
+    897897897
 
     /**
      * Returns scaled (stretched) @Bitmap from source bitmap using parameter maxSideSize
@@ -666,23 +882,6 @@ public class ImageUtils {
         bitmap = BitmapFactory.decodeByteArray(bitmapdata, 0, bitmapdata.length);
 
         return bitmap;
-    }
-
-    @SuppressLint("NewApi")
-    /**
-     * Returns size of a bitmap in bytes
-     *
-     * @param bitmap
-     * @return
-     */
-    public static int getBitmapSizeInBytes(final Bitmap bitmap) {
-        if (bitmap == null)
-            return 0;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB_MR1) {
-            return bitmap.getRowBytes() * bitmap.getHeight();
-        } else {
-            return bitmap.getByteCount();
-        }
     }
 
 //	public Bitmap decodeImage(String imagePath)

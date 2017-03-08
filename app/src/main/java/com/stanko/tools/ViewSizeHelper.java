@@ -6,8 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver.OnGlobalLayoutListener;
 
-import com.stanko.image.ImageUtils;
-import com.stanko.image.ImageUtils.BitmapInfo;
+import com.stanko.tools.ImageUtils.BitmapInfo;
 
 public class ViewSizeHelper {
 	
