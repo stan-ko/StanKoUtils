@@ -1,7 +1,8 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 24
+
+    compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
     defaultConfig {
@@ -27,6 +28,9 @@ dependencies {
     //SpongeCastle (adds Security algorithms)
     compile('com.madgag.spongycastle:core:1.54.0.0')
     compile('com.madgag.spongycastle:prov:1.54.0.0')
+    // support for v4.Fragments
+    //compile 'com.android.support:appcompat-v7:23.1.1'
+    //compile 'com.android.support:support-v4:23.1.1'
 }
 
 //// This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054

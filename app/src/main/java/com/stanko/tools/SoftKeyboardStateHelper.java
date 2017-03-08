@@ -1,7 +1,10 @@
 package com.stanko.tools;
 
+import android.annotation.TargetApi;
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.ResultReceiver;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -16,7 +19,6 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
 
     public interface SoftKeyboardStateListener {
         void onSoftKeyboardOpened(int keyboardHeightInPx);
-
         void onSoftKeyboardClosed();
     }
 
@@ -25,6 +27,134 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
     private int lastSoftKeyboardHeightInPx;
     private boolean mIsSoftKeyboardOpened;
     private final Rect mRect = new Rect();
+
+    /**
+     * Constructor using activity
+     *
+     * @param activity
+     */
+    public SoftKeyboardStateHelper(final Activity activity) {
+        this(activity.findViewById(android.R.id.content), false);
+    }
+
+    /**
+     * Constructor using activity and initial keyboard state
+     *
+     * @param activity
+     */
+    public SoftKeyboardStateHelper(final Activity activity, boolean isSoftKeyboardOpened) {
+        this(activity.findViewById(android.R.id.content), isSoftKeyboardOpened);
+    }
+
+    /**
+     * Constructor using activity and a listener
+     *
+     * @param activity
+     * @param listener
+     */
+    public SoftKeyboardStateHelper(final Activity activity, final SoftKeyboardStateListener listener) {
+        this(activity.findViewById(android.R.id.content), false);
+        addSoftKeyboardStateListener(listener);
+    }
+
+    /**
+     * Constructor using activity, listener and initial keyboard state
+     *
+     * @param activity
+     * @param listener
+     */
+    public SoftKeyboardStateHelper(final Activity activity, final SoftKeyboardStateListener listener, boolean isSoftKeyboardOpened) {
+        this(activity.findViewById(android.R.id.content), isSoftKeyboardOpened);
+        addSoftKeyboardStateListener(listener);
+    }
+
+    /**
+     * Constructor using android.app.Fragment
+     *
+     * @param fragment
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public SoftKeyboardStateHelper(final android.app.Fragment fragment) {
+        this(fragment.getActivity().findViewById(android.R.id.content), false);
+    }
+
+    /**
+     * Constructor using android.app.Fragment and initial keyboard state
+     *
+     * @param fragment
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public SoftKeyboardStateHelper(final android.app.Fragment fragment, boolean isSoftKeyboardOpened) {
+        this(fragment.getActivity().findViewById(android.R.id.content), isSoftKeyboardOpened);
+    }
+
+    /**
+     * Constructor using android.app.Fragment and a listener
+     *
+     * @param fragment
+     * @param listener
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public SoftKeyboardStateHelper(final android.app.Fragment fragment, final SoftKeyboardStateListener listener) {
+        this(fragment.getActivity().findViewById(android.R.id.content), false);
+        addSoftKeyboardStateListener(listener);
+    }
+
+    /**
+     * Constructor using android.app.Fragment, listener and initial keyboard state
+     *
+     * @param fragment
+     * @param listener
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public SoftKeyboardStateHelper(final android.app.Fragment fragment, final SoftKeyboardStateListener listener, boolean isSoftKeyboardOpened) {
+        this(fragment.getActivity().findViewById(android.R.id.content), isSoftKeyboardOpened);
+        addSoftKeyboardStateListener(listener);
+    }
+
+//    /**
+//     * Constructor using android.support.v4.app.Fragment
+//     *
+//     * @param fragment
+//     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    public SoftKeyboardStateHelper(final android.support.v4.app.Fragment fragment) {
+//        this(fragment.getActivity().findViewById(android.R.id.content), false);
+//    }
+//
+//    /**
+//     * Constructor using android.support.v4.app.Fragment and initial keyboard state
+//     *
+//     * @param fragment
+//     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    public SoftKeyboardStateHelper(final android.support.v4.app.Fragment fragment, boolean isSoftKeyboardOpened) {
+//        this(fragment.getActivity().findViewById(android.R.id.content), isSoftKeyboardOpened);
+//    }
+//
+//    /**
+//     * Constructor using android.support.v4.app.Fragment and a listener
+//     *
+//     * @param fragment
+//     * @param listener
+//     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    public SoftKeyboardStateHelper(final android.support.v4.app.Fragment fragment, final SoftKeyboardStateListener listener) {
+//        this(fragment.getActivity().findViewById(android.R.id.content), false);
+//        addSoftKeyboardStateListener(listener);
+//    }
+//
+//    /**
+//     * Constructor using android.support.v4.app.Fragment, listener and initial keyboard state
+//     *
+//     * @param fragment
+//     * @param listener
+//     */
+//    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+//    public SoftKeyboardStateHelper(final android.support.v4.app.Fragment fragment, final SoftKeyboardStateListener listener, boolean isSoftKeyboardOpened) {
+//        this(fragment.getActivity().findViewById(android.R.id.content), isSoftKeyboardOpened);
+//        addSoftKeyboardStateListener(listener);
+//    }
 
     /**
      * Constructor using activity root view
@@ -46,6 +176,16 @@ public class SoftKeyboardStateHelper implements ViewTreeObserver.OnGlobalLayoutL
         addSoftKeyboardStateListener(listener);
     }
 
+    /**
+     * Constructor using activity root view, listener and initial keyboard state
+     *
+     * @param activityRootView
+     * @param listener
+     */
+    public SoftKeyboardStateHelper(final View activityRootView, final SoftKeyboardStateListener listener, boolean isSoftKeyboardOpened) {
+        this(activityRootView, isSoftKeyboardOpened);
+        addSoftKeyboardStateListener(listener);
+    }
     /**
      * Constructor using activity root view and current keyboard state
      *

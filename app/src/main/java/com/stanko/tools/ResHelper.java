@@ -45,6 +45,27 @@ public class ResHelper {
             return sResources.getString(resId, args);
     }
 
+    public static String[] getStringArray(final int arrayResId) {
+        initOnDemand();
+        return sResources.getStringArray(arrayResId);
+    }
+
+    public static String getQuantityString(final int resId, final int quantity) {
+        initOnDemand();
+        if (resId == 0)
+            return null;
+        else
+            return sResources.getQuantityString(resId, quantity);
+    }
+
+    public static String getQuantityString(final int resId, final int quantity, Object... formatArgs) {
+        initOnDemand();
+        if (resId == 0)
+            return null;
+        else
+            return sResources.getQuantityString(resId, quantity, formatArgs);
+    }
+
     public static Drawable getDrawable(final int resId) {
         initOnDemand();
         return sResources.getDrawable(resId);
@@ -75,11 +96,6 @@ public class ResHelper {
         return sResources.getInteger(intResId);
     }
 
-    public static String[] getStringArray(final int arrayResId) {
-        initOnDemand();
-        return sResources.getStringArray(arrayResId);
-    }
-
     public static boolean getBoolean(final int booleanResId) {
         initOnDemand();
         return sResources.getBoolean(booleanResId);
@@ -100,22 +116,6 @@ public class ResHelper {
         return sResources.openRawResource(rawResId);
     }
 
-    public static String getQuantityString(final int resId, final int quantity) {
-        initOnDemand();
-        if (resId == 0)
-            return null;
-        else
-            return sResources.getQuantityString(resId, quantity);
-    }
-
-    public static String getQuantityString(final int resId, final int quantity, Object... formatArgs) {
-        initOnDemand();
-        if (resId == 0)
-            return null;
-        else
-            return sResources.getQuantityString(resId, quantity, formatArgs);
-    }
-
     public static int getResId(final String resName, final Class<?> c) {
         initOnDemand();
         try {
@@ -134,8 +134,7 @@ public class ResHelper {
             if (name == null || !name.startsWith(sAppContext.getPackageName())) {
                 return false;
             }
-            //Didn't catch so id is in res
-            return true;
+            return true; //Didn't catch exception so id is in res
         } catch (Resources.NotFoundException e) {
             return false;
         }

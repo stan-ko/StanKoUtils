@@ -183,18 +183,25 @@ public class FileUtils {
     /**
      * Writes a String to a File.
      *
-     * @param data       - String to write to a file
+     * @param data       - String data (text etc) to write or append to a file
      * @param targetFile - target File
      * @param doAppend   - append mode on/off
      * @return true if all OK or false otherwise
      */
     public static boolean stringToFile(final String data, final File targetFile, final boolean doAppend) {
-        if (targetFile == null || !isWritable(targetFile, true)) {
-            Log.e("stringToFile(): File is null or cant make path dirs");
+        if (data == null) {
+            Log.e(new NullPointerException("String data is null!"));
+            return false;
+        }
+        if (targetFile == null) {
+            Log.e(new NullPointerException("File is null!"));
+            return false;
+        }
+        if (!isWritable(targetFile, true)) {
+            Log.e(new IOException("File is null or " + targetFile + " is not writable"));
             //new IOException("File is null or cant make path dirs").printStackTrace();
             return false;
         }
-
         boolean isSucceed = true;
         try {
             final FileWriter out = new FileWriter(targetFile, doAppend);
@@ -204,8 +211,8 @@ public class FileUtils {
         } catch (IOException e) {
             //Logger.logError(TAG, e);
             isSucceed = false;
+            Log.e(e);
         }
-
         return isSucceed;
     }
 
@@ -1077,6 +1084,21 @@ public class FileUtils {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+
+    /**
+     * Appends String data (text, etc) to the end of given file.
+     *
+     * @param textToAppend - string data to be append to targetFile
+     * @param targetFile   - file to append string data to
+     */
+    public static boolean appendStringToFile(final String textToAppend, final File targetFile) {
+        if (!isWritable(targetFile)) {
+            Log.e(new IOException("File " + targetFile + " is not writable!"));
+            return false;
+        }
+        return stringToFile(textToAppend, targetFile, true);
     }
 
     /**

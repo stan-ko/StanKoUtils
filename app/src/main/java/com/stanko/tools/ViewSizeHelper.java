@@ -75,7 +75,7 @@ public class ViewSizeHelper {
 	}
 
 	
-	public static void setHeightAndWitdh(View view2Fix, int targetHeight, int targetWidth){
+	public static void setHeightAndWidth(View view2Fix, int targetHeight, int targetWidth){
 		if (view2Fix==null)
 			return;
 		final ViewGroup.LayoutParams viewLP = view2Fix.getLayoutParams();
@@ -123,11 +123,5 @@ public class ViewSizeHelper {
 		void onGotViewSize(final int height, final int width);
 	} 
 	
-//	public static final class ViewSize {
-//		public final int height, width;
-//		public ViewSize(int height, int width){
-//			this.height = height;
-//			this.width = width;
-//		}
-//	}
+
 }

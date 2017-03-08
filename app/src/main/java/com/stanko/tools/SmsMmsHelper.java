@@ -131,17 +131,17 @@ public class SmsMmsHelper {
                                final String phoneNumbers,
                                final String text2Send,
                                final File file) {
-        sendMMS(context, phoneNumbers, text2Send, null, null, null, file);
+        sendMMS(context, phoneNumbers, text2Send, file, null, null, null);
 
     }
 
     public static void sendMMS(final Context context,
                                final String phoneNumbers,
                                final String text2Send,
+                               final File file,
                                String pickerTitle,
                                String securityExceptionMessage,
-                               String noAssociatedAppErrorMessage,
-                               final File file) {
+                               String noAssociatedAppErrorMessage ) {
         if (TextUtils.isEmpty(pickerTitle))
             pickerTitle = MMSH_DEFAULT_PICKER_TITLE;
         if (TextUtils.isEmpty(securityExceptionMessage))

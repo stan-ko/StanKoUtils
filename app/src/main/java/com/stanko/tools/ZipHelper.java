@@ -1,5 +1,7 @@
 package com.stanko.tools;
 
+import android.text.TextUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -28,20 +30,20 @@ public class ZipHelper {
             zipOutputStream = new ZipOutputStream(new BufferedOutputStream(dest));
             final byte data[] = new byte[BUFFER];
             for (File file : files) {
-                add(file,zipOutputStream,data);
+                add(file, zipOutputStream, data);
             }
             FileUtils.sync(dest);
             dest.flush();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (zipOutputStream!=null)
+            if (zipOutputStream != null)
                 try {
                     zipOutputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            if (dest!=null)
+            if (dest != null)
                 try {
                     dest.close();
                 } catch (IOException e) {
@@ -59,7 +61,7 @@ public class ZipHelper {
             final byte data[] = new byte[BUFFER];
             for (String file : files) {
                 Log.d(LOG_TAG, "Adding: " + file);
-                add(new File(file),zipOutputStream,data);
+                add(new File(file), zipOutputStream, data);
             }
 
             FileUtils.sync(dest);
@@ -67,13 +69,13 @@ public class ZipHelper {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (zipOutputStream!=null)
+            if (zipOutputStream != null)
                 try {
                     zipOutputStream.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-            if (dest!=null)
+            if (dest != null)
                 try {
                     dest.close();
                 } catch (IOException e) {
@@ -82,7 +84,7 @@ public class ZipHelper {
         }
     }
 
-    private static void add(final File file, final ZipOutputStream zipOutputStream, final byte[] data){
+    private static void add(final File file, final ZipOutputStream zipOutputStream, final byte[] data) {
         Log.d(LOG_TAG, "Adding: " + file);
         BufferedInputStream origin = null;
         try {
@@ -101,16 +103,17 @@ public class ZipHelper {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            if (origin!=null)
+            if (origin != null)
                 try {
                     origin.close();
-                } catch (IOException ignored){}
+                } catch (IOException ignored) {
+                }
 
         }
     }
 
     public static void zip(final String fileToAddToZip, String targetZipFile) {
-        zip(new File(fileToAddToZip),new File(targetZipFile));
+        zip(new File(fileToAddToZip), new File(targetZipFile));
     }
 
     public static void zip(final File fileToAddToZip, File targetZipFile) {
@@ -141,18 +144,18 @@ public class ZipHelper {
 
 
     public void unzip(final String zipFile, final String targetLocation) {
-        unzip(new File(zipFile),new File(targetLocation));
+        unzip(new File(zipFile), new File(targetLocation));
     }
 
     public void unzip(final File zipFile, final File targetLocation) {
         if (!FileUtils.isReadable(zipFile)) {
-            new Exception("unzip(): Invalid zipFile: "+zipFile).printStackTrace();
+            new Exception("unzip(): Invalid zipFile: " + zipFile).printStackTrace();
             return;
         }
         //create target location folder if not exist
         targetLocation.mkdirs();
-        if (!targetLocation.exists()){
-            new Exception("unzip(): Can't create path (targetLocation): "+targetLocation).printStackTrace();
+        if (!targetLocation.exists()) {
+            new Exception("unzip(): Can't create path (targetLocation): " + targetLocation).printStackTrace();
             return;
         }
         try {
@@ -162,9 +165,8 @@ public class ZipHelper {
             while ((zipEntry = zipInputStream.getNextEntry()) != null) {
                 //create dir if required while unzipping
                 if (zipEntry.isDirectory()) {
-                    new File(targetLocation,zipEntry.getName()).mkdirs();//dirChecker(ze.getName());
-                }
-                else {
+                    new File(targetLocation, zipEntry.getName()).mkdirs();
+                } else {
                     final FileOutputStream fileOutputStream = new FileOutputStream(targetLocation + zipEntry.getName());
                     for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
                         fileOutputStream.write(c);
@@ -179,4 +181,46 @@ public class ZipHelper {
             e.printStackTrace();
         }
     }
+
+    public void unzip(final File zipFile, final String targetFile, final File targetLocation) {
+        if (!FileUtils.isReadable(zipFile)) {
+            new Exception("unzip(): Invalid zipFile: " + zipFile).printStackTrace();
+            return;
+        }
+        //create target location folder if not exist
+        targetLocation.mkdirs();
+        if (!targetLocation.exists()) {
+            new Exception("unzip(): Can't create path (targetLocation): " + targetLocation).printStackTrace();
+            return;
+        }
+        try {
+            final FileInputStream fileInputStream = new FileInputStream(zipFile);
+            final ZipInputStream zipInputStream = new ZipInputStream(fileInputStream);
+            ZipEntry zipEntry;
+            String zipEntryName;
+            while ((zipEntry = zipInputStream.getNextEntry()) != null) {
+                zipEntryName = zipEntry.getName();
+                //create dir if required while unzipping
+                if (zipEntry.isDirectory()) {
+                    new File(targetLocation, zipEntryName).mkdirs();
+                } else {
+                    if (TextUtils.equals(targetFile, zipEntryName)) {
+                        final FileOutputStream fileOutputStream = new FileOutputStream(targetLocation + zipEntryName);
+                        for (int c = zipInputStream.read(); c != -1; c = zipInputStream.read()) {
+                            fileOutputStream.write(c);
+                        }
+                        FileUtils.sync(fileOutputStream);
+                        zipInputStream.closeEntry();
+                        fileOutputStream.close();
+                    } else {
+                        zipInputStream.closeEntry();
+                    }
+                }
+            }
+            zipInputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 }

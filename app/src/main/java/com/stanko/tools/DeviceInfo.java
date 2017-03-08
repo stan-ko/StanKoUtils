@@ -884,7 +884,7 @@ public class DeviceInfo {
      * at java.lang.reflect.Method.invoke(Method.java)
      * at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:797)
      * at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:687)
-     * <p>
+     * <p/>
      * list of known devices with BT bug, HTC + Android M only!
      * HTC One (E8) dual sim
      * HTC Desire 630 dual sim
@@ -938,15 +938,12 @@ public class DeviceInfo {
      Applications targeting this or a later release will get these new changes in behavior:
      Content Providers: The default value of android:exported is now false.
      int	JELLY_BEAN_MR2	Android 4.3: Jelly Bean MR2, the revenge of the beans.
-     */
-
-    /**
-     * General method which detects if device supports only given API level
-     * Actually its equality comparison like Build.VERSION.SDK_INT == apiLevel
-     *
-     * @param apiLevel, integer, the API level to check support
-     * @return
-     */
+     <p/>
+     Its a general method which detects if device supports exactly given API level
+     Actually its equality comparison like Build.VERSION.SDK_INT == apiLevel
+     @param apiLevel, integer, the API level to check
+     @return
+    */
     public static boolean isAPI(final int apiLevel) {
         return sAPILevel == apiLevel;
     }

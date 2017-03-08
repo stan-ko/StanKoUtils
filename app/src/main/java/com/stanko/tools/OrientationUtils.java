@@ -28,21 +28,30 @@ import android.view.WindowManager;
 /** Static methods related to device orientation. */
 public class OrientationUtils {
 
-    // See constant value of orientations on http://developer.android.com/reference/android/R.attr.html#screenOrientation
-	private OrientationUtils() {}
-
-	/** Locks the device window in landscape mode. */
-	public static void lockOrientationLandscape(Activity activity) {
+	/**
+	 * Locks the device window in landscape mode.
+	 *
+	 * @param activity
+     */
+	public static void lockOrientationLandscape(final Activity activity) {
 		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 	}
 
-	/** Locks the device window in portrait mode. */
-	public static void lockOrientationPortrait(Activity activity) {
+	/**
+	 * Locks the device window in portrait mode.
+	 *
+	 * @param activity
+     */
+	public static void lockOrientationPortrait(final Activity activity) {
 		activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 	}
 
-	/** Locks the device window in actual screen mode. */
-	public static void lockOrientation(Activity activity) {
+	/**
+	 * Locks the device window in actual (current) screen mode.
+	 *
+	 * @param activity
+     */
+	public static void lockOrientation(final Activity activity) {
 		final int orientation = activity.getResources().getConfiguration().orientation;
 	    final int rotation = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
 
@@ -75,20 +84,30 @@ public class OrientationUtils {
 		}
 	}
 
-	/** Unlocks the device window in user defined screen mode. */
-	public static void unlockOrientation(Activity activity) {
+	/**
+	 * Unlocks the device window in user defined screen mode.
+	 *
+	 * @param activity
+     */
+	public static void unlockOrientation(final Activity activity) {
         activity.setRequestedOrientation(getManifestOrientation(activity));
 	}
 
-    private static int getManifestOrientation(Activity activity){
+	/**
+	 * Returns activity orientation declared in Manifest
+	 *
+	 * @param activity
+	 * @return integer, see constant value of orientations on http://developer.android.com/reference/android/R.attr.html#screenOrientation
+     */
+	public static int getManifestOrientation(final Activity activity){
         try {
             ActivityInfo app = activity
 					.getPackageManager()
 					.getActivityInfo(activity.getComponentName(), PackageManager.GET_ACTIVITIES|PackageManager.GET_META_DATA);
             return app.screenOrientation;
         } catch (PackageManager.NameNotFoundException e) {
-            return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
         }
+		return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
     }
 
 }

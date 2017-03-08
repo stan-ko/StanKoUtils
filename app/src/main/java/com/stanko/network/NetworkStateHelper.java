@@ -313,7 +313,7 @@ public class NetworkStateHelper {
             public void run() {
                 Log.i("checkIfHostRespondsTask started");
                 isRunning = true;
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                setBgThread();
                 //Looper.prepare();
                 // following method call could freeze for {TIME_OUT} seconds
                 final boolean doesHostRespond = isHostReachable(sHostToCheck);
@@ -407,7 +407,9 @@ public class NetworkStateHelper {
     public static boolean isHostReachable(final String hostUrl) {
         // init on demand
         initOnDemand();
+        setBgThread();
         boolean doesHostRespond = false;
+        boolean isExceptionHappens = true;
         try {
             // adding http:// if its just a pure host name like google.com instead of http://google.com
             final URL url = new URL(hostUrl.contains("://") ? hostUrl : "http://" + hostUrl);
@@ -429,16 +431,14 @@ public class NetworkStateHelper {
             final int responseCode = httpURLConnection.getResponseCode();
             // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
             // there are too many codes, guess checking if its gt 0 is enough
-            doesHostRespond = responseCode < 400;
+            doesHostRespond = responseCode > 0; //< 400;
+            isExceptionHappens = false;
         } catch (MalformedURLException e) {
             e.printStackTrace();
-//            isExceptionHappens = true;
         } catch (SocketTimeoutException e) {
             e.printStackTrace();
-//            isExceptionHappens = true;
         } catch (IOException e) {
             e.printStackTrace();
-//            isExceptionHappens = true;
         } catch (SecurityException e) {
             e.printStackTrace();
             // user could limit Internet access so app could crash here
@@ -448,9 +448,27 @@ public class NetworkStateHelper {
             e.printStackTrace();
         } catch (OutOfMemoryError e) {
             e.printStackTrace();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+            /*
+             * Fatal Exception: java.lang.NullPointerException: ssl_session == null
+             * at com.android.org.conscrypt.NativeCrypto.SSL_SESSION_cipher(NativeCrypto.java)
+             * at com.android.org.conscrypt.OpenSSLSessionImpl.getCipherSuite(OpenSSLSessionImpl.java:320)
+             * at com.android.okhttp.Handshake.get(Handshake.java:48)
+             * at com.android.okhttp.internal.http.SocketConnector.connectTls(SocketConnector.java:105)
+             * at com.android.okhttp.Connection.connect(Connection.java:167)
+             * at com.android.okhttp.Connection.connectAndSetOwner(Connection.java:209)
+             */
+            doesHostRespond = true;
         }
         return doesHostRespond;
     }
+
+    private static void setBgThread() {
+        Log.i("Priority: " + Thread.currentThread().getPriority());
+        Thread.currentThread().setPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+    }
+
 
     public static void setTrustAnySSLCertificateMode(final URL url) throws NoSuchAlgorithmException, KeyManagementException {
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
@@ -502,7 +520,7 @@ public class NetworkStateHelper {
             @Override
             public void run() {
                 Looper.prepare();
-                android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_BACKGROUND);
+                setBgThread();
                 boolean doesHostRespond = isHostReachable(hostUrl);
                 lastTimeHostWasChecked = System.currentTimeMillis();
                 // sending check result using callback

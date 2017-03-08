@@ -334,8 +334,14 @@ public class SDCardHelper {
         return mExternalStorageAvailable && mExternalStorageWriteable;
     }
 
+    /**
+     * Checks permissions and returns true if SD card (External Drive) is available to write to.
+     * Applicable for API 23 and higher.
+     *
+     * @return
+     */
     public static boolean isExternalStorageWritePermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT > 22) {
             if (sAppContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.i("Permission is granted");
                 return true;
@@ -350,8 +356,14 @@ public class SDCardHelper {
         return true;
     }
 
+    /**
+     * Checks permissions and returns true if SD card (External Drive) is available to read from.
+     * Applicable for API 23 and higher.
+     *
+     * @return
+     */
     public static boolean isExternalStorageReadPermissionGranted() {
-        if (Build.VERSION.SDK_INT >= 23) {
+        if (Build.VERSION.SDK_INT > 22) {
             initOnDemand();
             if (sAppContext.checkSelfPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 Log.i("Permission is granted");
@@ -498,10 +510,8 @@ public class SDCardHelper {
     /**
      * Returns a temporary directory (app cache directory) on External Storage Drive
      * if its available or based on context.getCacheDir() otherwise.
-     * This class must be initialized by calling the init() method before or null
-     * could be returned instead.
      *
-     * @return File or null if class wasn't initialized previously
+     * @return File or null if its nowhere to write
      */
     public static File getTempDir() {
         initOnDemand();
@@ -513,10 +523,8 @@ public class SDCardHelper {
     /**
      * Returns a temporary directory (app cache directory) on External Storage Drive
      * if its available or based on context.getCacheDir() otherwise
-     * This class must be initialized by calling the init() method before or null
-     * could be returned instead.
      *
-     * @return File or null if class wasn't initialized previously
+     * @return File or null if its nowhere to write
      */
     public static File getCacheDir() {
         initOnDemand();
@@ -528,10 +536,8 @@ public class SDCardHelper {
     /**
      * Returns a temporary directory (app cache directory) on External Storage Drive
      * if its available or based on context.getCacheDir() otherwise
-     * This class must be initialized by calling the init() method before or null
-     * could be returned instead.
      *
-     * @return File or null if class wasn't initialized previously
+     * @return File or null if its nowhere to write
      */
     public static File getCacheDir(Context context) {
         if (isExternalStorageAvailable() && isExternalStorageWritable())
