@@ -558,18 +558,48 @@ public class ImageUtils {
         return null;
     }
 
+    /**
+     *
+     * @param bitmapFile
+     * @param newHeight
+     * @param newWidth
+     * @return
+     */
     public static Bitmap getResizedBitmapFromFile(final String bitmapFile, final int newHeight, final int newWidth) {
         return getResizedBitmapFromFile(new File(bitmapFile), newHeight, newWidth, true);
     }
 
+    /**
+     *
+     * @param bitmapFile
+     * @param newHeight
+     * @param newWidth
+     * @return
+     */
     public static Bitmap getResizedBitmapFromFile(final File bitmapFile, final int newHeight, final int newWidth) {
         return getResizedBitmapFromFile(bitmapFile, newHeight, newWidth, true);
     }
 
+    /**
+     *
+     * @param bitmapFile
+     * @param newHeight
+     * @param newWidth
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getResizedBitmapFromFile(final String bitmapFile, final int newHeight, final int newWidth, final boolean isOptimistic) {
         return getResizedBitmapFromFile(new File(bitmapFile), newHeight, newWidth, isOptimistic);
     }
 
+    /**
+     *
+     * @param bitmapFile
+     * @param newHeight
+     * @param newWidth
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getResizedBitmapFromFile(final File bitmapFile, final int newHeight, int newWidth, final boolean isOptimistic) {
         if (!FileUtils.isReadable(bitmapFile))
             return null;
@@ -588,30 +618,77 @@ public class ImageUtils {
 
     // FileDescriptor
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxHeight
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxHeight(final FileDescriptor fileDescriptor, final int maxHeight) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxHeight, true, false);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxHeight
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxHeight(final FileDescriptor fileDescriptor, final int maxHeight, final boolean isOptimistic) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxHeight, true, isOptimistic);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxWidth
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxWidth(final FileDescriptor fileDescriptor, final int maxWidth) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxWidth, false, false);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxWidth
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxWidth(final FileDescriptor fileDescriptor, final int maxWidth, final boolean isOptimistic) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxWidth, false, isOptimistic);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxSideSize
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxSideSize(final FileDescriptor fileDescriptor, final int maxSideSize) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxSideSize, null, false);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxSideSize
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxSideSize(final FileDescriptor fileDescriptor, final int maxSideSize, final boolean isOptimistic) {
         return getBitmapFromFileDescriptorWithMaxSideSize(fileDescriptor, maxSideSize, null, isOptimistic);
     }
 
+    /**
+     *
+     * @param fileDescriptor
+     * @param maxSideSize
+     * @param isByHeight
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromFileDescriptorWithMaxSideSize(final FileDescriptor fileDescriptor,
                                                                     final int maxSideSize,
                                                                     final Boolean isByHeight,
@@ -640,10 +717,21 @@ public class ImageUtils {
     // Resources
     //
 
+    /**
+     *
+     * @param drawableResId
+     * @return
+     */
     public static Bitmap getBitmapFromResources(final int drawableResId) {
         return getBitmapFromResources(Initializer.getResources(), drawableResId);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @return
+     */
     public static Bitmap getBitmapFromResources(final Context context, final int drawableResId) {
         if (context == null || drawableResId == 0)
             return null;
@@ -651,6 +739,12 @@ public class ImageUtils {
         return getBitmapFromResources(context.getResources(), drawableResId);
     }
 
+    /**
+     *
+     * @param resources
+     * @param drawableResId
+     * @return
+     */
     public static Bitmap getBitmapFromResources(final Resources resources, final int drawableResId) {
         if (resources == null || drawableResId == 0)
             return null;
@@ -658,36 +752,82 @@ public class ImageUtils {
         return BitmapFactory.decodeResource(resources, drawableResId);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxHeight
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Context context, final int drawableResId, final int maxHeight) {
         if (context == null || drawableResId == 0)
             return null;
         return getBitmapFromResourcesWithMaxHeight(context, drawableResId, maxHeight, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxHeight
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxHeight(final Context context, final int drawableResId, final int maxHeight, final boolean isOptimistic) {
         if (context == null || drawableResId == 0 || maxHeight == 0)
             return null;
         return getBitmapFromResourcesWithMaxSideSize(context, drawableResId, maxHeight, true, isOptimistic);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxWidth
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Context context, final int drawableResId, final int maxWidth) {
         if (context == null || drawableResId == 0)
             return null;
         return getBitmapFromResourcesWithMaxWidth(context, drawableResId, maxWidth, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxWidth
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxWidth(final Context context, final int drawableResId, final int maxWidth, final boolean isOptimistic) {
         if (context == null || drawableResId == 0 || maxWidth == 0)
             return null;
         return getBitmapFromResourcesWithMaxSideSize(context, drawableResId, maxWidth, false, isOptimistic);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxSideSize
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(final Context context, final int drawableResId, final int maxSideSize) {
         if (context == null || drawableResId == 0)
             return null;
         return getBitmapFromResourcesWithMaxSideSize(context, drawableResId, maxSideSize, null, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param drawableResId
+     * @param maxSideSize
+     * @param isByHeight
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromResourcesWithMaxSideSize(final Context context,
                                                                final int drawableResId,
                                                                final int maxSideSize,
@@ -733,6 +873,14 @@ public class ImageUtils {
         return bitmap;
     }
 
+    /**
+     *
+     * @param inputStream
+     * @param maxSideSize
+     * @param isByHeight
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromStreamWithMaxSideSize(final InputStream inputStream,
                                                             final int maxSideSize,
                                                             final Boolean isByHeight,
@@ -861,10 +1009,22 @@ public class ImageUtils {
     //
     // from Uri
     //
+
+    /**
+     *
+     * @param mBitmapResId
+     * @return
+     */
     public static Uri getUriOfBitmapFromResources(final int mBitmapResId) {
         return getUriOfBitmapFromResources(Initializer.getsAppContext(), mBitmapResId);
     }
 
+    /**
+     *
+     * @param context
+     * @param mBitmapResId
+     * @return
+     */
     public static Uri getUriOfBitmapFromResources(final Context context, final int mBitmapResId) {
         if (context == null || mBitmapResId == 0)
             return null;
@@ -872,6 +1032,12 @@ public class ImageUtils {
         return getUriOfBitmapFromResources(resources, mBitmapResId);
     }
 
+    /**
+     *
+     * @param resources
+     * @param mBitmapResId
+     * @return
+     */
     public static Uri getUriOfBitmapFromResources(final Resources resources, final int mBitmapResId) {
         if (resources == null || mBitmapResId == 0)
             return null;
@@ -881,6 +1047,12 @@ public class ImageUtils {
                 resources.getResourceEntryName(mBitmapResId));
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @return
+     */
     public static Bitmap getBitmapFromUri(final Context context, final Uri uri) {
         if (context == null || uri == null)
             return null;
@@ -911,16 +1083,37 @@ public class ImageUtils {
         return bitmap;
     }
 
+    /**
+     *
+     * @param uri
+     * @param sideSizeLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxSideSize(final Uri uri, final int sideSizeLimit) {
         return getBitmapFromUriWithMaxSideSize(Initializer.getsAppContext(), uri, sideSizeLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param sideSizeLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxSideSize(final Context context, final Uri uri, final int sideSizeLimit) {
         if (context == null || uri == null)
             return null;
         return getBitmapFromUriWithMaxSideSize(context, uri, sideSizeLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param sideSizeLimit
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxSideSize(final Context context, final Uri uri, final int sideSizeLimit, final boolean isOptimistic) {
         if (context == null || uri == null)
             return null;
@@ -972,16 +1165,37 @@ public class ImageUtils {
     }
 
     // height limit
+    /**
+     *
+     * @param uri
+     * @param heightLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxHeight(final Uri uri, final int heightLimit) {
         return getBitmapFromUriWithMaxHeight(Initializer.getsAppContext(), uri, heightLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param heightLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxHeight(final Context context, final Uri uri, final int heightLimit) {
         if (context == null || uri == null)
             return null;
         return getBitmapFromUriWithMaxHeight(context, uri, heightLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param heightLimit
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxHeight(final Context context, final Uri uri, final int heightLimit, final boolean isOptimistic) {
         if (context == null || uri == null)
             return null;
@@ -1030,16 +1244,37 @@ public class ImageUtils {
     }
 
     // width limit
+    /**
+     *
+     * @param uri
+     * @param widthLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxWidth(final Uri uri, final int widthLimit) {
         return getBitmapFromUriWithMaxWidth(Initializer.getsAppContext(), uri, widthLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param widthLimit
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxWidth(final Context context, final Uri uri, final int widthLimit) {
         if (context == null || uri == null)
             return null;
         return getBitmapFromUriWithMaxWidth(context, uri, widthLimit, false);
     }
 
+    /**
+     *
+     * @param context
+     * @param uri
+     * @param widthLimit
+     * @param isOptimistic
+     * @return
+     */
     public static Bitmap getBitmapFromUriWithMaxWidth(final Context context, final Uri uri, final int widthLimit, final boolean isOptimistic) {
         if (context == null || uri == null)
             return null;
@@ -1083,6 +1318,14 @@ public class ImageUtils {
         return bitmap;
     }
 
+    /**
+     *
+     * @param bmfOptions
+     * @param maxSideSize
+     * @param isByHeight
+     * @param isOptimistic
+     * @return
+     */
     private static int getScaleRatio(final BitmapFactory.Options bmfOptions, final int maxSideSize, final Boolean isByHeight, final boolean isOptimistic) {
         // Find the correct scale value. It should be the power of 2.
         int width_tmp = bmfOptions.outWidth;
@@ -3032,6 +3275,5 @@ public class ImageUtils {
         final Drawable drawable = new BitmapDrawable(context.getResources(), bitmap);
         return drawable;
     }
-
 
 }
