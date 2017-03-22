@@ -4,9 +4,14 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.stanko.tools.Initializer;
 import com.stanko.tools.Log;
 
 public class AppVersion {
+
+    public static int getVersionCode() {
+        return getVersionCode(Initializer.getsAppContext());
+    }
 
     public static int getVersionCode(final Context context) {
         int version = 0;
@@ -20,6 +25,10 @@ public class AppVersion {
         return version;
     }
 
+    public static String getVersionName() {
+        return getVersionName(Initializer.getsAppContext());
+    }
+
     public static String getVersionName(final Context context) {
         String version = "";
         try {
@@ -30,6 +39,10 @@ public class AppVersion {
             Log.e(e);
         }
         return version;
+    }
+
+    public static AppVersionInfo getVersionInfo() {
+        return new AppVersionInfo(Initializer.getsAppContext());
     }
 
     public static AppVersionInfo getVersionInfo(final Context context) {

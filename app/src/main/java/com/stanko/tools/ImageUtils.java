@@ -525,11 +525,10 @@ public class ImageUtils {
             else
                 BitmapFactory.decodeStream(fileInputStream, null, bmfOptions);
 
-            if (fileInputStream != null)
-                try {
-                    fileInputStream.close();
-                } catch (IOException ignored) {
-                }
+            try {
+                fileInputStream.close();
+            } catch (IOException ignored) {
+            }
 
             // Find the correct scale value. It should be the power of 2.
             bmfOptions.inSampleSize = getScaleRatio(bmfOptions, maxSideSize, isByHeight, isOptimistic);
@@ -559,7 +558,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param bitmapFile
      * @param newHeight
      * @param newWidth
@@ -570,7 +568,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param bitmapFile
      * @param newHeight
      * @param newWidth
@@ -581,7 +578,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param bitmapFile
      * @param newHeight
      * @param newWidth
@@ -593,7 +589,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param bitmapFile
      * @param newHeight
      * @param newWidth
@@ -619,7 +614,6 @@ public class ImageUtils {
     // FileDescriptor
 
     /**
-     *
      * @param fileDescriptor
      * @param maxHeight
      * @return
@@ -629,7 +623,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxHeight
      * @param isOptimistic
@@ -640,7 +633,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxWidth
      * @return
@@ -650,7 +642,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxWidth
      * @param isOptimistic
@@ -661,7 +652,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxSideSize
      * @return
@@ -671,7 +661,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxSideSize
      * @param isOptimistic
@@ -682,7 +671,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param fileDescriptor
      * @param maxSideSize
      * @param isByHeight
@@ -718,7 +706,6 @@ public class ImageUtils {
     //
 
     /**
-     *
      * @param drawableResId
      * @return
      */
@@ -727,7 +714,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @return
@@ -740,7 +726,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param resources
      * @param drawableResId
      * @return
@@ -753,7 +738,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxHeight
@@ -766,7 +750,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxHeight
@@ -780,7 +763,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxWidth
@@ -793,7 +775,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxWidth
@@ -807,7 +788,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxSideSize
@@ -820,7 +800,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param drawableResId
      * @param maxSideSize
@@ -874,7 +853,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param inputStream
      * @param maxSideSize
      * @param isByHeight
@@ -1011,7 +989,6 @@ public class ImageUtils {
     //
 
     /**
-     *
      * @param mBitmapResId
      * @return
      */
@@ -1020,7 +997,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param mBitmapResId
      * @return
@@ -1033,7 +1009,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param resources
      * @param mBitmapResId
      * @return
@@ -1048,7 +1023,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @return
@@ -1084,7 +1058,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param uri
      * @param sideSizeLimit
      * @return
@@ -1094,7 +1067,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param sideSizeLimit
@@ -1107,7 +1079,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param sideSizeLimit
@@ -1165,8 +1136,8 @@ public class ImageUtils {
     }
 
     // height limit
+
     /**
-     *
      * @param uri
      * @param heightLimit
      * @return
@@ -1176,7 +1147,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param heightLimit
@@ -1189,7 +1159,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param heightLimit
@@ -1244,8 +1213,8 @@ public class ImageUtils {
     }
 
     // width limit
+
     /**
-     *
      * @param uri
      * @param widthLimit
      * @return
@@ -1255,7 +1224,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param widthLimit
@@ -1268,7 +1236,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param context
      * @param uri
      * @param widthLimit
@@ -1319,7 +1286,6 @@ public class ImageUtils {
     }
 
     /**
-     *
      * @param bmfOptions
      * @param maxSideSize
      * @param isByHeight
@@ -2122,7 +2088,7 @@ public class ImageUtils {
      *
      * @param resources
      * @param drawableResId
-     * @param radius - must be greater than 1
+     * @param radius        - must be greater than 1
      * @return
      */
     public static Bitmap getBlurredBitmap(final Resources resources, final int drawableResId, final int radius) {
@@ -2135,7 +2101,7 @@ public class ImageUtils {
      * Returns blurred copy of given image
      *
      * @param bitmapToBlur
-     * @param radius - must be greater than 1
+     * @param radius       - must be greater than 1
      * @return
      */
     public static Bitmap getBlurredBitmap(final Bitmap bitmapToBlur, final int radius) {
@@ -2148,7 +2114,7 @@ public class ImageUtils {
      * Blurs given image
      *
      * @param bitmapToBlur - Bitmap to apply blur to
-     * @param radius - must be greater than 1
+     * @param radius       - must be greater than 1
      */
     public static void blurBitmap(final Bitmap bitmapToBlur, final int radius) {
         if (radius < 1)
@@ -2363,7 +2329,7 @@ public class ImageUtils {
      * Takes screenshot of view (identified by given id) of the activity.
      *
      * @param activity - Activity holding/managing target View
-     * @param id - target View's ID
+     * @param id       - target View's ID
      * @return Bitmap or null if View could not be found
      */
     public static Bitmap getScreenShotOfActivityView(final Activity activity, final int id) {
@@ -2388,8 +2354,8 @@ public class ImageUtils {
     /**
      * Takes a screenshot with deisred dimensions of the view.
      *
-     * @param view - target View
-     * @param width - desired width of screenshot
+     * @param view   - target View
+     * @param width  - desired width of screenshot
      * @param height - desired height of screenshot
      * @return - Bitmap or null if View is null
      */
@@ -2405,9 +2371,9 @@ public class ImageUtils {
     /**
      * Returns cropped from center image with previous scaling. Works with File.
      *
-     * @param bitmapFile - File to get image from
+     * @param bitmapFile   - File to get image from
      * @param cropToHeight - target height
-     * @param cropToWidth - target width
+     * @param cropToWidth  - target width
      * @return - cropped Bitmap
      */
     public static Bitmap getBitmapByCropFromCenterWithScaling(final File bitmapFile, final int cropToHeight, final int cropToWidth) {
@@ -2528,9 +2494,9 @@ public class ImageUtils {
      * Returns cropped from center image with previous scaling. Works with Resources.
      * Uses Context from Initializer so it must be initialized before
      *
-     * @param bitmapResId - resource ID to get image of
+     * @param bitmapResId  - resource ID to get image of
      * @param cropToHeight - target height
-     * @param cropToWidth - target width
+     * @param cropToWidth  - target width
      * @return - cropped Bitmap
      */
     public static Bitmap getBitmapByCropFromCenterWithScaling(final int bitmapResId, final int cropToHeight, final int cropToWidth) {
@@ -2540,10 +2506,10 @@ public class ImageUtils {
     /**
      * Returns cropped from center image with previous scaling. Works with Resources.
      *
-     * @param context - to have access to resources
-     * @param bitmapResId - resource ID to get image of
+     * @param context      - to have access to resources
+     * @param bitmapResId  - resource ID to get image of
      * @param cropToHeight - target height
-     * @param cropToWidth - target width
+     * @param cropToWidth  - target width
      * @return - cropped Bitmap or null if given context, bitmap is null or of dimensions is 0
      */
     public static Bitmap getBitmapByCropFromCenterWithScaling(final Context context, final int bitmapResId, final int cropToHeight, final int cropToWidth) {
@@ -2665,8 +2631,8 @@ public class ImageUtils {
      * Returns cropped from center image.
      *
      * @param bitmapToScale - image to crop&scale
-     * @param cropToHeight - target height
-     * @param cropToWidth - target width
+     * @param cropToHeight  - target height
+     * @param cropToWidth   - target width
      * @return - cropped Bitmap or null if given bitmap is null or of dimensions is 0
      */
     public static Bitmap getBitmapByCropFromCenterWithScaling(final Bitmap bitmapToScale, final int cropToHeight, final int cropToWidth) {
@@ -2769,7 +2735,7 @@ public class ImageUtils {
      *
      * @param bitmapToCrop - Bitmap to crop from
      * @param cropToHeight - target height
-     * @param cropToWidth - target width
+     * @param cropToWidth  - target width
      * @return - cropped Bitmap or null if given bitmap is null or of dimensions is 0
      */
     public static Bitmap getCroppedFromCenterBitmap(final Bitmap bitmapToCrop, final int cropToHeight, final int cropToWidth) {
@@ -2845,7 +2811,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed Bitmap image
      *
-     * @param bitmap - bitmap to compress to JPEG
+     * @param bitmap      - bitmap to compress to JPEG
      * @param jpegQuality - target JPEG quality
      * @return
      */
@@ -2859,7 +2825,7 @@ public class ImageUtils {
      * Returns byte array of JPEG compressed image from File
      *
      * @param imageFilePath - image file path
-     * @param jpegQuality - target JPEG quality
+     * @param jpegQuality   - target JPEG quality
      * @return
      */
     public static byte[] getJPEGByteArrayFromFile(final String imageFilePath, final int jpegQuality) {
@@ -2869,7 +2835,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from File
      *
-     * @param imageFile - image File
+     * @param imageFile   - image File
      * @param jpegQuality - target JPEG quality
      * @return
      */
@@ -2883,7 +2849,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given File
      *
-     * @param imageFile - image File
+     * @param imageFile   - image File
      * @param maxSideSize - limit of the bigger dimension
      * @param jpegQuality - target JPEG quality
      * @return
@@ -2895,7 +2861,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given File
      *
-     * @param imageFile - image File
+     * @param imageFile   - image File
      * @param maxSideSize - limit of the bigger dimension
      * @param jpegQuality - target JPEG quality
      * @return
@@ -2910,7 +2876,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given drawable resource
      *
-     * @param imageResId - image drawable resource ID (R.drawable.ID)
+     * @param imageResId  - image drawable resource ID (R.drawable.ID)
      * @param jpegQuality - target JPEG quality
      * @return
      */
@@ -2921,8 +2887,8 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given drawable resource
      *
-     * @param context - to get access to Resources
-     * @param imageResId - drawable resource ID (R.drawable.ID)
+     * @param context     - to get access to Resources
+     * @param imageResId  - drawable resource ID (R.drawable.ID)
      * @param jpegQuality - target JPEG quality
      * @return
      */
@@ -2936,7 +2902,7 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given drawable resource
      *
-     * @param imageResId - drawable resource ID (R.drawable.ID)
+     * @param imageResId  - drawable resource ID (R.drawable.ID)
      * @param maxSideSize - limit of bigger image side size
      * @param jpegQuality - target JPEG quality
      * @return
@@ -2948,8 +2914,8 @@ public class ImageUtils {
     /**
      * Returns byte array of JPEG compressed image from given drawable resource
      *
-     * @param context - to get access to Resources
-     * @param imageResId - drawable resource ID (R.drawable.ID)
+     * @param context     - to get access to Resources
+     * @param imageResId  - drawable resource ID (R.drawable.ID)
      * @param maxSideSize - limit of bigger image side size
      * @param jpegQuality - target JPEG quality
      * @return
@@ -2999,7 +2965,7 @@ public class ImageUtils {
     /**
      * Returns byte array of PNG compressed image
      *
-     * @param imageFile - image File path
+     * @param imageFile   - image File path
      * @param maxSideSize - limit of bigger image side size
      * @return
      */
@@ -3010,7 +2976,7 @@ public class ImageUtils {
     /**
      * Returns byte array of PNG compressed image
      *
-     * @param image - image File
+     * @param image       - image File
      * @param maxSideSize - limit of bigger image side size
      * @return
      */
@@ -3024,7 +2990,7 @@ public class ImageUtils {
     /**
      * Returns byte array of PNG compressed image
      *
-     * @param context - to get access to Resources
+     * @param context    - to get access to Resources
      * @param imageResId - drawable resource ID (R.drawable.ID)
      * @return
      */
@@ -3038,8 +3004,8 @@ public class ImageUtils {
     /**
      * Returns byte array of PNG compressed image
      *
-     * @param context - to get access to Resources
-     * @param imageResId - drawable resource ID (R.drawable.ID)
+     * @param context     - to get access to Resources
+     * @param imageResId  - drawable resource ID (R.drawable.ID)
      * @param maxSideSize - limit of bigger image side size
      * @return
      */

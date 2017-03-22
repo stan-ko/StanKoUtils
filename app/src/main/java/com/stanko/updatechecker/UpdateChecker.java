@@ -92,12 +92,12 @@ public class UpdateChecker implements Runnable {
      * @param context context
      */
     public UpdateChecker(final Context context) {
-        this(context.getApplicationContext(), DAY);
+        this(context, DAY);
     }
 
 
     public UpdateChecker(final Context context, final Object eventToPost) {
-        this(context.getApplicationContext(), DAY, eventToPost);
+        this(context, DAY, eventToPost);
     }
 
 //    /**
@@ -220,7 +220,7 @@ public class UpdateChecker implements Runnable {
     }
 
     /**
-     * Builds and shows the Dialog in case it is not updated
+     * Builds and shows the Dialog in case if app is outdated
      */
     public static AlertDialog.Builder showUpdateAvailableDialog(final Activity activity) {
         return showUpdateAvailableDialog(activity,
@@ -231,7 +231,7 @@ public class UpdateChecker implements Runnable {
     }
 
     /**
-     * Builds and shows the Dialog in case it is not updated
+     * Builds and shows the Dialog in case if app is outdated
      */
     public static AlertDialog.Builder showUpdateAvailableDialog(final Activity activity,
                                                                 int titleResId,
@@ -247,7 +247,7 @@ public class UpdateChecker implements Runnable {
     }
 
     /**
-     * Builds and shows the Dialog in case it is not updated
+     * Builds and shows the Dialog in case if app is outdated
      */
     public static AlertDialog.Builder showUpdateAvailableDialog(final Activity activity,
                                                                 final String title,

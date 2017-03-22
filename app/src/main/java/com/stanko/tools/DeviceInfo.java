@@ -38,7 +38,7 @@ public class DeviceInfo {
     private static Context sAppContext;
 
     // display section
-    private static DisplayMetrics sDisplayMetrics;
+    private static DisplayMetrics sDisplayMetrics = new DisplayMetrics();
     private static int sDisplayDensity;
     private static int sDisplayHeight;
     private static int sDisplayWidth;
@@ -217,18 +217,21 @@ public class DeviceInfo {
         if (sIsInitialized && context != null)
             return true;
 
-        sAppContext = context.getApplicationContext(); // to be sure its sAppContext
-        sDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
-        sDisplayDensity = sDisplayMetrics.densityDpi;
-        sDisplayHeight = sDisplayMetrics.heightPixels;
-        sDisplayWidth = sDisplayMetrics.widthPixels;
-        sDisplayPortraitHeight = getBiggestScreenSideSize();
-        sDisplayPortraitWidth = getSmallestScreenSideSize();
-
+        sAppContext = context.getApplicationContext(); // to be sure it is an Application Context
         final Resources resources = sAppContext.getResources();
-
         final Display display = ((WindowManager) sAppContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-        int realDisplayHeight = sDisplayHeight, realDisplayWidth = sDisplayWidth;
+//        sDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
+        if (sAPILevel<17){
+            display.getMetrics(sDisplayMetrics);
+        } else /*if (hasAPI(17))*/{
+            display.getRealMetrics(sDisplayMetrics);
+        }
+        sDisplayDensity = sDisplayMetrics.densityDpi;
+
+        // initial values
+        final int metricsDisplayHeight = sDisplayMetrics.heightPixels;
+        final int metricsDisplayWidth = sDisplayMetrics.widthPixels;
+        int realDisplayHeight = metricsDisplayHeight, realDisplayWidth = metricsDisplayWidth;
         if (sAPILevel < 14) {
             realDisplayHeight = sDisplayMetrics.heightPixels;
             realDisplayWidth = sDisplayMetrics.widthPixels;
@@ -240,17 +243,25 @@ public class DeviceInfo {
             } catch (Exception ignored) {
             }
         } else /*if (hasAPILevel >= 17)*/ {
-            // includes window decorations (statusbar bar/menu bar)
-            try {
-                final Point realSize = new Point();
-                Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
-                realDisplayWidth = realSize.x;
-                realDisplayHeight = realSize.y;
-            } catch (Exception ignored) {
-            }
+            final Point realSize = new Point();
+            display.getRealSize(realSize);
+            realDisplayWidth = realSize.x;
+            realDisplayHeight = realSize.y;
+//            // includes window decorations (statusbar bar/menu bar)
+//            try {
+//                Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
+//                realDisplayWidth = realSize.x;
+//                realDisplayHeight = realSize.y;
+//            } catch (Exception ignored) {
+//            }
         }
 
-        sHasPermanentMenuKeys = sDisplayHeight == realDisplayHeight;
+        sHasPermanentMenuKeys = metricsDisplayHeight == realDisplayHeight;
+
+        sDisplayHeight = realDisplayHeight;
+        sDisplayWidth = realDisplayWidth;
+        sDisplayPortraitHeight = getBiggestScreenSideSize();
+        sDisplayPortraitWidth = getSmallestScreenSideSize();
 
         // http://stackoverflow.com/a/28983720/1811719
         try {
