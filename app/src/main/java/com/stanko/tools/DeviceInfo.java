@@ -220,44 +220,54 @@ public class DeviceInfo {
         sAppContext = context.getApplicationContext(); // to be sure it is an Application Context
         final Resources resources = sAppContext.getResources();
         final Display display = ((WindowManager) sAppContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
-//        sDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
-        if (sAPILevel<17){
+        if (sAPILevel < 17) {
             display.getMetrics(sDisplayMetrics);
-        } else /*if (hasAPI(17))*/{
+        } else /*if (hasAPI(17))*/ {
             display.getRealMetrics(sDisplayMetrics);
         }
-        sDisplayDensity = sDisplayMetrics.densityDpi;
 
-        // initial values
-        final int metricsDisplayHeight = sDisplayMetrics.heightPixels;
-        final int metricsDisplayWidth = sDisplayMetrics.widthPixels;
+        // initial display size values
+        DisplayMetrics resourceDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
+        final int metricsDisplayHeight = resourceDisplayMetrics.heightPixels;
+        final int metricsDisplayWidth = resourceDisplayMetrics.widthPixels;
         int realDisplayHeight = metricsDisplayHeight, realDisplayWidth = metricsDisplayWidth;
-        if (sAPILevel < 14) {
-            realDisplayHeight = sDisplayMetrics.heightPixels;
-            realDisplayWidth = sDisplayMetrics.widthPixels;
-        } else if (sAPILevel > 13 && sAPILevel < 17) {
-            // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
+        final Point sizePoint = new Point(0, 0);
+        if (sAPILevel > 16) {
+            boolean tryToUseReflection = false;
             try {
-                realDisplayWidth = (int) Display.class.getMethod("getRawWidth").invoke(display);
-                realDisplayHeight = (int) Display.class.getMethod("getRawHeight").invoke(display);
+                display.getRealSize(sizePoint);
             } catch (Exception ignored) {
+                tryToUseReflection = true;
             }
-        } else /*if (hasAPILevel >= 17)*/ {
-            final Point realSize = new Point();
-            display.getRealSize(realSize);
-            realDisplayWidth = realSize.x;
-            realDisplayHeight = realSize.y;
-//            // includes window decorations (statusbar bar/menu bar)
-//            try {
-//                Display.class.getMethod("getRealSize", Point.class).invoke(display, realSize);
-//                realDisplayWidth = realSize.x;
-//                realDisplayHeight = realSize.y;
-//            } catch (Exception ignored) {
-//            }
+            if (tryToUseReflection) {
+                // includes window decorations (statusbar bar/menu bar)
+                try {
+                    Display.class.getMethod("getRealSize", Point.class).invoke(display, sizePoint);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        // also for API lower than 17
+        if (sizePoint.x == 0 || sizePoint.y == 0) {
+            if (sAPILevel < 14) {
+                sizePoint.set(sDisplayMetrics.widthPixels, sDisplayMetrics.heightPixels);
+            } else /*if (sAPILevel > 13 && sAPILevel < 17)*/ {
+                // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
+                // or if API 17 does not have getRealSize() method for some reason (impossible?)
+                try {
+                    sizePoint.set((int) Display.class.getMethod("getRawWidth").invoke(display),
+                            (int) Display.class.getMethod("getRawHeight").invoke(display));
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (sizePoint.x > 0 && sizePoint.y > 0) {
+            realDisplayWidth = sizePoint.x;
+            realDisplayHeight = sizePoint.y;
         }
 
         sHasPermanentMenuKeys = metricsDisplayHeight == realDisplayHeight;
-
+        sDisplayDensity = resourceDisplayMetrics.densityDpi;
         sDisplayHeight = realDisplayHeight;
         sDisplayWidth = realDisplayWidth;
         sDisplayPortraitHeight = getBiggestScreenSideSize();
@@ -919,42 +929,43 @@ public class DeviceInfo {
     }
 
     /**
-     SDK VERSION
-
-     int	BASE	October 2008: The original, first, version of Android.
-     int	BASE_1_1	February 2009: First Android update, officially called 1.1.
-     int	CUPCAKE	May 2009: Android 1.5.
-     int	CUR_DEVELOPMENT	Magic version number for a current development build, which has not yet turned into an official release.
-     int	DONUT	September 2009: Android 1.6.
-     int	ECLAIR	November 2009: Android 2.0
-
-     Applications targeting this or a later release will get these new changes in behavior:
-     The Service.onStartCommand function will return the new START_STICKY behavior instead of the old compatibility START_STICKY_COMPATIBILITY.
-     int	ECLAIR_0_1	December 2009: Android 2.0.1
-     int	ECLAIR_MR1	January 2010: Android 2.1
-     int	FROYO	June 2010: Android 2.2
-     int	GINGERBREAD	November 2010: Android 2.3
-
-     Applications targeting this or a later release will get these new changes in behavior:
-     The application's notification icons will be shown on the new dark status bar background, so must be visible in this situation.
-     int	GINGERBREAD_MR1	February 2011: Android 2.3.3.
-     int	HONEYCOMB	February 2011: Android 3.0.
-     int	HONEYCOMB_MR1	May 2011: Android 3.1.
-     int	HONEYCOMB_MR2	June 2011: Android 3.2.
-     int	ICE_CREAM_SANDWICH	October 2011: Android 4.0.
-     int	ICE_CREAM_SANDWICH_MR1	December 2011: Android 4.0.3.
-     int	JELLY_BEAN	June 2012: Android 4.1.
-     int	JELLY_BEAN_MR1	Android 4.2: Moar jelly beans!
-
-     Applications targeting this or a later release will get these new changes in behavior:
-     Content Providers: The default value of android:exported is now false.
-     int	JELLY_BEAN_MR2	Android 4.3: Jelly Bean MR2, the revenge of the beans.
-     <p/>
-     Its a general method which detects if device supports exactly given API level
-     Actually its equality comparison like Build.VERSION.SDK_INT == apiLevel
-     @param apiLevel, integer, the API level to check
-     @return
-    */
+     * SDK VERSION
+     * <p>
+     * int	BASE	October 2008: The original, first, version of Android.
+     * int	BASE_1_1	February 2009: First Android update, officially called 1.1.
+     * int	CUPCAKE	May 2009: Android 1.5.
+     * int	CUR_DEVELOPMENT	Magic version number for a current development build, which has not yet turned into an official release.
+     * int	DONUT	September 2009: Android 1.6.
+     * int	ECLAIR	November 2009: Android 2.0
+     * <p>
+     * Applications targeting this or a later release will get these new changes in behavior:
+     * The Service.onStartCommand function will return the new START_STICKY behavior instead of the old compatibility START_STICKY_COMPATIBILITY.
+     * int	ECLAIR_0_1	December 2009: Android 2.0.1
+     * int	ECLAIR_MR1	January 2010: Android 2.1
+     * int	FROYO	June 2010: Android 2.2
+     * int	GINGERBREAD	November 2010: Android 2.3
+     * <p>
+     * Applications targeting this or a later release will get these new changes in behavior:
+     * The application's notification icons will be shown on the new dark status bar background, so must be visible in this situation.
+     * int	GINGERBREAD_MR1	February 2011: Android 2.3.3.
+     * int	HONEYCOMB	February 2011: Android 3.0.
+     * int	HONEYCOMB_MR1	May 2011: Android 3.1.
+     * int	HONEYCOMB_MR2	June 2011: Android 3.2.
+     * int	ICE_CREAM_SANDWICH	October 2011: Android 4.0.
+     * int	ICE_CREAM_SANDWICH_MR1	December 2011: Android 4.0.3.
+     * int	JELLY_BEAN	June 2012: Android 4.1.
+     * int	JELLY_BEAN_MR1	Android 4.2: Moar jelly beans!
+     * <p>
+     * Applications targeting this or a later release will get these new changes in behavior:
+     * Content Providers: The default value of android:exported is now false.
+     * int	JELLY_BEAN_MR2	Android 4.3: Jelly Bean MR2, the revenge of the beans.
+     * <p/>
+     * Its a general method which detects if device supports exactly given API level
+     * Actually its equality comparison like Build.VERSION.SDK_INT == apiLevel
+     *
+     * @param apiLevel, integer, the API level to check
+     * @return
+     */
     public static boolean isAPI(final int apiLevel) {
         return sAPILevel == apiLevel;
     }
