@@ -732,7 +732,7 @@ public class SharedPrefsHelper {
         }
         //restorePreferences
         if (!prefs.contains(theKey))
-            return null;
+            return defaultValue;
 
         Object objectToReturn = defaultValue;
         final String objectInString = getString(prefs, theKey, null);
