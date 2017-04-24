@@ -378,6 +378,7 @@ public class DeviceInfo {
 
     @SuppressLint("NewApi")
     public static Point getDisplaySize() {
+        initOnDemand();
         final Resources resources = sAppContext.getResources();
         final Display display = ((WindowManager) sAppContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
         if (sAPILevel < 17) {
