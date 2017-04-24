@@ -430,11 +430,11 @@ public class DeviceInfo {
     }
 
     public static int getCurrentOrientationDisplayHeight(){
-        return getDisplaySize().x;
+        return getDisplaySize().y;
     }
 
     public static int getCurrentOrientationDisplayWidth(){
-        return getDisplaySize().y;
+        return getDisplaySize().x;
     }
 
     public static boolean isTablet() {

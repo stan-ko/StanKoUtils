@@ -122,11 +122,11 @@ public class OrientationUtils {
     }
 
     public static int getCurrentOrientationScreenHeight() {
-        return DeviceInfo.getDisplaySize().x;
+        return DeviceInfo.getDisplaySize().y;
     }
 
     public static int getCurrentOrientationScreenWidth() {
-        return DeviceInfo.getDisplaySize().y;
+        return DeviceInfo.getDisplaySize().x;
     }
 
 }
