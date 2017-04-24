@@ -231,36 +231,7 @@ public class DeviceInfo {
         final int metricsDisplayHeight = resourceDisplayMetrics.heightPixels;
         final int metricsDisplayWidth = resourceDisplayMetrics.widthPixels;
         int realDisplayHeight = metricsDisplayHeight, realDisplayWidth = metricsDisplayWidth;
-        final Point sizePoint = new Point(0, 0);
-        if (sAPILevel > 16) {
-            boolean tryToUseReflection = false;
-            try {
-                display.getRealSize(sizePoint);
-            } catch (Exception ignored) {
-                tryToUseReflection = true;
-            }
-            if (tryToUseReflection) {
-                // includes window decorations (statusbar bar/menu bar)
-                try {
-                    Display.class.getMethod("getRealSize", Point.class).invoke(display, sizePoint);
-                } catch (Exception ignored) {
-                }
-            }
-        }
-        // also for API lower than 17
-        if (sizePoint.x == 0 || sizePoint.y == 0) {
-            if (sAPILevel < 14) {
-                sizePoint.set(sDisplayMetrics.widthPixels, sDisplayMetrics.heightPixels);
-            } else /*if (sAPILevel > 13 && sAPILevel < 17)*/ {
-                // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
-                // or if API 17 does not have getRealSize() method for some reason (impossible?)
-                try {
-                    sizePoint.set((int) Display.class.getMethod("getRawWidth").invoke(display),
-                            (int) Display.class.getMethod("getRawHeight").invoke(display));
-                } catch (Exception ignored) {
-                }
-            }
-        }
+        final Point sizePoint = getDisplaySize();
         if (sizePoint.x > 0 && sizePoint.y > 0) {
             realDisplayWidth = sizePoint.x;
             realDisplayHeight = sizePoint.y;
@@ -403,6 +374,66 @@ public class DeviceInfo {
         if (!sIsInitialized)
             init(context);
         return sNavigationBarHeight;
+    }
+
+    @SuppressLint("NewApi")
+    public static Point getDisplaySize() {
+        final Resources resources = sAppContext.getResources();
+        final Display display = ((WindowManager) sAppContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+        if (sAPILevel < 17) {
+            display.getMetrics(sDisplayMetrics);
+        } else /*if (hasAPI(17))*/ {
+            display.getRealMetrics(sDisplayMetrics);
+        }
+
+        // initial display size values
+        DisplayMetrics resourceDisplayMetrics = sAppContext.getResources().getDisplayMetrics();
+        final int metricsDisplayHeight = resourceDisplayMetrics.heightPixels;
+        final int metricsDisplayWidth = resourceDisplayMetrics.widthPixels;
+        int realDisplayHeight = metricsDisplayHeight, realDisplayWidth = metricsDisplayWidth;
+        final Point sizePoint = new Point(0, 0);
+        if (sAPILevel > 16) {
+            boolean tryToUseReflection = false;
+            try {
+                display.getRealSize(sizePoint);
+            } catch (Exception ignored) {
+                tryToUseReflection = true;
+            }
+            if (tryToUseReflection) {
+                // includes window decorations (statusbar bar/menu bar)
+                try {
+                    Display.class.getMethod("getRealSize", Point.class).invoke(display, sizePoint);
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        // also for API lower than 17
+        if (sizePoint.x == 0 || sizePoint.y == 0) {
+            if (sAPILevel < 14) {
+                sizePoint.set(sDisplayMetrics.widthPixels, sDisplayMetrics.heightPixels);
+            } else /*if (sAPILevel > 13 && sAPILevel < 17)*/ {
+                // includes window decorations (statusbar bar/menu bar) 14,15,16 api levels
+                // or if API 17 does not have getRealSize() method for some reason (impossible?)
+                try {
+                    sizePoint.set((int) Display.class.getMethod("getRawWidth").invoke(display),
+                            (int) Display.class.getMethod("getRawHeight").invoke(display));
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        if (sizePoint.x > 0 && sizePoint.y > 0) {
+            realDisplayWidth = sizePoint.x;
+            realDisplayHeight = sizePoint.y;
+        }
+        return sizePoint;
+    }
+
+    public static int getCurrentOrientationDisplayHeight(){
+        return getDisplaySize().x;
+    }
+
+    public static int getCurrentOrientationDisplayWidth(){
+        return getDisplaySize().y;
     }
 
     public static boolean isTablet() {

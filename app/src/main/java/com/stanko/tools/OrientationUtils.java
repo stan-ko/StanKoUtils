@@ -21,7 +21,6 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.os.Build;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -54,16 +53,6 @@ public class OrientationUtils {
 	public static void lockOrientation(final Activity activity) {
 		final int orientation = activity.getResources().getConfiguration().orientation;
 	    final int rotation = ((WindowManager) activity.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
-
-		// Copied from Android docs, since we don't have these values in Froyo 2.2
-		int SCREEN_ORIENTATION_REVERSE_LANDSCAPE = 8;
-		int SCREEN_ORIENTATION_REVERSE_PORTRAIT = 9;
-
-		// Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO
-		if (!(Build.VERSION.SDK_INT >= Build.VERSION_CODES.GINGERBREAD)) {
-			SCREEN_ORIENTATION_REVERSE_LANDSCAPE = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-			SCREEN_ORIENTATION_REVERSE_PORTRAIT = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-		}
 
 		if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90){
 			if (orientation == Configuration.ORIENTATION_PORTRAIT){
@@ -108,6 +97,33 @@ public class OrientationUtils {
         } catch (PackageManager.NameNotFoundException e) {
         }
 		return ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+    }
+
+    public static boolean isCurrentOrientationPortrait(final Context activityContext){
+        final int orientation = activityContext.getResources().getConfiguration().orientation;
+        final int rotation = ((WindowManager) activityContext.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+
+        if (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_90){
+            if (orientation == Configuration.ORIENTATION_PORTRAIT){
+                return true;
+            }
+            else if (orientation == Configuration.ORIENTATION_LANDSCAPE){
+                return false;
+            }
+        }
+        else if (rotation == Surface.ROTATION_180 || rotation == Surface.ROTATION_270) {
+            if (orientation == Configuration.ORIENTATION_PORTRAIT){
+                return true;
+            }
+            else if (orientation == Configuration.ORIENTATION_LANDSCAPE){
+                return false;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isCurrentOrientationLandscape(final Context activityContext){
+        return !isCurrentOrientationPortrait(activityContext);
     }
 
 }
