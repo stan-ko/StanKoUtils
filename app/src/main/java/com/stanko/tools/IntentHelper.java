@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.net.Uri;
+import android.telephony.PhoneNumberUtils;
 import android.text.TextUtils;
 
 import java.io.File;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * by Devlight
@@ -298,17 +300,21 @@ public class IntentHelper {
      * @param phoneNumber - string with phone number
      * @return true is Intent starts without any Exception, false otherwise
      */
-    public static boolean dialPhoneNumber(final Context context, final String phoneNumber) {
+    public static boolean dialPhoneNumber(final Context context, String phoneNumber) {
+        Initializer.init(context);
         boolean isStarted = true;
         Intent intent = new Intent(Intent.ACTION_DIAL);
+        try {
+            phoneNumber = PhoneNumberUtils.stripSeparators(phoneNumber);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         intent.setData(Uri.parse("tel:" + phoneNumber));
         // could be device with no browser installed OR SecurityException
         try {
             if (intent.resolveActivity(context.getPackageManager()) != null)
                 context.startActivity(intent);
-//        } catch (SecurityException e) {
-//            e.printStackTrace();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             isStarted = false;
             e.printStackTrace();
         }
@@ -337,6 +343,47 @@ public class IntentHelper {
             e.printStackTrace();
         }
         return isStarted;
+    }
+
+    /**
+     * This method checks if app of given package is installed and if it is so returns an empty
+     * Intent targeting this package. You need to add category, action and any other extra data
+     * this Intent needs yourself.
+     * Note: This method uses Initializer context
+     *
+     * @return Intent if given package was found and applied or null otherwise
+     */
+    public static Intent getIntentForPackage(final String targetPackage) {
+        return getIntentForPackage(Initializer.getsAppContext(),targetPackage);
+    }
+
+    /**
+     * This method checks if app of given package is installed and if it is so returns an empty
+     * Intent targeting this package. You need to add category, action and any other extra data
+     * this Intent needs yourself.
+     *
+     * @return Intent if given package was found and applied or null otherwise
+     */
+    public static Intent getIntentForPackage(final Context appContext, final String targetPackage) {
+        final Context context = Initializer.getsAppContext();
+        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        final List<ResolveInfo> pkgAppsList = context.getPackageManager().queryIntentActivities(mainIntent, 0);
+        int count = 0;
+        String intentPackage = null;
+        for (ResolveInfo info : pkgAppsList) {
+            if (info.activityInfo.packageName.toLowerCase(Locale.US).contains(targetPackage)
+                    || info.activityInfo.name.toLowerCase(Locale.US).contains(targetPackage)) {
+                intentPackage = info.activityInfo.packageName;
+                count++;
+            }
+        }
+        if (count == 1) {
+            final Intent intent = new Intent();
+            intent.setPackage(intentPackage);
+            return intent;
+        }
+        return null;
     }
 
 }
