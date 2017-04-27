@@ -177,7 +177,7 @@ public class DeviceInfo {
         return sDeviceARMs;
     }
 
-    public static boolean isHasTelephony() {
+    public static boolean hasTelephony() {
         initOnDemand();
         return sHasTelephony;
     }
@@ -539,10 +539,6 @@ public class DeviceInfo {
 
     public static float getConfigurationRatio() {
         return sConfigurationRatio;
-    }
-
-    public static boolean hasTelephony() {
-        return sHasTelephony;
     }
 
     public static void checkHasTelephony(Context context) {
