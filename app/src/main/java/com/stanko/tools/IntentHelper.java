@@ -367,10 +367,10 @@ public class IntentHelper {
      * @return Intent if given package was found and applied or null otherwise
      */
     public static Intent getIntentForPackage(final Context appContext, final String targetPackage) {
-        final Context context = Initializer.getsAppContext();
         final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        final List<ResolveInfo> pkgAppsList = context.getPackageManager().queryIntentActivities(mainIntent, 0);
+        final List<ResolveInfo> pkgAppsList = appContext.getPackageManager().queryIntentActivities(mainIntent, 0);
+//        final List<ResolveInfo> pkgAppsList = appContext.getPackageManager().getInstalledPackages(0);
         int count = 0;
         String intentPackage = null;
         for (ResolveInfo info : pkgAppsList) {
