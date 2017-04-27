@@ -349,6 +349,7 @@ public class IntentHelper {
      * This method checks if app of given package is installed and if it is so returns an empty
      * Intent targeting this package. You need to add category, action and any other extra data
      * this Intent needs yourself.
+     * This method is useful to check if application (package) is installed on device.
      * Note: This method uses Initializer context
      *
      * @return Intent if given package was found and applied or null otherwise
@@ -361,6 +362,7 @@ public class IntentHelper {
      * This method checks if app of given package is installed and if it is so returns an empty
      * Intent targeting this package. You need to add category, action and any other extra data
      * this Intent needs yourself.
+     * This method is useful to check if application (package) is installed on device.
      *
      * @return Intent if given package was found and applied or null otherwise
      */
