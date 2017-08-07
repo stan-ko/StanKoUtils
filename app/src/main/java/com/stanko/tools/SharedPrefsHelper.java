@@ -7,9 +7,6 @@ import android.graphics.BitmapFactory;
 import android.text.TextUtils;
 import android.util.Base64;
 
-import com.securepreferences.SecurePreferences;
-import com.tozny.crypto.android.AesCbcWithIntegrity;
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -40,7 +37,7 @@ public class SharedPrefsHelper {
 
     private static Context sAppContext; // Application context is singleton and could be kept static
 
-    private static boolean sIsSecuredMode;
+//    private static boolean sIsSecuredMode;
 
     private final static HashMap<String, SharedPreferences> sSharedPreferencesInstances = new HashMap<String, SharedPreferences>();
 
@@ -55,55 +52,55 @@ public class SharedPrefsHelper {
 //            // switching from secured to nonsecured
 //            sSharedPreferencesInstances.remove(sharedPrefsName);
 //        }
-        sIsSecuredMode = false;
+//        sIsSecuredMode = false;
         SharedPrefsHelper.sAppContext = context.getApplicationContext();
         sSharedPreferencesInstances.clear();
         getSharedPreferences(sAppContext, sharedPrefsName);
     }
 
-    // context NPE not safe
-    public static boolean initSecured(final Context context) {
-        Exception caughtException = null;
-        final Context appContext = context.getApplicationContext();
-        final String packageName = appContext.getPackageName();
-
-        // attempt #1
-        try {
-            initSecured(appContext, packageName);
-        } catch (Exception e) {
-            caughtException = e;
-            // most probably NoSuchAlgorithmException
-        }
-
-        // attempt #2
-        if (caughtException != null) {
-            AesCbcWithIntegrity.PrngFixes.apply();
-            try {
-                initSecured(appContext, packageName);
-            } catch (Exception e) {
-                // most probably NoSuchAlgorithmException
-                caughtException = e;
-            }
-        }
-
-        // attempt #3
-        if (caughtException != null) {
-            Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
-            try {
-                initSecured(appContext, packageName);
-            } catch (Exception e) {
-                // most probably NoSuchAlgorithmException
-                caughtException = e;
-            }
-        }
-
-        if (caughtException != null) {
-            Log.e(caughtException);
-            Log.e("Initializing regular (not secured) version");
-            init(context);
-        }
-        return sIsSecuredMode;
-    }
+//    // context NPE not safe
+//    public static boolean initSecured(final Context context) {
+//        Exception caughtException = null;
+//        final Context appContext = context.getApplicationContext();
+//        final String packageName = appContext.getPackageName();
+//
+//        // attempt #1
+//        try {
+//            initSecured(appContext, packageName);
+//        } catch (Exception e) {
+//            caughtException = e;
+//            // most probably NoSuchAlgorithmException
+//        }
+//
+//        // attempt #2
+//        if (caughtException != null) {
+//            AesCbcWithIntegrity.PrngFixes.apply();
+//            try {
+//                initSecured(appContext, packageName);
+//            } catch (Exception e) {
+//                // most probably NoSuchAlgorithmException
+//                caughtException = e;
+//            }
+//        }
+//
+//        // attempt #3
+//        if (caughtException != null) {
+//            Security.insertProviderAt(new org.spongycastle.jce.provider.BouncyCastleProvider(), 1);
+//            try {
+//                initSecured(appContext, packageName);
+//            } catch (Exception e) {
+//                // most probably NoSuchAlgorithmException
+//                caughtException = e;
+//            }
+//        }
+//
+//        if (caughtException != null) {
+//            Log.e(caughtException);
+//            Log.e("Initializing regular (not secured) version");
+//            init(context);
+//        }
+//        return sIsSecuredMode;
+//    }
 
     // context NPE not safe
     public static void initSecured(final Context context, final String sharedPrefsName) {
@@ -111,7 +108,7 @@ public class SharedPrefsHelper {
 //            // switching from nonsecured to secured
 //            sSharedPreferencesInstances.remove(sharedPrefsName);
 //        }
-        sIsSecuredMode = true;
+//        sIsSecuredMode = true;
         SharedPrefsHelper.sAppContext = context.getApplicationContext();
         sSharedPreferencesInstances.clear();
         getSharedPreferences(sAppContext, sharedPrefsName);
@@ -146,12 +143,12 @@ public class SharedPrefsHelper {
                 sAppContext = context.getApplicationContext();
             if (sAppContext != null) {
                 sLastUsedSharedPrefsName = sharedPrefsName;
-                if (sIsSecuredMode)
-                    sSharedPreferencesInstances.put(sLastUsedSharedPrefsName, new SecurePreferences(
-                            sAppContext,
-                            Hash.getMD5(sharedPrefsName),
-                            sharedPrefsName));
-                else
+//                if (sIsSecuredMode)
+//                    sSharedPreferencesInstances.put(sLastUsedSharedPrefsName, new SecurePreferences(
+//                            sAppContext,
+//                            Hash.getMD5(sharedPrefsName),
+//                            sharedPrefsName));
+//                else
                     sSharedPreferencesInstances.put(sLastUsedSharedPrefsName,
                             sAppContext.getSharedPreferences(sharedPrefsName, Context.MODE_PRIVATE));
             }

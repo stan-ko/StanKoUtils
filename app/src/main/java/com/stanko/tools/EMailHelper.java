@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import java.io.File;
+import java.net.IDN;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -26,27 +27,38 @@ public class EMailHelper {
     public static boolean isValidEmail(final String email) {
         if (TextUtils.isEmpty(email))
             return false;
-        // https://en.wikipedia.org/wiki/Domain_Name_System
-        // a label may contain zero to 63 characters
-        // subdivisions may have up to 127 levels
-        // but total domain name 253 chars max
-        final String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,63}";
-        final Pattern p = Pattern.compile(expression);
-        final Matcher m = p.matcher(email);
-        if (m.matches()) {
-            final String domainPart = expression.substring(expression.indexOf("@") + 1);
-            final String[] domainParts = domainPart.split(".");
-            if (domainParts.length < 127) {
-                // check labels
-                for (String domainLabel : domainParts) {
-                    if (domainLabel.length() < 1 || domainLabel.length() > 63)
-                        return false;
-                }
-                return domainPart.length() < 254;
-            } else
-                return false;
-        } else
-            return false;
+        final String punyEncodedEmail = IDN.toASCII(email);
+        if (TextUtils.equals(email, punyEncodedEmail)) { // usual email address
+            // https://en.wikipedia.org/wiki/Domain_Name_System
+            // a label may contain zero to 63 characters
+            // subdivisions may have up to 127 levels
+            // but total domain name 253 chars max
+            final String expression = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,63}";
+            final Pattern p = Pattern.compile(expression);
+            final Matcher m = p.matcher(email);
+            if (m.matches()) {
+                final String domainPart = expression.substring(expression.indexOf("@") + 1);
+                final String[] domainParts = domainPart.split(".");
+                if (domainParts.length < 127) {
+                    // check labels
+                    for (String domainLabel : domainParts) {
+                        if (domainLabel.length() < 1 || domainLabel.length() > 63)
+                            return false;
+                    }
+                    return domainPart.length() < 254;
+                } else
+                    return false;
+            }
+        } else {
+            // cyrillic domain or umlaut or any other specific chars but probably valid mail
+            //General Email Regex (RFC 5322 Official Standard)
+            // "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"
+            //final String expression = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])";
+            final String expression = "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z0-9-]{2,64}";
+            //Log.w("punyEncodedEmail: " + punyEncodedEmail + " isValid: " + punyEncodedEmail.matches(expression));
+            return punyEncodedEmail.matches(expression);
+        }
+        return false;
     }
 
     /**

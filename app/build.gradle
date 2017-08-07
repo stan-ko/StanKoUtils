@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         versionCode 25
-        versionName "1.63"
+        versionName "1.64"
         minSdkVersion 10
         targetSdkVersion 24
     }
@@ -24,10 +24,10 @@ dependencies {
     compile 'org.jsoup:jsoup:1.8.1'
     // EventBus
     compile 'org.greenrobot:eventbus:3.0.0'
-    compile 'com.scottyab:secure-preferences-lib:0.1.4'
+    //compile 'com.scottyab:secure-preferences-lib:0.1.4'
     //SpongeCastle (adds Security algorithms)
-    compile('com.madgag.spongycastle:core:1.54.0.0')
-    compile('com.madgag.spongycastle:prov:1.54.0.0')
+    //compile('com.madgag.spongycastle:core:1.54.0.0')
+    //compile('com.madgag.spongycastle:prov:1.54.0.0')
     // support for v4.Fragments
     //compile 'com.android.support:appcompat-v7:23.1.1'
     //compile 'com.android.support:support-v4:23.1.1'
