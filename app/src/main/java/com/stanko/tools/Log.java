@@ -1,7 +1,9 @@
 package com.stanko.tools;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.os.Bundle;
 import android.text.TextUtils;
 
 import java.util.Locale;
@@ -66,37 +68,37 @@ public class Log {
 
     // Method as logTag
     public static void v() {
-        if (isDebuggable){
-            final String [] classDotMethod = getClassDotMethod();
-            android.util.Log.v(classDotMethod[0],classDotMethod[1]);
+        if (isDebuggable) {
+            final String[] classDotMethod = getClassDotMethod();
+            android.util.Log.v(classDotMethod[0], classDotMethod[1]);
         }
     }
 
     public static void d() {
-        if (isDebuggable){
-            final String [] classDotMethod = getClassDotMethod();
-            android.util.Log.d(classDotMethod[0],classDotMethod[1]);
+        if (isDebuggable) {
+            final String[] classDotMethod = getClassDotMethod();
+            android.util.Log.d(classDotMethod[0], classDotMethod[1]);
         }
     }
 
     public static void i() {
-        if (isDebuggable){
-            final String [] classDotMethod = getClassDotMethod();
-            android.util.Log.i(classDotMethod[0],classDotMethod[1]);
+        if (isDebuggable) {
+            final String[] classDotMethod = getClassDotMethod();
+            android.util.Log.i(classDotMethod[0], classDotMethod[1]);
         }
     }
 
     public static void w() {
 //        if (isDebuggable){
-            final String [] classDotMethod = getClassDotMethod();
-            android.util.Log.w(classDotMethod[0],classDotMethod[1]);
+        final String[] classDotMethod = getClassDotMethod();
+        android.util.Log.w(classDotMethod[0], classDotMethod[1]);
 //        }
     }
 
     public static void e() {
 //        if (isDebuggable){
-            final String [] classDotMethod = getClassDotMethod();
-            android.util.Log.e(classDotMethod[0],classDotMethod[1]);
+        final String[] classDotMethod = getClassDotMethod();
+        android.util.Log.e(classDotMethod[0], classDotMethod[1]);
 //        }
     }
 
@@ -288,7 +290,7 @@ public class Log {
      * @return
      */
     public static String[] getClassDotMethod() {
-        final String[] classMethod = new String[]{"U/D","U/D"};
+        final String[] classMethod = new String[]{"U/D", "U/D"};
         //String methodName = "U/D";
         StackTraceElement[] stackTraceElements;
         StackTraceElement stackTraceElement;
@@ -308,6 +310,85 @@ public class Log {
             classMethod[1] = String.format(Locale.US, "%s():%d", stackTraceElement.getMethodName(), stackTraceElement.getLineNumber());
         }
         return classMethod;
+    }
+
+    private final static int DIVIDER_LENGTH = 120;
+
+    public static void logIntent(final Intent intent, String title) {
+        if (!isDebuggable)
+            return;
+
+        final StringBuilder divider = new StringBuilder();
+
+        final int titleLength;
+        if (title == null) {
+            title = "";
+            titleLength = 0;
+        } else {
+            title = String.format(" %s ", title);
+            titleLength = title.length();
+        }
+        for (int i = 0; i < DIVIDER_LENGTH - 15 - titleLength; i++) divider.append("─");
+
+        d("┌───────────────" + title + divider.toString());
+        if (intent != null && intent.getExtras() != null) {
+            final Bundle bundle = intent.getExtras();
+            logBundle(null, bundle);
+        } else {
+            d("├ NO EXTRAS");
+        }
+        divider.insert(0, "└───────────────");
+        for (int i = 0; i < titleLength; i++) divider.append("─");
+        Log.d(divider.toString());
+    }
+
+    public static void logBundle(final Bundle bundle, String title) {
+        if (!isDebuggable)
+            return;
+
+        final StringBuilder divider = new StringBuilder();
+
+        final int titleLength;
+        if (title == null) {
+            title = "";
+            titleLength = 0;
+        } else {
+            title = String.format(" %s ", title);
+            titleLength = title.length();
+        }
+        for (int i = 0; i < DIVIDER_LENGTH - 15 - titleLength; i++) divider.append("─");
+
+        d("┌───────────────" + title + divider.toString());
+        logBundle(null, bundle);
+        divider.insert(0, "└───────────────");
+        for (int i = 0; i < titleLength; i++) divider.append("─");
+        Log.d(divider.toString());
+    }
+
+    private static void logBundle(String parentKey, final Bundle bundle) {
+        if (bundle != null) {
+            if (bundle.size() != 0) {
+                for (String key : bundle.keySet()) {
+                    final Object value = bundle.get(key);
+                    if (parentKey != null) key = String.format("%s.%s", parentKey, key);
+                    if (value != null) {
+                        if (value instanceof Bundle) logBundle(key, (Bundle) value);
+                        else {
+                            d(String.format("├ KEY: [%s] ─── %s (%s)",
+                                    key, value.toString(), value.getClass().getName())
+                            );
+                        }
+                    } else
+                        d(String.format("├ KEY: [%s] ─── null", key));
+                }
+            } else
+                d(String.format("├ KEY: [%s] ─── NO EXTRAS", parentKey));
+        } else {
+            if (parentKey == null)
+                d("├ NO EXTRAS");
+            else
+                d(String.format("├ %s NO EXTRAS", parentKey));
+        }
     }
 
 }
