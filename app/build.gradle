@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         versionCode 26
-        versionName "1.64"
+        versionName "1.69"
         minSdkVersion 14
         targetSdkVersion 23
     }
@@ -21,7 +21,7 @@ android {
 }
 
 dependencies {
-    compile 'org.jsoup:jsoup:1.8.1'
+    compile 'org.jsoup:jsoup:1.11.2'
     // EventBus
     compile 'org.greenrobot:eventbus:3.1.1'
     //compile 'com.scottyab:secure-preferences-lib:0.1.4'
