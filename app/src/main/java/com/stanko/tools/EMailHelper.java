@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
 
 public class EMailHelper {
 
+    private final static String EMAIL_URL = "mailto:";
+
     /**
      * Checks if given EMail address might be a valid one.
      *
@@ -25,7 +27,7 @@ public class EMailHelper {
      * @return
      */
     public static boolean isValidEmail(final String email) {
-        if (TextUtils.isEmpty(email))
+        if (TextUtils.isEmpty(email) || email.startsWith("."))
             return false;
         final String punyEncodedEmail = IDN.toASCII(email);
         if (TextUtils.equals(email, punyEncodedEmail)) { // usual email address
@@ -247,30 +249,35 @@ public class EMailHelper {
         if (TextUtils.isEmpty(noAssociatedAppErrorMessage))
             noAssociatedAppErrorMessage = EMH_DEFAULT_NO_ASSOCIATED_APP_ERROR_MESSAGE;
 
-
-        final Intent emailIntent = new Intent(Intent.ACTION_SEND);
-        if (receivers != null && receivers.length > 0)
-            emailIntent.putExtra(Intent.EXTRA_EMAIL, receivers);
-        if (!TextUtils.isEmpty(subject))
-            emailIntent.putExtra(Intent.EXTRA_SUBJECT, subject);
-        if (!TextUtils.isEmpty(text))
-            emailIntent.putExtra(Intent.EXTRA_TEXT, text);
-        emailIntent.setData(Uri.parse("mailto:"));
-//        emailIntent.setType("text/plain");
-        emailIntent.setType("message/rfc822");
+        final Intent emailIntent = new Intent(Intent.ACTION_VIEW);
+        final StringBuilder queryMail = new StringBuilder(EMAIL_URL);
+        if (receivers != null && receivers.length > 0) {
+            final StringBuilder receiversLine = new StringBuilder();
+            for (String receiver : receivers) {
+                if (receiversLine.length() > 0)
+                    receiversLine.append(",");
+                receiversLine.append(receiver);
+            }
+            //emailIntent.putExtra(Intent.EXTRA_EMAIL, receivers);
+            queryMail.append(receiversLine);
+        }
+        // proper adding possible parameters like subject and body in HTTP GET style
+        Uri.Builder mailUriBuilder = Uri.parse(EMAIL_URL).buildUpon();
+        if (!TextUtils.isEmpty(subject)) {
+            mailUriBuilder.appendQueryParameter("subject", subject);
+        }
+        if (!TextUtils.isEmpty(text)) {
+            mailUriBuilder.appendQueryParameter("body", text);
+        }
+        // extract string with HTTP GET parameters
+        final String mailToWithParams =  mailUriBuilder.build().toString();
+        // add target email address(es) (queryMail starts with same EMAIL_URL)
+        emailIntent.setData(Uri.parse(mailToWithParams.replace(EMAIL_URL, queryMail.toString())));
+        //emailIntent.setType("text/plain");
+        //emailIntent.setType("message/rfc822"); // use it for email-format files, like
 
         boolean isIntentSent = false;
-        if (applyKnownPackage(context, emailIntent)) {
-            //Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
-            try {
-                context.startActivity(Intent.createChooser(emailIntent, pickerTitle));
-                isIntentSent = true;
-            } catch (ActivityNotFoundException e) {
-                Toast.makeText(context, noAssociatedAppErrorMessage, Toast.LENGTH_LONG).show();
-            } catch (SecurityException e) {
-                Toast.makeText(context, securityExceptionMessage, Toast.LENGTH_LONG).show();
-            }
-        } else if (emailIntent.resolveActivity(context.getPackageManager()) != null)
+        if (emailIntent.resolveActivity(context.getPackageManager()) != null)
             try {
                 context.startActivity(emailIntent);
                 isIntentSent = true;
