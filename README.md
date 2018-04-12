@@ -11,30 +11,19 @@ Download
 
 You can download a .jar from GitHub's [releases page](https://github.com/stan-ko/StanKoUtils/releases).
 
-Or use Gradle jCenter:
+Or using Gradle, add it in your root build.gradle at the end of repositories:
 
-    dependencies {
-        repositories {
-            mavenCentral()
-            maven {
-                url  'http://dl.bintray.com/gigamole/maven/'
-            }
-        }
-        compile 'com.github.stankoutils:app:+'
-    }
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+Step 2. Add the dependency
 
-Or Gradle Maven Central:
-
-    compile 'com.github.stankoutils:app:1.3.1'
-
-Or Maven:
-
-    <dependency>
-	    <groupId>com.github.stankoutils</groupId>
-	    <artifactId>app</artifactId>
-	    <version>1.0.0</version>
-	    <type>aar</type>
-    </dependency>
+	dependencies {
+	        compile 'com.github.stan-ko:StanKoUtils:v1.70'
+	}
 
 Android SDK Version
 =========
