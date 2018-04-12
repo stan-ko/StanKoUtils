@@ -40,4 +40,4 @@ Apache 2.0. See LICENSE file for details.
 
 Author
 =======
-StanKo - @stan-ko
+StanKo - @stan-ko <Stan.Koshutsky@gmail.com>
