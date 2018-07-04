@@ -284,7 +284,7 @@ public class UpdateChecker implements Runnable {
      *
      * @param localVersion  the version name of the app installed on the system
      * @param webVersion the version name of the app released on the Google Play
-     * @return true if a the online_version_string is greater than the local_version_string
+     * @return true if a the webVersion is greater than the localVersion
      */
     private static boolean isNewerVersionAvailable(final String localVersion, final String webVersion) {
         final DefaultArtifactVersion dafLocalVersion = new DefaultArtifactVersion(localVersion);

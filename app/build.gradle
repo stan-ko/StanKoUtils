@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         versionCode 26
-        versionName "1.69"
+        versionName "1.70"
         minSdkVersion 14
         targetSdkVersion 23
     }
@@ -34,18 +34,18 @@ dependencies {
 }
 
 // This is the actual solution, as in http://stackoverflow.com/a/19037807/1002054
-task clearJar(type: Delete) {
-    delete 'build/libs/stankoutils.jar'
-}
-
-task makeJar(type: Copy) {
-    from('build/intermediates/bundles/release/')
-    into('build/outputs/jar/')
-    include('classes.jar')
-    rename ('classes.jar', 'stankoutils.jar')
-}
-
-makeJar.dependsOn(clearJar, build)
+//task clearJar(type: Delete) {
+//    delete 'build/libs/stankoutils.jar'
+//}
+//
+//task makeJar(type: Copy) {
+//    from('build/intermediates/bundles/release/')
+//    into('build/outputs/jar/')
+//    include('classes.jar')
+//    rename ('classes.jar', 'stankoutils.jar')
+//}
+//
+//makeJar.dependsOn(clearJar, build)
 ////targetFile
 //
 //android.libraryVariants.all { variant ->
