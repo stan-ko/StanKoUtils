@@ -10,7 +10,7 @@ import com.stanko.tools.Log;
 public class AppVersion {
 
     public static int getVersionCode() {
-        return getVersionCode(Initializer.getsAppContext());
+        return getVersionCode(Initializer.getAppContext());
     }
 
     public static int getVersionCode(final Context context) {
@@ -26,7 +26,7 @@ public class AppVersion {
     }
 
     public static String getVersionName() {
-        return getVersionName(Initializer.getsAppContext());
+        return getVersionName(Initializer.getAppContext());
     }
 
     public static String getVersionName(final Context context) {
@@ -42,7 +42,7 @@ public class AppVersion {
     }
 
     public static AppVersionInfo getVersionInfo() {
-        return new AppVersionInfo(Initializer.getsAppContext());
+        return new AppVersionInfo(Initializer.getAppContext());
     }
 
     public static AppVersionInfo getVersionInfo(final Context context) {

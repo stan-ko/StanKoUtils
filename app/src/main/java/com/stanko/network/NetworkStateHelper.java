@@ -735,11 +735,11 @@ public class NetworkStateHelper {
 
     private static void initOnDemand(){
         // init on demand
-        if (sAppContext==null && Initializer.getsAppContext()!=null){
+        if (sAppContext==null && Initializer.getAppContext()!=null){
             if (!TextUtils.isEmpty(Initializer.getsHostToPing())){
-                init( Initializer.getsAppContext(),Initializer.getsHostToPing());
+                init( Initializer.getAppContext(),Initializer.getsHostToPing());
             } else{
-                init( Initializer.getsAppContext());
+                init( Initializer.getAppContext());
             }
         }
     }

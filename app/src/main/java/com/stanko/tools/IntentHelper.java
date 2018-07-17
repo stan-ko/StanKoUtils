@@ -355,7 +355,7 @@ public class IntentHelper {
      * @return Intent if given package was found and applied or null otherwise
      */
     public static Intent getIntentForPackage(final String targetPackage) {
-        return getIntentForPackage(Initializer.getsAppContext(),targetPackage);
+        return getIntentForPackage(Initializer.getAppContext(),targetPackage);
     }
 
     /**

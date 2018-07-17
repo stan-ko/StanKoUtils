@@ -33,7 +33,7 @@ public class Initializer {
         sHostToPing = _hostToPing;
     }
 
-    public static Context getsAppContext(){
+    public static Context getAppContext(){
         if (sAppContext==null)
             Log.e("You should initialize Initializer class with Context first. Otherwise NPE will be thrown");
         return sAppContext;

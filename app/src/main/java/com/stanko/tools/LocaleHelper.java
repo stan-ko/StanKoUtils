@@ -18,7 +18,7 @@ public class LocaleHelper {
      * @param languageCode - ISO language code, applicable for instantiating Locale
      */
     public static void setAppLocale(final String languageCode) {
-        setAppLocale(Initializer.getsAppContext(), new Locale(languageCode));
+        setAppLocale(Initializer.getAppContext(), new Locale(languageCode));
     }
 
     /**
@@ -31,7 +31,7 @@ public class LocaleHelper {
      * @param languageCode - ISO language code, applicable for instantiating Locale
      */
     public static void setAppLocale(final String countryCode, final String languageCode) {
-        setAppLocale(Initializer.getsAppContext(), new Locale(languageCode, countryCode));
+        setAppLocale(Initializer.getAppContext(), new Locale(languageCode, countryCode));
     }
 
     /**

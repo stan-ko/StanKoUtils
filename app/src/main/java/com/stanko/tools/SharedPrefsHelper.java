@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -991,8 +990,8 @@ public class SharedPrefsHelper {
 
     private static void initOnDemand() {
         // init on demand
-        if (sAppContext == null && Initializer.getsAppContext() != null) {
-            init(Initializer.getsAppContext());
+        if (sAppContext == null && Initializer.getAppContext() != null) {
+            init(Initializer.getAppContext());
         }
     }
 

@@ -142,8 +142,8 @@ public class ResHelper {
 
     private static void initOnDemand() {
         // init on demand
-        if (sAppContext == null && Initializer.getsAppContext() != null) {
-            init(Initializer.getsAppContext());
+        if (sAppContext == null && Initializer.getAppContext() != null) {
+            init(Initializer.getAppContext());
         }
     }
 

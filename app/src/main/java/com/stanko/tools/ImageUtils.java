@@ -119,7 +119,7 @@ public class ImageUtils {
      * @return BitmapInfo or null if Uri or Context is null (Initializer was not initialized)
      */
     public static BitmapInfo getBitmapInfoFromUri(final Uri uri) {
-        final Context context = Initializer.getsAppContext();
+        final Context context = Initializer.getAppContext();
         return getBitmapInfoFromUri(uri, context);
     }
 
@@ -131,7 +131,7 @@ public class ImageUtils {
      * @return BitmapInfo or null if bitmapResId==0 or Initializer was not initialized
      */
     public static BitmapInfo getBitmapInfoFromResources(final int bitmapResId) {
-        return getBitmapInfoFromResources(Initializer.getsAppContext(), bitmapResId);
+        return getBitmapInfoFromResources(Initializer.getAppContext(), bitmapResId);
     }
 
     /**
@@ -890,7 +890,7 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapFromRawResources(final int mBitmapResId) {
-        return getBitmapFromRawResources(Initializer.getsAppContext(), mBitmapResId);
+        return getBitmapFromRawResources(Initializer.getAppContext(), mBitmapResId);
     }
 
     /**
@@ -937,7 +937,7 @@ public class ImageUtils {
     public static Bitmap getResizedBitmapFromResources(final int bitmapResId, final int newHeight, final int newWidth) {
         if (bitmapResId == 0)
             return null;
-        return getResizedBitmapFromResources(Initializer.getsAppContext(), bitmapResId, newHeight, newWidth, false);
+        return getResizedBitmapFromResources(Initializer.getAppContext(), bitmapResId, newHeight, newWidth, false);
     }
 
     /**
@@ -993,7 +993,7 @@ public class ImageUtils {
      * @return
      */
     public static Uri getUriOfBitmapFromResources(final int mBitmapResId) {
-        return getUriOfBitmapFromResources(Initializer.getsAppContext(), mBitmapResId);
+        return getUriOfBitmapFromResources(Initializer.getAppContext(), mBitmapResId);
     }
 
     /**
@@ -1063,7 +1063,7 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapFromUriWithMaxSideSize(final Uri uri, final int sideSizeLimit) {
-        return getBitmapFromUriWithMaxSideSize(Initializer.getsAppContext(), uri, sideSizeLimit, false);
+        return getBitmapFromUriWithMaxSideSize(Initializer.getAppContext(), uri, sideSizeLimit, false);
     }
 
     /**
@@ -1143,7 +1143,7 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapFromUriWithMaxHeight(final Uri uri, final int heightLimit) {
-        return getBitmapFromUriWithMaxHeight(Initializer.getsAppContext(), uri, heightLimit, false);
+        return getBitmapFromUriWithMaxHeight(Initializer.getAppContext(), uri, heightLimit, false);
     }
 
     /**
@@ -1220,7 +1220,7 @@ public class ImageUtils {
      * @return
      */
     public static Bitmap getBitmapFromUriWithMaxWidth(final Uri uri, final int widthLimit) {
-        return getBitmapFromUriWithMaxWidth(Initializer.getsAppContext(), uri, widthLimit, false);
+        return getBitmapFromUriWithMaxWidth(Initializer.getAppContext(), uri, widthLimit, false);
     }
 
     /**
@@ -2500,7 +2500,7 @@ public class ImageUtils {
      * @return - cropped Bitmap
      */
     public static Bitmap getBitmapByCropFromCenterWithScaling(final int bitmapResId, final int cropToHeight, final int cropToWidth) {
-        return getBitmapByCropFromCenterWithScaling(Initializer.getsAppContext(), bitmapResId, cropToHeight, cropToWidth);
+        return getBitmapByCropFromCenterWithScaling(Initializer.getAppContext(), bitmapResId, cropToHeight, cropToWidth);
     }
 
     /**
@@ -2881,7 +2881,7 @@ public class ImageUtils {
      * @return
      */
     public static byte[] getJPEGByteArrayFromResources(final int imageResId, final int jpegQuality) {
-        return getJPEGByteArrayFromResources(Initializer.getsAppContext(), imageResId, jpegQuality);
+        return getJPEGByteArrayFromResources(Initializer.getAppContext(), imageResId, jpegQuality);
     }
 
     /**
@@ -2908,7 +2908,7 @@ public class ImageUtils {
      * @return
      */
     public static byte[] getJPEGByteArrayFromResources(final int imageResId, final int maxSideSize, final int jpegQuality) {
-        return getJPEGByteArrayFromResources(Initializer.getsAppContext(), imageResId, maxSideSize, jpegQuality);
+        return getJPEGByteArrayFromResources(Initializer.getAppContext(), imageResId, maxSideSize, jpegQuality);
     }
 
     /**

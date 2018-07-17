@@ -61,7 +61,7 @@ public class FontsHelperBase {
      * @return Typeface
      */
     public static Typeface getFont(final String fontFileName) {
-        return getFont(Initializer.getsAppContext(), fontFileName);
+        return getFont(Initializer.getAppContext(), fontFileName);
     }
 
 
